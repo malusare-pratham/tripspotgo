@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { User, Mail, Phone, Lock, QrCode, CreditCard, CheckCircle2, Users, ArrowRight } from 'lucide-react';
 import './Signup.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://magicpoint.onrender.com';
 
 function Signup() {
     const navigate = useNavigate();

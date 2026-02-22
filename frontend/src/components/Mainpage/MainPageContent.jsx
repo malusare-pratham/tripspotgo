@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Star, MapPin, Clock, ChevronRight } from "lucide-react";
 import "./MainPageContent.css";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://magicpoint.onrender.com";
 
 const offers = [
   {

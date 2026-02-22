@@ -9,7 +9,7 @@ mongoose.connect(mongoUri)
         await Admin.create({
             username: 'SuperAdmin',
             email: 'admin@magicpoint.com',
-            password: 'adminPassword123' // हे नंतर बदलून घे
+            password: 'admin123' // हे नंतर बदलून घे
         });
         console.log("Admin User Created!");
     } else {

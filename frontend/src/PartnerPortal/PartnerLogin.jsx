@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Store, Lock, Mail, ArrowRight } from 'lucide-react';
 import './PartnerLogin.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://magicpoint.onrender.com';
 
 const PartnerLogin = () => {
     const [email, setEmail] = useState('');

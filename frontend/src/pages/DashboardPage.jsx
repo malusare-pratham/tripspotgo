@@ -6,7 +6,7 @@ import MainPageContent from "../components/Mainpage/MainPageContent";
 import Footer from "../components/Footer/Footer";
 import Navbar from "../components/Navbar/Navbar";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://magicpoint.onrender.com";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
