@@ -7,7 +7,7 @@ import Categories from './components/categories/Categories';
 import Signup from './pages/Signup/Signup';
 import Login from './pages/Login/Login'; 
 import ForgotPassword from './pages/ForgotPassword'; 
-import BillPage from './pages/billpage'; 
+import BillPage from './pages/BillPage'; 
 import VerifyOTP from './pages/VerifyOTP'; 
 import Confirmation from './pages/Confirmation'; 
 import Footer from './components/Footer/Footer'; 
