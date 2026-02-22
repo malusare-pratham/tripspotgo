@@ -1,0 +1,129 @@
+.magic-hero {
+  /* १. बॅकग्राउंडला आता तुमचा सॉलिड #411bbf कलर दिला आहे */
+  background: #411bbf; 
+  position: relative;
+  min-height: 550px; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px 0px 20px; 
+  color: white;
+  overflow: hidden;
+  text-align: center;
+  
+  /* २. बाहेरच्या बाजूचा कर्व्ह */
+  border-bottom-left-radius: 50% 20px;
+  border-bottom-right-radius: 50% 20px;
+}
+
+.hero-svg-bg {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("https://static.magicpin.com/samara/static/images/home/homepage-illustration.svg");
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: bottom center; 
+  /* इमेज स्पष्ट (Clear) दिसण्यासाठी ओपॅसिटी 0.6 केली आहे */
+  opacity: 0.6; 
+  z-index: 2; 
+}
+
+.hero-inner {
+  position: relative;
+  /* मजकूर स्पष्ट दिसण्यासाठी z-index १० ठेवला आहे */
+  z-index: 10; 
+  width: 100%;
+  max-width: 1100px;
+  margin-bottom: 20px; 
+}
+
+/* --- 10% OFF Highlight Box --- */
+.offer-highlight-box {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    border: 2px dashed #ffc107;
+    padding: 20px;
+    border-radius: 20px;
+    display: inline-block;
+    margin: 25px 0;
+    animation: pulse 2s infinite;
+}
+
+.discount-main { font-size: 28px; font-weight: 900; }
+.big-percent { color: #ffc107; font-size: 45px; text-shadow: 0 0 15px rgba(255, 193, 7, 0.5); }
+.offer-sub { font-size: 14px; font-weight: 700; letter-spacing: 2px; margin-top: 5px; color: #eef2ff; }
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+}
+
+/* --- Search & Other Styles --- */
+.limited-offer-tag { display: inline-flex; align-items: center; gap: 8px; background: #ffc107; color: #000; padding: 5px 15px; border-radius: 20px; font-weight: 800; font-size: 12px; margin-bottom: 10px; }
+.hero-title { font-size: clamp(32px, 6vw, 55px); font-weight: 900; }
+.city-name { color: #fff; text-decoration: underline; text-decoration-color: #ff3f6c; }
+
+.search-wrapper { display: flex; justify-content: center; margin-bottom: 25px; }
+
+.single-search-bar { 
+    background: #fff; 
+    width: 100%; 
+    max-width: 750px; 
+    display: flex; 
+    align-items: center; 
+    padding: 8px 10px; 
+    border-radius: 12px; 
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3); 
+}
+.search-icon-fa { color: #888; margin: 0 10px; }
+.single-search-bar input { flex: 1; border: none; outline: none; padding: 12px; font-size: 16px; color: #333; }
+.get-deals-btn { background: #411bbf; color: #fff; border: none; padding: 12px 35px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+.hero-stats { display: flex; justify-content: center; gap: 30px; margin-bottom: 60px; font-size: 14px; opacity: 0.9; }
+
+/* ३. बाहेरच्या बाजूचा कर्व्ह (Inverted Curve Effect) */
+.hero-curve-bottom {
+  position: absolute;
+  bottom: -1px; 
+  left: 50%;
+  transform: translateX(-50%) scaleX(1.3);
+  width: 140%;
+  height: 180px; 
+  background: white;
+  border-radius: 100% 100% 0 0;
+  z-index: 5;
+}
+
+/* --- मोबाईलसाठी विशेष अपडेट्स --- */
+@media (max-width: 600px) {
+  .magic-hero { 
+    min-height: 450px;
+    padding-top: 30px;
+    border-bottom-left-radius: 50% 15px;
+    border-bottom-right-radius: 50% 15px;
+  }
+  
+  .search-wrapper { margin-bottom: 15px; width: 95%; }
+  .single-search-bar { 
+    padding: 4px 6px; 
+    border-radius: 50px; 
+  }
+  .single-search-bar input { 
+    padding: 8px; 
+    font-size: 13px; 
+  }
+  .get-deals-btn { 
+    padding: 8px 15px; 
+    font-size: 12px; 
+    border-radius: 50px; 
+  }
+
+  .offer-highlight-box { width: 95%; padding: 15px; }
+  .discount-main { font-size: 20px; }
+  .big-percent { font-size: 32px; }
+  
+  .hero-curve-bottom { height: 100px; width: 220%; bottom: -1px; }
+  .hero-stats { gap: 10px; font-size: 11px; margin-bottom: 20px; }
+}/*old max*/

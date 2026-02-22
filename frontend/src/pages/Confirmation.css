@@ -1,0 +1,157 @@
+.conf-scope.conf-page-container  {
+    min-height: 100vh;
+    background: #f0f4f8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Navigation */
+.conf-scope .conf-top-nav  {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 20px;
+}
+
+.conf-scope .home-btn  {
+    background: white;
+    border: none;
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    color: #411bbf;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* Card Styling */
+.conf-scope .conf-card  {
+    background: white;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 32px;
+    padding: 30px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+
+/* Checkmark Animation */
+.conf-scope .success-header  { text-align: center; margin-bottom: 25px; }
+
+.conf-scope .checkmark  {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    display: block;
+    stroke-width: 2;
+    stroke: #22c55e;
+    stroke-miterlimit: 10;
+    margin: 0 auto 15px;
+    box-shadow: inset 0px 0px 0px #22c55e;
+    animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+}
+
+.conf-scope .checkmark__circle  {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 2;
+    stroke-miterlimit: 10;
+    stroke: #22c55e;
+    fill: none;
+    animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.conf-scope .checkmark__check  {
+    transform-origin: 50% 50%;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+}
+
+@keyframes stroke { 100% { stroke-dashoffset: 0; } }
+@keyframes fill { 100% { box-shadow: inset 0px 0px 0px 30px #f0fdf4; } }
+
+.conf-scope .success-title  { color: #1e293b; font-weight: 850; font-size: 1.8rem; margin-bottom: 5px; }
+.conf-scope .success-subtitle  { color: #64748b; font-size: 0.9rem; }
+
+/* Savings Highlight */
+.conf-scope .savings-highlight-box  {
+    background: linear-gradient(135deg, #411bbf, #6366f1);
+    border-radius: 24px;
+    padding: 25px;
+    text-align: center;
+    color: white;
+    margin-bottom: 25px;
+}
+
+.conf-scope .saving-label  { font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px; }
+.conf-scope .saving-value  { font-size: 2.5rem; font-weight: 900; margin-bottom: 5px; }
+.conf-scope .saving-tag  { background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; display: inline-block; }
+
+/* Summary List */
+.conf-scope .conf-summary-section  { margin-bottom: 25px; }
+.conf-scope .summary-item  { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+.conf-scope .s-label  { color: #64748b; font-size: 0.9rem; }
+.conf-scope .s-value  { font-weight: 700; color: #1e293b; }
+.conf-scope .discount-text .s-value  { color: #16a34a; }
+.conf-scope .total-payable  { border-bottom: none; padding-top: 15px; font-size: 1.1rem; }
+.conf-scope .total-payable .s-value  { color: #411bbf; font-size: 1.2rem; }
+
+/* Meta Info */
+.conf-scope .transaction-meta  {
+    background: #f8fafc;
+    border-radius: 18px;
+    padding: 15px;
+    margin-bottom: 25px;
+}
+
+.conf-scope .meta-row  { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 8px; color: #64748b; }
+.conf-scope .status-badge  { 
+    display: inline-flex; align-items: center; gap: 6px; 
+    background: #dcfce7; color: #15803d; 
+    padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+}
+.conf-scope .dot  { width: 6px; height: 6px; background: #22c55e; border-radius: 50%; }
+
+/* Action Buttons */
+.conf-scope .conf-action-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+.conf-scope .action-btn  { 
+    padding: 12px; border-radius: 14px; border: none; font-weight: 700; 
+    display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;
+}
+.conf-scope .action-btn.primary  { background: #411bbf; color: white; }
+.conf-scope .action-btn.secondary  { background: #f1f5f9; color: #1e293b; }
+
+/* Next Steps */
+.conf-scope .next-steps-card  { background: #fffbeb; border-radius: 18px; padding: 15px; margin-bottom: 20px; border: 1px solid #fef3c7; }
+.conf-scope .next-steps-card h4  { font-size: 0.9rem; color: #92400e; margin-bottom: 10px; }
+.conf-scope .next-steps-card ul  { padding-left: 20px; font-size: 0.8rem; color: #b45309; }
+.conf-scope .next-steps-card li  { margin-bottom: 5px; }
+
+/* Footer Lifetime Savings */
+.conf-scope .lifetime-savings-footer  {
+    background: #fbbf24;
+    padding: 20px;
+    border-radius: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #451a03;
+}
+.conf-scope .footer-content p  { font-size: 0.8rem; margin: 0; }
+.conf-scope .footer-content h3  { font-size: 1.5rem; font-weight: 900; margin: 0; }
+.conf-scope .footer-icon  { font-size: 1.5rem; }
+
+/* Responsive */
+@media (max-width: 480px) {
+    .conf-scope .conf-card  { padding: 20px; }
+    .conf-scope .saving-value  { font-size: 2rem; }
+    .conf-scope .success-title  { font-size: 1.5rem; }
+}

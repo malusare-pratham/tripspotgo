@@ -1,0 +1,129 @@
+.categories-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    /* चारही बाजूंनी प्रॉपर पॅडिंग (Top/Bottom: 40px, Left/Right: 20px) */
+    padding: 40px 20px; 
+    background-color: transparent;
+    text-align: center;
+    width: 100%;
+}
+
+/* मुख्य हेडिंग - साईज वाढवून मोठी केली आहे */
+.categories-title {
+    /* फॉन्ट साईज 1.8rem वरून 2.5rem केली */
+    font-size: 2.5rem; 
+    font-weight: 850;
+    color: #411bbf; /* तुमचा ब्रँड कलर */
+    margin-bottom: 50px; /* अंडरलाईन आणि कार्ड्समध्ये स्पेस वाढवली */
+    position: relative;
+    display: inline-block;
+    letter-spacing: -1px;
+}
+
+/* स्टाइलिश ग्रेडियंट अंडरलाईन - हेडिंगनुसार मोठी केली */
+.categories-title::after {
+    content: '';
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px; /* रुंदी वाढवली */
+    height: 5px; /* जाडी वाढवली */
+    background: linear-gradient(90deg, #411bbf 0%, #ff4791 100%);
+    border-radius: 10px;
+}
+
+.categories-grid {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.category-card {
+    flex: 1;
+    padding: 30px 15px;
+    border-radius: 24px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.category-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* प्रीमियम ग्रेडियंट्स */
+.cat-blue { background: linear-gradient(135deg, #411bbf, #2d128a); }
+.cat-green { background: linear-gradient(135deg, #22c55e, #15803d); }
+.cat-orange { background: linear-gradient(135deg, #f59e0b, #b45309); }
+.cat-purple { background: linear-gradient(135deg, #a855f7, #7e22ce); }
+
+.cat-icon-wrapper {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+    padding: 15px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 5px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.category-card h3 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+.category-card p {
+    font-size: 0.8rem;
+    font-weight: 500;
+    opacity: 0.9;
+    background: rgba(0, 0, 0, 0.1);
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin: 0;
+}
+
+/* --- मोबाईल फ्रेंडली (2x2 Grid) --- */
+@media (max-width: 768px) {
+    .categories-container {
+        padding: 30px 12px; /* मोबाईलवर सुद्धा प्रॉपर स्पेसिंग */
+    }
+
+    .categories-title {
+        font-size: 1.8rem; /* मोबाईलसाठी सुटसुटीत मोठी साईज */
+        margin-bottom: 40px;
+    }
+
+    .categories-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .category-card {
+        padding: 22px 10px;
+        border-radius: 20px;
+    }
+
+    .cat-icon-wrapper {
+        padding: 10px;
+    }
+
+    .category-card h3 {
+        font-size: 1rem;
+    }
+}

@@ -1,0 +1,141 @@
+.main-container {
+  max-width: 1300px;
+  margin: 0 auto;
+  /* चारही बाजूंनी व्यवस्थित पॅडिंग दिली आहे (Top: 40px, Right: 20px, Bottom: 40px, Left: 20px) */
+  padding: 40px 20px; 
+  background-color: transparent; 
+  overflow-x: hidden;
+}
+
+/* मुख्य हेडिंग - साईज वाढवली आहे */
+.main-top-heading {
+  text-align: center;
+  /* फॉन्ट साईज 1.8rem वरून 2.5rem केली आहे */
+  font-size: 2.5rem; 
+  font-weight: 850; /* अधिक बोल्ड */
+  color: #411bbf;
+  margin-bottom: 50px; /* अंडरलाईन आणि कंटेंट मध्ये जास्त गॅप दिला आहे */
+  letter-spacing: -1px;
+  position: relative;
+  display: block;
+}
+
+/* स्टाइलिश ग्रेडियंट अंडरलाईन - हेडिंगनुसार मोठी केली */
+.main-top-heading::after {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px; /* रुंदी थोडी वाढवली */
+  height: 5px; /* जाडी थोडी वाढवली */
+  background: linear-gradient(90deg, #411bbf 0%, #ff4791 100%);
+  border-radius: 10px;
+}
+
+.category-section {
+  margin-bottom: 35px; /* सेक्शनमधील अंतर वाढवले */
+}
+
+.section-title {
+  font-size: 1.6rem; /* सब-टायटल सुद्धा थोडे मोठे केले */
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: 15px;
+  text-transform: capitalize;
+  padding-left: 5px; /* टायटलला डावीकडून थोडी जागा दिली */
+}
+
+.sliding-row {
+  display: flex;
+  gap: 15px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 10px 5px 20px 5px; /* कार्ड्सना श्वास घ्यायला जागा दिली */
+  scroll-snap-type: x mandatory; 
+  scrollbar-width: none; 
+}
+
+.sliding-row::-webkit-scrollbar {
+  display: none;
+}
+
+.deal-card {
+  flex: 0 0 230px;
+  background: #fff;
+  border-radius: 16px;
+  position: relative;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  border: 1px solid #f0f0f0;
+  scroll-snap-align: start;
+}
+
+.deal-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.image-container {
+  height: 150px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.discount-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #ff4757;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  z-index: 2;
+}
+
+.card-info {
+  padding: 12px;
+}
+
+.shop-label {
+  font-size: 11px;
+  color: #6c5ce7;
+  font-weight: 700;
+  margin-bottom: 3px;
+  display: block;
+}
+
+.item-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #2d3436;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- Responsive (Mobile) --- */
+@media (max-width: 600px) {
+  .main-container {
+    padding: 30px 12px; /* मोबाईलवर साईड स्पेस थोडी कमी केली */
+  }
+  .main-top-heading { 
+    font-size: 1.8rem; /* मोबाईलवर हेडिंग सुटसुटीत ठेवली */
+    margin-bottom: 40px;
+  }
+  .deal-card { 
+    flex: 0 0 180px; 
+    scroll-snap-align: center; 
+  }
+  .image-container { height: 120px; }
+  .category-section { margin-bottom: 25px; }
+}

@@ -1,0 +1,12 @@
+node_modules/
+dist/
+build/
+.env
+.env.local
+vendor/
+.DS_Store 
+
+node_modules
+dist
+.env
+

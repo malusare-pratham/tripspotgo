@@ -1,0 +1,136 @@
+.benefits-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    /* चारही बाजूंनी प्रॉपर पॅडिंग (Top/Bottom: 40px, Left/Right: 20px) */
+    padding: 40px 20px; 
+    background-color: transparent;
+    text-align: center;
+    width: 100%;
+}
+
+/* मुख्य हेडिंग - साईज मोठी आणि ठळक केली आहे */
+.benefits-title {
+    /* फॉन्ट साईज 1.8rem वरून 2.5rem केली */
+    font-size: 2.5rem; 
+    font-weight: 850;
+    color: #411bbf; /* ब्रँड कलर */
+    margin-bottom: 50px; /* अंडरलाईन आणि कार्ड्समध्ये जास्त जागा दिली */
+    position: relative;
+    display: inline-block;
+    letter-spacing: -1px;
+}
+
+/* स्टाइलिश ग्रेडियंट अंडरलाईन - हेडिंगनुसार मोठी केली */
+.benefits-title::after {
+    content: '';
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px; /* रुंदी वाढवली */
+    height: 5px; /* जाडी वाढवली */
+    background: linear-gradient(90deg, #411bbf 0%, #ff4791 100%);
+    border-radius: 10px;
+}
+
+.benefits-grid {
+    display: flex;
+    justify-content: center;
+    align-items: stretch; /* सर्व कार्ड्स एकाच उंचीचे राहतील */
+    gap: 20px; /* कार्ड्समधील अंतर थोडे वाढवले */
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-wrap: nowrap;
+}
+
+.benefit-card {
+    background: #ffffff;
+    padding: 25px 20px; /* पॅडिंग थोडी वाढवली */
+    border-radius: 24px; /* अधिक मॉडर्न कोपरे */
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.benefit-card:hover {
+    transform: translateY(-8px);
+    border-color: #411bbf33;
+    box-shadow: 0 15px 30px rgba(65, 27, 191, 0.1);
+}
+
+.benefit-icon-box {
+    width: 55px; /* साईज थोडी वाढवली */
+    height: 55px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* आयकॉन कलर्स */
+.bg-green { background: #dcfce7; color: #16a34a; }
+.bg-blue { background: #dbeafe; color: #2563eb; }
+.bg-yellow { background: #fef3c7; color: #d97706; }
+.bg-purple { background: #f3e8ff; color: #9333ea; }
+
+.benefit-info {
+    text-align: left;
+}
+
+.benefit-info h3 {
+    font-size: 1rem; /* टायटल थोडा मोठा केला */
+    font-weight: 800;
+    margin: 0;
+    color: #1e293b;
+    letter-spacing: -0.2px;
+}
+
+.benefit-info p {
+    font-size: 0.8rem; /* डिस्क्रिप्शन थोडे मोठे केले */
+    color: #64748b;
+    margin: 6px 0 0 0;
+    line-height: 1.5;
+}
+
+/* --- मोबाईल फ्रेंडली (2x2 Grid) --- */
+@media (max-width: 768px) {
+    .benefits-container {
+        padding: 30px 12px; /* मोबाईलवर व्यवस्थित स्पेसिंग */
+    }
+
+    .benefits-title {
+        font-size: 1.8rem; /* मोबाईलसाठी सुटसुटीत मोठी साईज */
+        margin-bottom: 40px;
+    }
+
+    .benefits-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .benefit-card {
+        padding: 20px 10px;
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+    }
+
+    .benefit-info {
+        text-align: center;
+    }
+
+    .benefit-info h3 {
+        font-size: 0.9rem;
+    }
+
+    .benefit-info p {
+        display: none; /* मोबाईलवर सुटसुटीत दिसण्यासाठी डिस्क्रिप्शन हाईड केले */
+    }
+}

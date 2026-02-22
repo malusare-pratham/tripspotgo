@@ -1,0 +1,242 @@
+.signup-scope.auth-wrapper  {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.signup-scope .auth-card  {
+    position: relative;
+    background: white;
+    width: 100%;
+    max-width: 700px;
+    padding: 50px;
+    border-radius: 40px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+/* 🔥 Gradient Logo */
+.signup-scope .brand-logo  {
+    font-size: 30px;
+    font-weight: 900;
+    background: linear-gradient(90deg, #6366f1, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+}
+
+.signup-scope .brand-logo span  {
+    background: linear-gradient(90deg, #ec4899, #f43f5e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* 🔙 Back Button */
+.signup-scope .back-btn  {
+    position: absolute;
+    top: 25px;
+    left: 25px;
+    background: #f1f5f9;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.signup-scope .back-btn:hover  {
+    background: #e2e8f0;
+}
+
+/* Membership Plans UI */
+.signup-scope .plans-display-container  {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-top: 30px;
+    margin-bottom: 40px;
+}
+
+.signup-scope .premium-plan-card  {
+    border: 2px solid #f1f5f9;
+    border-radius: 24px;
+    padding: 30px 20px;
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    background: #fff;
+}
+
+.signup-scope .plan-badge-top  {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #f59e0b;
+    color: white;
+    padding: 4px 15px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+.signup-scope .green-badge  { background: #22c55e; }
+
+.signup-scope .plan-visual  {
+    width: 60px;
+    height: 60px;
+    border-radius: 20px;
+    margin: 0 auto 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.signup-scope .single-bg  { background: #eff6ff; color: #3b82f6; }
+.signup-scope .family-bg  { background: #f0fdf4; color: #22c55e; }
+
+.signup-scope .plan-cost  { 
+    font-size: 1.8rem; 
+    font-weight: 900; 
+    color: #1e293b; 
+    margin: 10px 0; 
+}
+.signup-scope .plan-cost span  { 
+    font-size: 0.9rem; 
+    color: #64748b; 
+    font-weight: 400; 
+}
+
+/* Features */
+.signup-scope .plan-features  {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+    text-align: left;
+}
+
+.signup-scope .plan-features li  {
+    font-size: 0.9rem;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+/* Selection Buttons */
+.signup-scope .select-plan-btn  {
+    width: 100%;
+    padding: 12px;
+    border-radius: 14px;
+    border: none;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.signup-scope .blue-btn  { background: #f1f5f9; color: #3b82f6; }
+.signup-scope .green-btn  { background: #f1f5f9; color: #22c55e; }
+
+.signup-scope .selected-single  { 
+    border-color: #3b82f6; 
+    transform: scale(1.05); 
+    box-shadow: 0 15px 30px rgba(59, 130, 246, 0.1); 
+}
+.signup-scope .selected-single .blue-btn  { background: #3b82f6; color: white; }
+
+.signup-scope .selected-family  { 
+    border-color: #22c55e; 
+    transform: scale(1.05); 
+    box-shadow: 0 15px 30px rgba(34, 197, 94, 0.1); 
+}
+.signup-scope .selected-family .green-btn  { background: #22c55e; color: white; }
+
+/* Registration Section */
+.signup-scope .registration-section-fade-in  {
+    animation: fadeIn 0.5s ease-out;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 30px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.signup-scope .section-divider  { 
+    margin-bottom: 25px; 
+    font-weight: 700; 
+    color: #64748b; 
+    font-size: 0.9rem; 
+}
+
+/* 🔥 Attractive Input Fields */
+.signup-scope .input-group  {
+    position: relative;
+    margin-bottom: 18px;
+}
+
+.signup-scope .input-group input  {
+    width: 100%;
+    padding: 14px 14px 14px 45px;
+    border-radius: 14px;
+    border: 2px solid #e2e8f0;
+    outline: none;
+    font-size: 0.95rem;
+    transition: 0.3s ease;
+    background: #f8fafc;
+}
+
+.signup-scope .input-group input:focus  {
+    border-color: #6366f1;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(99,102,241,0.1);
+}
+
+.signup-scope .input-icon  {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+/* Payment Box */
+.signup-scope .payment-info-box  { 
+    padding: 25px; 
+    border-radius: 20px; 
+    border: 2px dashed #cbd5e1; 
+    margin-bottom: 20px; 
+}
+.signup-scope .blue-soft  { background: #eff6ff; border-color: #3b82f6; }
+.signup-scope .green-soft  { background: #f0fdf4; border-color: #22c55e; }
+
+.signup-scope .final-submit-btn  {
+    width: 100%;
+    padding: 18px;
+    border: none;
+    border-radius: 16px;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    transition: 0.3s;
+}
+.signup-scope .final-submit-btn:hover  {
+    transform: translateY(-2px);
+}
+
+.signup-scope .bg-blue  { background: #3b82f6; }
+.signup-scope .bg-green  { background: #22c55e; }
+
+/* Responsive */
+@media (max-width: 650px) {
+    .signup-scope .plans-display-container  { grid-template-columns: 1fr; }
+    .signup-scope .auth-card  { padding: 30px 20px; }
+}

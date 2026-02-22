@@ -1,0 +1,217 @@
+/* १. बेस सेटअप आणि फॉन्ट */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+.mp-scope {
+  --primary-purple: #5a35d6;
+  --accent-pink: #ff4791;
+  --success-green: #1ba94c;
+  --text-dark: #1a1a1a;
+  --text-muted: #666;
+  --bg-light: #fcfcfc;
+  --shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+
+  background: var(--bg-light);
+  font-family: 'Inter', sans-serif;
+  color: var(--text-dark);
+  padding-bottom: 40px;
+}
+
+/* २. कंटेनर आणि हेडर */
+.mp-main-container {
+  padding: 20px;
+  max-width: 1350px;
+  margin: auto;
+}
+
+.mp-page-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.mp-gradient-title {
+  font-size: clamp(24px, 6vw, 36px);
+  font-weight: 900;
+  background: linear-gradient(90deg, var(--primary-purple), var(--accent-pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+  letter-spacing: -1px;
+}
+
+/* ३. सेक्शन आणि 'See All' बटन */
+.mp-section {
+  margin-bottom: 20px;
+}
+
+.mp-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.mp-section-header h2 {
+  font-size: clamp(18px, 4vw, 22px);
+  font-weight: 800;
+}
+
+.mp-view-all {
+  background: transparent;
+  border: none;
+  color: var(--primary-purple);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: opacity 0.2s;
+}
+
+/* ४. रिस्पॉन्सिव्ह कार्ड कंटेनर - स्मूथ स्लाईड सेटिंग */
+.mp-offers-container {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto; 
+  padding: 10px 5px 15px 5px;
+  
+  /* स्मूथ स्क्रोलिंगसाठी हे महत्वाचे आहे */
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory; 
+  -webkit-overflow-scrolling: touch; /* iOS वर स्मूथ फीलसाठी */
+  
+  scrollbar-width: none; /* Firefox */
+}
+
+.mp-offers-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* ५. कार्ड स्टायलिंग */
+.mp-offer-card {
+  min-width: 280px; 
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  border: 1px solid #f0f0f0;
+  cursor: pointer;
+  flex-shrink: 0;
+  
+  /* स्नॅप अलाइनमेंट */
+  scroll-snap-align: start; 
+  
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.mp-offer-card:hover {
+  transform: translateY(-8px);
+}
+
+.mp-image-box {
+  position: relative;
+  height: 170px;
+}
+
+.mp-image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mp-save-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: var(--primary-purple);
+  color: #fff;
+  font-size: 11px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-weight: 800;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.mp-card-content {
+  padding: 16px;
+}
+
+.mp-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.mp-card-header h3 {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.mp-rating {
+  color: #fff;
+  padding: 3px 8px;
+  font-size: 12px;
+  border-radius: 6px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.mp-rating.high { background: var(--success-green); }
+.mp-rating.mid { background: #db7c00; }
+
+.mp-info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mp-distance, .mp-open-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mp-distance { color: var(--text-muted); }
+.mp-open-status { color: var(--success-green); }
+
+/* ६. मीडिया क्वेरीज */
+
+/* टॅब्लेट आणि मोबाईल साठी (स्लायडर स्मूथनेससह) */
+@media (max-width: 1023px) {
+  .mp-offers-container {
+    display: flex; 
+  }
+  .mp-offer-card {
+    min-width: 280px; 
+    /* टॅबवर ३ कार्ड्स किंवा २ कार्ड्स पूर्ण दिसावीत यासाठी युजर स्वॅप करेल */
+  }
+}
+
+/* फक्त डेस्कटॉप साठी - ग्रीड (येथे स्लायडरची गरज नसते) */
+@media (min-width: 1024px) {
+  .mp-offers-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    overflow: visible;
+    scroll-snap-type: none; /* डेस्कटॉपवर स्नॅपिंग नको */
+  }
+  
+  .mp-offer-card {
+    min-width: unset;
+    scroll-snap-align: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .mp-main-container { padding: 15px; }
+  .mp-offer-card { min-width: 260px; }
+}

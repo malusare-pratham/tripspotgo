@@ -1,0 +1,167 @@
+.steps-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    /* चारही बाजूंनी प्रॉपर पॅडिंग (Top/Bottom: 40px, Left/Right: 20px) */
+    padding: 40px 20px; 
+    background: transparent;
+    text-align: center;
+    width: 100%;
+    overflow: hidden;
+}
+
+/* मुख्य हेडिंग - साईज मोठी करून अंडरलाईन जोडली आहे */
+.steps-title {
+    /* फॉन्ट साईज 2.2rem वरून 2.5rem केली */
+    font-size: 2.5rem; 
+    font-weight: 850;
+    color: #411bbf; 
+    margin-bottom: 60px; /* अंडरलाईन आणि कंटेंटमध्ये प्रॉपर गॅप */
+    letter-spacing: -1px;
+    position: relative;
+    display: inline-block;
+}
+
+/* स्टाइलिश ग्रेडियंट अंडरलाईन - सर्व सेक्शन्सशी मॅच होण्यासाठी */
+.steps-title::after {
+    content: '';
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 5px;
+    background: linear-gradient(90deg, #411bbf 0%, #ff4791 100%);
+    border-radius: 10px;
+}
+
+.steps-wrapper {
+    display: flex;
+    justify-content: center;
+    /* align-items: stretch मुळे सर्व स्टेप्सची उंची सारखी राहते */
+    align-items: stretch; 
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 20px;
+}
+
+.step-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    padding: 20px;
+}
+
+/* डेस्कटॉपसाठी डॅश्ड लाईन - कलर थोडा गडद केला जेणेकरून दिसेल */
+@media (min-width: 769px) {
+    .step-card:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        top: 65px; /* आयकॉनच्या मध्यभागी ॲडजस्ट केली */
+        left: 70%;
+        width: 60%;
+        height: 2px;
+        border-top: 2px dashed #cbd5e1;
+        z-index: 1;
+        opacity: 0.6;
+    }
+}
+
+.step-icon-wrapper {
+    width: 90px;
+    height: 90px;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 25px;
+    position: relative;
+    z-index: 2;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.step-card:hover .step-icon-wrapper {
+    transform: translateY(-8px) rotate(5deg);
+}
+
+/* आयकॉन बॅकग्राउंड कलर्स - ग्रेडियंट इफेक्टसह अधिक प्रीमियम */
+.icon-blue { background: linear-gradient(135deg, #411bbf, #5a38d1); color: #ffffff; }
+.icon-green { background: linear-gradient(135deg, #22c55e, #16a34a); color: #ffffff; }
+.icon-yellow { background: linear-gradient(135deg, #f59e0b, #d97706); color: #ffffff; }
+
+.step-number-tag {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: #fff;
+    color: #411bbf;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border: 2px solid #f1f5f9;
+}
+
+.step-info h3 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin-bottom: 12px;
+}
+
+.step-info p {
+    font-size: 1rem;
+    color: #4b5563;
+    line-height: 1.6;
+    max-width: 250px;
+}
+
+/* --- Mobile Responsive --- */
+@media (max-width: 768px) {
+    .steps-container { padding: 30px 10px; }
+    
+    .steps-title { 
+        font-size: 1.8rem; 
+        margin-bottom: 40px; 
+    }
+
+    .steps-title::after {
+        width: 60px;
+        height: 4px;
+        bottom: -10px;
+    }
+    
+    .steps-wrapper {
+        flex-direction: row; 
+        gap: 10px;
+    }
+
+    .step-card { padding: 5px; }
+
+    .step-icon-wrapper {
+        width: 60px;
+        height: 60px;
+        border-radius: 18px;
+        margin-bottom: 15px;
+    }
+
+    .step-number-tag {
+        width: 22px;
+        height: 22px;
+        font-size: 11px;
+    }
+
+    .step-info h3 { font-size: 0.85rem; margin-bottom: 5px; }
+    .step-info p {
+        font-size: 0.65rem;
+        max-width: 100px;
+        line-height: 1.3;
+    }
+}

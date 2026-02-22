@@ -1,0 +1,36 @@
+.card {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+  text-align: center;
+  width: 300px;
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-10px);
+}
+
+.price {
+  font-size: 32px;
+  font-weight: bold;
+  margin: 20px 0;
+  color: #007bff;
+}
+
+.card ul {
+  list-style: none;
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.buy-btn {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background: #007bff;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}

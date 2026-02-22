@@ -1,0 +1,157 @@
+.magic-navbar {
+  background-color: #411bbf; /* Main background color jo tumhi sangitla */
+  width: 100%;
+  height: 70px; /* Standard balanced height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Arial', sans-serif;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.nav-container {
+  width: 92%;
+  max-width: 1300px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+}
+
+/* Logo & Tagline */
+.nav-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  font-size: 28px; /* Slightly larger as requested */
+  font-weight: 900;
+  margin: 0;
+  letter-spacing: -1px;
+}
+
+.tagline {
+  font-size: 10px;
+  margin-top: -2px;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+/* Menu Pill Design (Darker background) */
+.menu-pill {
+  background-color: #2a0b8f; /* Tumhi sangitla to dark menu color */
+  padding: 6px 10px 6px 25px;
+  border-radius: 50px; /* Pill shape design */
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  position: relative;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 30px;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links li {
+  font-size: 17px; /* Mothi font size as requested */
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.nav-links li:hover {
+  opacity: 0.8;
+}
+
+/* Sign In Button */
+.signin-btn {
+  background-color: #ff3f6c;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 16px; /* Match with larger font theme */
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.signin-btn:hover {
+  transform: scale(1.05);
+}
+
+.dashboard-pill {
+  background-color: #2a0b8f;
+  padding: 6px 10px 6px 25px;
+  gap: 25px;
+}
+
+.premium-menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.premium-dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  background: #1f085f;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 170px;
+  z-index: 1200;
+}
+
+.premium-dropdown button {
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.premium-dropdown button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Responsive: Hide menu on mobile */
+@media (max-width: 850px) {
+  .nav-links {
+    display: none;
+  }
+  .dashboard-pill {
+    background: transparent;
+    padding: 0;
+    gap: 10px;
+  }
+  .premium-menu-btn {
+    display: inline-flex;
+  }
+  .premium-dropdown {
+    display: flex;
+  }
+  .premium-dropdown {
+    right: -4px;
+  }
+}

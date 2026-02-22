@@ -1,0 +1,190 @@
+.lgn-page-container {
+    min-height: 100vh;
+    background: #f4f7fa;
+    display: flex;
+    justify-content: center; /* आडवे सेंटर */
+    align-items: center;     /* उभे सेंटर */
+    padding: 20px;
+    font-family: 'Inter', sans-serif;
+    position: relative; /* Back button साठी आवश्यक */
+}
+
+/* नवीन ॲड केलेले: Back to Home Button */
+.lgn-back-home-btn {
+    position: absolute;
+    top: 25px;
+    left: 25px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 10px 16px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #411bbf;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    z-index: 10;
+}
+
+.lgn-back-home-btn:hover {
+    background: #411bbf;
+    color: white;
+    transform: translateX(-3px);
+}
+
+.lgn-glass-card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 420px;
+    padding: 50px 35px;
+    border-radius: 35px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.05);
+    text-align: center;
+}
+
+.lgn-brand-logo { 
+    font-size: 2.2rem; 
+    font-weight: 900; 
+    color: #411bbf; 
+    margin-bottom: 15px; 
+}
+.lgn-brand-logo span { color: #ff4791; }
+
+.lgn-title-purple {
+    font-size: 1.5rem;
+    color: #411bbf;
+    font-weight: 800;
+    margin-bottom: 20px;
+}
+
+.lgn-subtitle {
+    color: #64748b;
+    font-size: 0.95rem;
+    margin-bottom: 30px;
+}
+
+.lgn-custom-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.lgn-input-wrapper {
+    position: relative;
+    background: #f8fafc;
+    border: 2px solid #f1f5f9;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    transition: 0.3s;
+}
+
+.lgn-input-wrapper:focus-within {
+    border-color: #411bbf; 
+    background: #ffffff;
+    box-shadow: 0 8px 20px rgba(65, 27, 191, 0.08);
+}
+
+.lgn-field-icon {
+    position: absolute;
+    left: 18px;
+    color: #94a3b8;
+}
+
+.lgn-input-wrapper:focus-within .lgn-field-icon {
+    color: #411bbf;
+}
+
+.lgn-main-input {
+    width: 100%;
+    padding: 16px 15px 16px 52px;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 1rem;
+    color: #1e293b;
+}
+
+.lgn-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.lgn-forgot-link {
+    color: #411bbf;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.lgn-submit-btn {
+    background: #411bbf;
+    color: white;
+    padding: 16px;
+    border: none;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: 0.3s;
+    box-shadow: 0 10px 20px rgba(65, 27, 191, 0.15);
+}
+
+.lgn-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(65, 27, 191, 0.25);
+    opacity: 0.9;
+}
+
+.lgn-back-btn {
+    margin-top: 20px;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.lgn-footer-area {
+    margin-top: 30px;
+    padding-top: 25px;
+    border-top: 1px solid #f1f5f9;
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+.lgn-signup-link {
+    color: #411bbf;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+/* मोबाईलवर सेंटर राहण्यासाठी */
+@media (max-width: 480px) {
+    .lgn-page-container {
+        padding: 15px;
+        align-items: center; /* मोबाईलवर सुद्धा उभे सेंटर */
+    }
+    .lgn-glass-card {
+        padding: 40px 20px;
+    }
+    .lgn-back-home-btn {
+        top: 15px;
+        left: 15px;
+        padding: 8px 12px;
+        font-size: 0.75rem;
+    }
+}

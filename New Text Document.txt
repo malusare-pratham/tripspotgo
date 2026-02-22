@@ -1,0 +1,57 @@
+MAGICPOINT/
+├── backend/                        # Backend (Node/Express)
+│   ├── config/                     # Database & Config
+│   │   ├── db.js
+│   │   └── env.js
+│   ├── controllers/                # Logic Functions
+│   │   ├── authController.js
+│   │   ├── membershipController.js
+│   │   └── restaurantController.js
+│   ├── middleware/                 # Safety & Errors
+│   │   ├── asyncHandler.js
+│   │   ├── auth.js
+│   │   ├── errorHandler.js
+│   │   └── notFound.js
+│   ├── models/                     # DB Schemas
+│   │   ├── Membership.js
+│   │   └── User.js
+│   ├── routes/                     # API Routes
+│   │   ├── authRoutes.js
+│   │   ├── membershipRoutes.js
+│   │   └── restaurantRoutes.js
+│   ├── utils/                      # Helpers
+│   │   └── generateToken.js
+│   ├── app.js                      # App Setup
+│   ├── server.js                   # Entry Point
+│   ├── seed.js                     # Initial Data
+│   └── .env.example
+│
+├── frontend/                       # Frontend (React + Vite)
+│   ├── src/
+│   │   ├── assets/                 # Images & Icons
+│   │   ├── components/             # Reusable UI Parts
+│   │   │   ├── benefits/
+│   │   │   ├── categories/         # Food: Biryani, Pizza, etc.
+│   │   │   ├── Footer/
+│   │   │   ├── Hero/
+│   │   │   ├── MainContent/        # Restaurant Grid
+│   │   │   ├── Mainpage/
+│   │   │   ├── MembershipCard/
+│   │   │   ├── Navbar/
+│   │   │   ├── singlepage/
+│   │   │   └── steps/
+│   │   ├── pages/                  # Full View Pages
+│   │   │   ├── Login/              # Login Page Folder
+│   │   │   ├── Signup/             # Signup Page Folder
+│   │   │   ├── BillPage.jsx & .css
+│   │   │   ├── Confirmation.jsx & .css
+│   │   │   ├── DashboardPage.jsx & .css
+│   │   │   ├── ForgotPassword.jsx & .css
+│   │   │   └── VerifyOTP.jsx & .css
+│   │   ├── App.jsx                 # Main Router
+│   │   ├── main.jsx                # Render Point
+│   │   └── index.css
+│   ├── index.html
+│   ├── vite.config.js
+│   └── package.json
+└── README.md

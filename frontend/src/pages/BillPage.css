@@ -1,0 +1,230 @@
+/* --- Main Container --- */
+.bill-scope.bill-page-container {
+    min-height: 100vh;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    position: relative;
+}
+
+/* --- Top Navigation (Logo Left & Back Button Right) --- */
+.bill-scope .bill-top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 550px;
+    margin-bottom: 20px;
+}
+
+/* Logo Styling (Left) */
+.bill-scope .brand-logo {
+    font-size: 1.4rem;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+}
+
+.bill-scope .logo-magic { color: #411bbf; }
+.bill-scope .logo-point { color: #ff4791; }
+
+/* Back Button (Right) */
+.bill-scope .bill-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 8px 16px;
+    border-radius: 12px;
+    color: #411bbf;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    transition: all 0.3s ease;
+    z-index: 2;
+}
+
+.bill-scope .bill-back-btn:hover {
+    background: #f1f5f9;
+    transform: translateX(3px);
+}
+
+/* --- Bill Card --- */
+.bill-scope .bill-card {
+    background: #ffffff;
+    max-width: 550px;
+    width: 100%;
+    border-radius: 30px;
+    padding: 40px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+/* Header & Title */
+.bill-scope .bill-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.bill-scope .upload-icon-circle {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #411bbf, #ff4791);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    box-shadow: 0 10px 20px rgba(65, 27, 191, 0.2);
+}
+
+.bill-scope .main-bill-heading {
+    font-size: 2.2rem;
+    font-weight: 850;
+    color: #411bbf;
+    margin-bottom: 8px;
+    letter-spacing: -1px;
+}
+
+.bill-scope .sub-bill-text {
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+/* Instructions Box */
+.bill-scope .instructions-box {
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.bill-scope .info-icon {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #d97706;
+    font-weight: 700;
+}
+
+.bill-scope .instructions-box ul li {
+    font-size: 0.85rem;
+    color: #92400e;
+    margin-bottom: 6px;
+    list-style: inside disc;
+}
+
+/* Form Elements */
+.bill-scope .input-group {
+    margin-bottom: 20px;
+}
+
+.bill-scope .input-group label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.bill-scope .bill-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #f1f5f9;
+    border-radius: 12px;
+    font-size: 16px;
+    background: #f8fafc;
+}
+
+.bill-scope .amount-input-wrapper {
+    position: relative;
+}
+
+.bill-scope .currency-symbol {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: 700;
+    color: #411bbf;
+}
+
+.bill-scope .p-left { padding-left: 35px; }
+
+/* Upload Area */
+.bill-scope .upload-area {
+    border: 2px dashed #e2e8f0;
+    border-radius: 16px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    background: #fdfdfd;
+    margin-bottom: 30px;
+}
+
+.bill-scope .upload-area:hover {
+    border-color: #411bbf;
+    background: #f5f3ff;
+}
+
+/* Submit Button */
+.bill-scope .generate-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #411bbf, #2d128a);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(65, 27, 191, 0.15);
+}
+
+/* Feature Grid */
+.bill-scope .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.bill-scope .feature-item { text-align: center; }
+.bill-scope .f-title { display: block; font-weight: 800; font-size: 1.1rem; }
+.bill-scope .f-sub { font-size: 0.7rem; color: #64748b; text-transform: uppercase; }
+
+.bill-scope .text-green { color: #22c55e; }
+.bill-scope .text-blue { color: #3b82f6; }
+.bill-scope .text-orange { color: #f59e0b; }
+
+/* --- Responsive Media Queries --- */
+@media (max-width: 600px) {
+    .bill-scope.bill-page-container {
+        padding: 15px;
+        justify-content: flex-start;
+        padding-top: 30px;
+    }
+
+    .bill-scope .bill-top-nav {
+        padding: 0 5px;
+    }
+
+    .bill-scope .bill-card {
+        padding: 25px 15px;
+        border-radius: 20px;
+    }
+
+    .bill-scope .main-bill-heading {
+        font-size: 1.7rem;
+    }
+
+    .bill-scope .f-title { font-size: 0.9rem; }
+}
