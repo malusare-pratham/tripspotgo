@@ -18,17 +18,21 @@ const app = express();
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
 
+const normalizeOrigin = (value) => String(value || '').trim().replace(/\/+$/, '');
+const allowedOrigins = corsOrigins.map(normalizeOrigin);
+
 app.use(helmet());
 app.use(
     cors({
         origin: (origin, callback) => {
-            const isConfiguredOrigin = origin && corsOrigins.includes(origin);
-            const isVercelOrigin = origin && /^https:\/\/([a-z0-9-]+\.)?vercel\.app$/i.test(origin);
+            const normalizedOrigin = normalizeOrigin(origin);
+            const isConfiguredOrigin = normalizedOrigin && allowedOrigins.includes(normalizedOrigin);
+            const isVercelOrigin = normalizedOrigin && /^https:\/\/([a-z0-9-]+\.)?vercel\.app$/i.test(normalizedOrigin);
 
             if (!origin || isConfiguredOrigin || isVercelOrigin) {
                 return callback(null, true);
             }
-            return callback(new Error('CORS policy blocked this origin.'));
+            return callback(null, false);
         }
     })
 );
