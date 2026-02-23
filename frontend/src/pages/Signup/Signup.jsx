@@ -59,7 +59,7 @@ function Signup() {
         } catch (error) {
             const message = error?.response?.data?.message ||
                 (error?.request
-                    ? 'Backend server is not running. Please start backend on port 5000.'
+                    ? `Unable to reach server (${API_BASE_URL}). Check Render deployment, CORS_ORIGINS, and VITE_API_BASE_URL.`
                     : 'Signup failed. Please try again.');
             setErrorMessage(message);
         } finally {

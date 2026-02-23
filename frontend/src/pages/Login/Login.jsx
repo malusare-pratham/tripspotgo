@@ -50,7 +50,10 @@ function Login() {
             navigate('/DashboardPage');
         } catch (error) {
             const message =
-                error?.response?.data?.message || 'Login failed. Please check credentials.';
+                error?.response?.data?.message ||
+                (error?.request
+                    ? `Unable to reach server (${API_BASE_URL}). Check Render deployment, CORS_ORIGINS, and VITE_API_BASE_URL.`
+                    : 'Login failed. Please check credentials.');
             setErrorMessage(message);
         } finally {
             setIsSubmitting(false);
