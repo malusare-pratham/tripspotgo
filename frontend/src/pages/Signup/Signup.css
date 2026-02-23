@@ -3,18 +3,34 @@
     background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
     display: flex;
     justify-content: center;
-    padding: 40px 20px;
+    padding: 12px 20px 40px;
+}
+
+.signup-scope .signup-card-shell  {
+    width: 100%;
+    max-width: 660px;
 }
 
 .signup-scope .auth-card  {
     position: relative;
     background: white;
     width: 100%;
-    max-width: 700px;
+    max-width: 660px;
     padding: 50px;
     border-radius: 40px;
     box-shadow: 0 30px 60px rgba(0,0,0,0.08);
     text-align: center;
+}
+
+@media (min-width: 1024px) {
+    .signup-scope .signup-card-shell,
+    .signup-scope .auth-card {
+        max-width: 700px;
+    }
+}
+
+.signup-scope .auth-header  {
+    margin-top: -20px;
 }
 
 /* 🔥 Gradient Logo */
@@ -24,7 +40,7 @@
     background: linear-gradient(90deg, #6366f1, #ec4899);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 10px;
+    margin-bottom: 1px;
 }
 
 .signup-scope .brand-logo span  {
@@ -35,20 +51,41 @@
 
 /* 🔙 Back Button */
 .signup-scope .back-btn  {
-    position: absolute;
-    top: 25px;
-    left: 25px;
+    position: static;
     background: #f1f5f9;
+    color: #0f172a;
     border: none;
     padding: 8px 16px;
     border-radius: 12px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    transition: 0.3s ease;
+    transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    margin-bottom: 12px;
+    animation: backBtnIn 0.35s ease-out;
+    box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
 }
 
 .signup-scope .back-btn:hover  {
-    background: #e2e8f0;
+    background: #f1f5f9;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 16px rgba(15, 23, 42, 0.16);
+}
+
+.signup-scope .back-btn:active  {
+    background: #f1f5f9;
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 4px 10px rgba(76, 29, 149, 0.45);
+}
+
+@keyframes backBtnIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Membership Plans UI */
@@ -156,11 +193,32 @@
 }
 .signup-scope .selected-family .green-btn  { background: #22c55e; color: white; }
 
+.signup-scope .default-point-out  {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.35);
+    animation: defaultCardPulse 1.4s ease-out infinite;
+}
+
+@keyframes defaultCardPulse {
+    0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.35); }
+    100% { box-shadow: 0 0 0 12px rgba(59, 130, 246, 0); }
+}
+
 /* Registration Section */
 .signup-scope .registration-section-fade-in  {
     animation: fadeIn 0.5s ease-out;
     border-top: 1px solid #f1f5f9;
     padding-top: 30px;
+    scroll-margin-top: 16px;
+}
+
+.signup-scope .registration-point-out  {
+    animation: fadeIn 0.5s ease-out, registrationPulse 1.2s ease-out;
+}
+
+@keyframes registrationPulse {
+    0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.35); }
+    100% { box-shadow: 0 0 0 14px rgba(99, 102, 241, 0); }
 }
 
 @keyframes fadeIn {
@@ -235,8 +293,30 @@
 .signup-scope .bg-blue  { background: #3b82f6; }
 .signup-scope .bg-green  { background: #22c55e; }
 
+.signup-scope .auth-footer {
+    margin-top: 14px;
+}
+
+.signup-scope .signup-login-link  {
+    color: #2563eb;
+    font-weight: 800;
+    text-decoration: none;
+}
+
 /* Responsive */
 @media (max-width: 650px) {
+    .signup-scope .signup-card-shell  { 
+        display: flex;
+        flex-direction: column;
+    }
+    .signup-scope .back-btn  {
+        align-self: flex-start;
+        margin-bottom: 10px;
+    }
     .signup-scope .plans-display-container  { grid-template-columns: 1fr; }
     .signup-scope .auth-card  { padding: 30px 20px; }
+    .signup-scope .final-submit-btn  {
+        padding: 14px;
+        font-size: 1rem;
+    }
 }

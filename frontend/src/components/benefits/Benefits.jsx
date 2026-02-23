@@ -1,8 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Benefits.css';
 import { BadgePercent, ShieldCheck, CalendarDays, Users2 } from 'lucide-react'; 
 
 const Benefits = () => {
+    const navigate = useNavigate();
     const benefitsData = [
         {
             id: 1,
@@ -39,7 +41,7 @@ const Benefits = () => {
             <h2 className="benefits-title">Membership Benefits</h2>
             <div className="benefits-grid">
                 {benefitsData.map((item) => (
-                    <div className="benefit-card" key={item.id}>
+                    <div className="benefit-card" key={item.id} onClick={() => navigate('/signup')}>
                         <div className={`benefit-icon-box ${item.colorClass}`}>
                             {item.icon}
                         </div>

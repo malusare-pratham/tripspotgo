@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { User, Mail, Phone, Lock, QrCode, CreditCard, CheckCircle2, Users, ArrowRight } from 'lucide-react';
@@ -15,6 +15,13 @@ function Signup() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [statusMessage, setStatusMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [highlightRegistration, setHighlightRegistration] = useState(false);
+    const registrationRef = useRef(null);
+
+    useEffect(() => {
+        // Warm up backend on page open to reduce first submit latency (Render cold start).
+        axios.get(`${API_BASE_URL}/health`, { timeout: 8000 }).catch(() => {});
+    }, []);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -50,7 +57,7 @@ function Signup() {
                 membershipPlan: activePlan === 'single' ? 'Single Plan' : 'Family Plan'
             };
 
-            const response = await axios.post(`${API_BASE_URL}/api/auth/signup`, payload);
+            const response = await axios.post(`${API_BASE_URL}/api/auth/signup`, payload, { timeout: 15000 });
             const message = response?.data?.message || 'Signup successful';
             setStatusMessage(`${message}. Please login now.`);
 
@@ -67,12 +74,26 @@ function Signup() {
         }
     };
 
+    useEffect(() => {
+        if (!activePlan || !registrationRef.current) return;
+
+        registrationRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setHighlightRegistration(true);
+
+        const timer = setTimeout(() => {
+            setHighlightRegistration(false);
+        }, 1600);
+
+        return () => clearTimeout(timer);
+    }, [activePlan]);
+
     return (
         <div className="auth-wrapper signup-scope">
-            <div className="auth-card signup-card">
-
+            <div className="signup-card-shell">
                 {/* Back Button */}
                 <button className="back-btn" onClick={handleBack}>← Back</button>
+
+                <div className="auth-card signup-card">
 
                 <div className="auth-header">
                     <div className="brand-logo">
@@ -86,7 +107,10 @@ function Signup() {
                 <div className="plans-display-container">
 
                     {/* Single Plan */}
-                    <div className={`premium-plan-card ${activePlan === 'single' ? 'selected-single' : ''}`}>
+                    <div
+                        className={`premium-plan-card ${activePlan === 'single' ? 'selected-single' : ''} ${!activePlan ? 'default-point-out' : ''}`}
+                        onClick={() => setActivePlan('single')}
+                    >
                         <div className="plan-badge-top">Popular</div>
                         <div className="plan-visual single-bg">
                             <User size={30} />
@@ -109,7 +133,10 @@ function Signup() {
                     </div>
 
                     {/* Family Plan */}
-                    <div className={`premium-plan-card ${activePlan === 'family' ? 'selected-family' : ''}`}>
+                    <div
+                        className={`premium-plan-card ${activePlan === 'family' ? 'selected-family' : ''} ${!activePlan ? 'default-point-out' : ''}`}
+                        onClick={() => setActivePlan('family')}
+                    >
                         <div className="plan-badge-top green-badge">Best Value</div>
                         <div className="plan-visual family-bg">
                             <Users size={30} />
@@ -135,7 +162,10 @@ function Signup() {
 
                 {/* Registration Form */}
                 {activePlan && (
-                    <div className="registration-section-fade-in">
+                    <div
+                        ref={registrationRef}
+                        className={`registration-section-fade-in ${highlightRegistration ? 'registration-point-out' : ''}`}
+                    >
                         <div className="section-divider">
                             <span>Register for {activePlan === 'single' ? 'Single' : 'Family'} Membership</span>
                         </div>
@@ -194,9 +224,10 @@ function Signup() {
                     </div>
                 )}
 
-                <p className="auth-footer">
-                    Already a member? <a href="/login">Login here</a>
-                </p>
+                    <p className="auth-footer">
+                        Already a member? <a href="/login" className="signup-login-link">Login here</a>
+                    </p>
+                </div>
             </div>
         </div>
     );

@@ -1,8 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Categories.css';
 import { Hotel, Utensils, Zap, ShoppingBag } from 'lucide-react'; 
 
 const Categories = () => {
+    const navigate = useNavigate();
     const categoriesData = [
         {
             id: 1,
@@ -39,7 +41,7 @@ const Categories = () => {
             <h2 className="categories-title">Discount Categories</h2>
             <div className="categories-grid">
                 {categoriesData.map((cat) => (
-                    <div className={`category-card ${cat.colorClass}`} key={cat.id}>
+                    <div className={`category-card ${cat.colorClass}`} key={cat.id} onClick={() => navigate('/signup')}>
                         <div className="cat-icon-wrapper">
                             {cat.icon}
                         </div>

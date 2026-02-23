@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar/Navbar';
 import Hero from './components/Hero/Hero';
 import Steps from './components/steps/Steps'; 
@@ -76,13 +76,8 @@ const AppLayout = () => {
 };
 
 const HomePage = () => {
-  const navigate = useNavigate();
-
   return (
-    <div 
-      onClick={() => navigate('/signup')} 
-      style={{ cursor: 'pointer' }} 
-    >
+    <div>
       <Navbar />
       <Hero />
       <MainContent/>

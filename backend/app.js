@@ -28,12 +28,15 @@ app.use(
             const normalizedOrigin = normalizeOrigin(origin);
             const isConfiguredOrigin = normalizedOrigin && allowedOrigins.includes(normalizedOrigin);
             const isVercelOrigin = normalizedOrigin && /^https:\/\/([a-z0-9-]+\.)?vercel\.app$/i.test(normalizedOrigin);
+            const isLocalDevOrigin = normalizedOrigin && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(normalizedOrigin);
 
-            if (!origin || isConfiguredOrigin || isVercelOrigin) {
+            if (!origin || isConfiguredOrigin || isVercelOrigin || isLocalDevOrigin) {
                 return callback(null, true);
             }
             return callback(null, false);
-        }
+        },
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization']
     })
 );
 app.use(express.json({ limit: '1mb' }));

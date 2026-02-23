@@ -37,6 +37,18 @@ const registerUser = asyncHandler(async (req, res) => {
         ...(email ? { email: String(email).trim().toLowerCase() } : {})
     };
 
+    if (!/^\d{10}$/.test(userPayload.mobileNumber)) {
+        const error = new Error('mobile must be a 10-digit number');
+        error.statusCode = 400;
+        throw error;
+    }
+
+    if (userPayload.password.length < 8) {
+        const error = new Error('password must be at least 8 characters long');
+        error.statusCode = 400;
+        throw error;
+    }
+
     const query = [
         { mobileNumber: userPayload.mobileNumber },
         { mobile: userPayload.mobileNumber }

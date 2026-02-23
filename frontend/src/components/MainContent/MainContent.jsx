@@ -1,7 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './MainContent.css';
 
 const MainContent = () => {
+  const navigate = useNavigate();
   const categories = [
     {
       title: "Food & Dining",
@@ -59,7 +61,7 @@ const MainContent = () => {
           <h2 className="section-title">{cat.title}</h2>
           <div className="sliding-row">
             {cat.items.map((item, i) => (
-              <div key={i} className="deal-card">
+              <div key={i} className="deal-card" onClick={() => navigate('/signup')}>
                 <div className="image-container">
                   <div className="discount-badge">10% OFF</div>
                   <img src={item.img} alt={item.name} loading="lazy" />
