@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './AdminLogin.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://magicpoint.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 const AdminLogin = () => {
     const [email, setEmail] = useState('');
@@ -62,3 +62,4 @@ const AdminLogin = () => {
 };
 
 export default AdminLogin;
+

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { LayoutDashboard, LogOut, TrendingUp, DollarSign, Users, FileText, Search, RefreshCw } from 'lucide-react';
 import './PartnerDashboard.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://magicpoint.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 const PartnerDashboard = () => {
     const [partnerInfo, setPartnerInfo] = useState(null);
@@ -185,3 +185,4 @@ const PartnerDashboard = () => {
 };
 
 export default PartnerDashboard;
+

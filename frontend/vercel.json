@@ -1,5 +1,7 @@
 {
   "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://magicpoint.onrender.com/api/$1" },
+    { "source": "/uploads/(.*)", "destination": "https://magicpoint.onrender.com/uploads/$1" },
     { "source": "/(.*)", "destination": "/" }
   ]
 }

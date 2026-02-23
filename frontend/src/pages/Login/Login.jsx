@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Lock, LogIn, ArrowRight, ArrowLeft, ChevronLeft, Phone } from 'lucide-react';
 import './Login.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://magicpoint.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 function Login() {
     const [isForgot, setIsForgot] = useState(false);
@@ -155,3 +155,4 @@ function Login() {
 }
 
 export default Login;
+
