@@ -86,6 +86,7 @@
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(12px);
     border: 2px dashed #ffc107;
+    box-shadow: 0 0 0 1px rgba(255, 193, 7, 0.22), 0 10px 22px rgba(255, 193, 7, 0.18);
     padding: 12px 25px; 
     border-radius: 18px;
     display: inline-block;
@@ -112,7 +113,22 @@
     box-shadow: 0 0 8px #4ade80;
 }
 
-.mg-card-body { font-size: 18px; font-weight: 900; margin: 4px 0; }
+.mg-card-body {
+    font-size: 18px;
+    font-weight: 900;
+    margin: 4px 0;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 6px;
+}
+.mg-plan-text { font-size: 32px; }
+.mg-divider {
+    opacity: 0.7;
+    font-size: 24px;
+    line-height: 1.2;
+    display: inline-block;
+}
 .mg-price-main { color: #ffc107; font-size: 36px; text-shadow: 0 0 10px rgba(255, 193, 7, 0.3); }
 .mg-price-sub { font-size: 15px; opacity: 0.9; font-weight: 400; }
 
@@ -220,12 +236,28 @@
       background-position: center bottom;
   }
   .mg-membership-card-combined { 
-      padding: 12px 15px; 
-      width: 95%; 
+      padding: 10px 14px; 
+      width: calc(100% - 64px); 
+      max-width: calc(100% - 64px);
       margin-top: 15px; 
+      min-height: 108px;
   }
-  .mg-price-main { font-size: 26px; }
-  .mg-card-body { font-size: 14px; }
+  .mg-card-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+  }
+  .mg-price-main { font-size: 22px; }
+  .mg-card-body {
+      font-size: 12px;
+      gap: 4px;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+  }
+  .mg-plan-text { font-size: 20px; }
+  .mg-divider { font-size: 18px; }
+  .mg-price-sub { font-size: 12px; white-space: nowrap; }
   
   /* Footer adjustments for mobile readability */
   .mg-card-footer { 
@@ -241,7 +273,19 @@
       justify-content: center;
   }
   
-  .mg-search-bar { width: 100%; }
+  .mg-search-bar {
+      width: calc(100% - 64px);
+      max-width: calc(100% - 64px);
+      padding: 5px 8px;
+  }
+  .mg-search-bar input {
+      padding: 6px;
+      font-size: 13px;
+  }
+  .mg-search-btn {
+      padding: 6px 14px;
+      font-size: 11px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -250,22 +294,46 @@
       padding: 10px 10px 28px;
   }
   .mg-membership-card-combined {
-      width: 100%;
+      width: calc(100% - 48px);
+      max-width: calc(100% - 48px);
       border-radius: 14px;
       margin-top: 12px;
+      min-height: 102px;
   }
   .mg-card-header {
-      flex-direction: column;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
   }
-  .mg-price-main {
-      font-size: 24px;
+  .mg-price-main { font-size: 20px; }
+  .mg-card-body {
+      font-size: 11px;
+      gap: 3px;
+      flex-wrap: nowrap;
+      white-space: nowrap;
   }
+  .mg-plan-text { font-size: 18px; }
+  .mg-divider { font-size: 16px; }
+  .mg-price-sub { font-size: 11px; white-space: nowrap; }
   .mg-price-sub {
       font-size: 12px;
   }
   .mg-hero-stats {
       font-size: 9px;
+  }
+  .mg-search-bar {
+      width: calc(100% - 48px);
+      max-width: calc(100% - 48px);
+      padding: 4px 7px;
+  }
+  .mg-search-bar input {
+      padding: 5px;
+      font-size: 12px;
+  }
+  .mg-search-btn {
+      padding: 5px 12px;
+      font-size: 10px;
   }
 }

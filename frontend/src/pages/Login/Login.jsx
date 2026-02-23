@@ -106,7 +106,7 @@ function Login() {
                         {errorMessage && <p style={{ color: '#dc2626' }}>{errorMessage}</p>}
                         <div className="lgn-options">
                             <label className="lgn-checkbox-container">
-                                <input type="checkbox" /> Remember me
+                                <input type="checkbox" className="lgn-remember-checkbox" defaultChecked /> Remember me
                             </label>
                             <span className="lgn-forgot-link" onClick={() => setIsForgot(true)}>Forgot Password?</span>
                         </div>

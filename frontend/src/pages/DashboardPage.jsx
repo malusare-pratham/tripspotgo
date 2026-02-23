@@ -112,7 +112,7 @@ const DashboardPage = () => {
 
   return (
     <div className="pg-root-combined">
-      <Navbar isAuthenticated onLogout={handleLogout} />
+      <Navbar isAuthenticated onLogout={handleLogout} showMobileMenu={false} />
 
       <section className="mg-hero-combined">
         <div className="mg-hero-svg-bg"></div>
@@ -131,7 +131,7 @@ const DashboardPage = () => {
                
                <div className="mg-card-body">
                   <span className="mg-plan-text">{membershipPlan.toUpperCase()}</span>
-                  <span className="mg-divider">•</span>
+                  <span className="mg-divider">|</span>
                   <span className="mg-price-main">₹50</span>
                   <span className="mg-price-sub">/ 2 days</span>
                </div>
@@ -175,3 +175,4 @@ const DashboardPage = () => {
 
 export default DashboardPage;
 
+//old

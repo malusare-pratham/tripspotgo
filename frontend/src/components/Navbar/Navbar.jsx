@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Navbar.css";
 
-function Navbar({ isAuthenticated = false, onLogout }) {
+function Navbar({ isAuthenticated = false, onLogout, showMobileMenu = true }) {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -46,15 +46,17 @@ function Navbar({ isAuthenticated = false, onLogout }) {
                   Logout
                 </button>
 
-                <button
-                  className="premium-menu-btn"
-                  onClick={() => setMenuOpen((prev) => !prev)}
-                  aria-label="Open menu options"
-                >
-                  <i className="fa-solid fa-bars"></i>
-                </button>
+                {showMobileMenu && (
+                  <button
+                    className="premium-menu-btn"
+                    onClick={() => setMenuOpen((prev) => !prev)}
+                    aria-label="Open menu options"
+                  >
+                    <i className="fa-solid fa-bars"></i>
+                  </button>
+                )}
 
-                {menuOpen && (
+                {showMobileMenu && menuOpen && (
                   <div className="premium-dropdown">
                     <button type="button">About us</button>
                     <button type="button">Contact us</button>

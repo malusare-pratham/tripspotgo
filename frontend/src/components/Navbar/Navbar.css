@@ -150,6 +150,10 @@
     padding: 0;
     gap: 10px;
   }
+  .dashboard-pill .signin-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
   .premium-menu-btn {
     display: inline-flex;
   }
