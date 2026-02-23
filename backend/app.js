@@ -22,7 +22,10 @@ app.use(helmet());
 app.use(
     cors({
         origin: (origin, callback) => {
-            if (!origin || corsOrigins.includes(origin)) {
+            const isConfiguredOrigin = origin && corsOrigins.includes(origin);
+            const isVercelOrigin = origin && /^https:\/\/([a-z0-9-]+\.)?vercel\.app$/i.test(origin);
+
+            if (!origin || isConfiguredOrigin || isVercelOrigin) {
                 return callback(null, true);
             }
             return callback(new Error('CORS policy blocked this origin.'));
