@@ -7,7 +7,7 @@ import './PartnerLogin.css';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 const PartnerLogin = () => {
-    const [email, setEmail] = useState('');
+    const [loginId, setLoginId] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -15,8 +15,12 @@ const PartnerLogin = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            // बॅकेंड राऊट: /api/admin/partner-login (हा आपण नंतर बनवू)
-            const res = await axios.post(`${API_BASE_URL}/api/admin/partner-login`, { email, password });
+            const identifier = loginId.trim();
+            const res = await axios.post(`${API_BASE_URL}/api/admin/partner-login`, {
+                loginId: identifier,
+                email: identifier,
+                password
+            });
             
             localStorage.setItem('partnerToken', res.data.token);
             localStorage.setItem('partnerInfo', JSON.stringify(res.data.partner));
@@ -30,6 +34,9 @@ const PartnerLogin = () => {
 
     return (
         <div className="partner-login-wrapper">
+            <button type="button" className="partner-back-btn" onClick={() => navigate('/')}>
+                Back
+            </button>
             <div className="login-card">
                 <div className="login-header">
                     <div className="logo-circle">
@@ -43,12 +50,12 @@ const PartnerLogin = () => {
 
                 <form onSubmit={handleLogin} className="login-form">
                     <div className="input-field">
-                        <label><Mail size={16} /> Business Email</label>
+                        <label><Mail size={16} /> Login ID / Email</label>
                         <input 
-                            type="email" 
-                            placeholder="hotel@example.com" 
-                            value={email} 
-                            onChange={(e) => setEmail(e.target.value)} 
+                            type="text" 
+                            placeholder="Enter Login ID or Email" 
+                            value={loginId} 
+                            onChange={(e) => setLoginId(e.target.value)} 
                             required 
                         />
                     </div>
