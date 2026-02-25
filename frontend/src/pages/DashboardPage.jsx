@@ -151,7 +151,7 @@ const DashboardPage = () => {
             <div className="mg-search-bar">
               <i className="fa-solid fa-magnifying-glass mg-search-icon"></i>
               <input type="text" placeholder="Search hotels, food, strawberries..." />
-              <button className="mg-search-btn">Get Deals</button>
+              <button className="mg-search-btn">Get Deals</button> 
             </div>
           </div>
 
