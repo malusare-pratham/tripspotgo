@@ -1,0 +1,132 @@
+/* Container - Fully Transparent */
+.menu-slider-wrapper {
+    width: 100%;
+    padding: 12px 0 0;
+    background: transparent;
+    overflow: hidden;
+}
+
+.menu-header-container {
+    max-width: 1350px;
+    margin: 0 auto 12px auto;
+    padding: 0 25px;
+    text-align: left; /* टायटल डावीकडेच राहील */
+}
+
+/* Updated Title Styling with Gradient */
+.mp-gradient-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 40px;            /* डेस्कटॉपसाठी ४० पिक्सेल */
+    font-weight: 900;           /* एक्स्ट्रा बोल्ड */
+    letter-spacing: -1px;       /* अक्षरांमधील अंतर थोडे कमी */
+    margin: 0;
+    
+    background: linear-gradient(90deg, #5a35d6 0%, #ff4791 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.slider-relative-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+/* Grid for 2 Rows */
+.menu-scroll-container {
+    display: grid;
+    grid-template-rows: repeat(2, 1fr);
+    grid-auto-flow: column;
+    grid-auto-columns: min-content;
+    gap: 20px 30px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    padding: 10px 40px;
+}
+
+.menu-scroll-container::-webkit-scrollbar {
+    display: none;
+}
+
+/* Exact Card Size: 120px * 156px */
+.menu-card {
+    width: 120px;
+    height: 156px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    background: transparent;
+}
+
+.menu-card:hover {
+    transform: scale(1.08);
+}
+
+.menu-image-wrapper {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.menu-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Navigation Arrows */
+.nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: white;
+    border: none;
+    border-radius: 50%;
+    color: #5a35d6;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.nav-arrow:hover {
+    color: #ff4791;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.left-arrow { left: 15px; }
+.right-arrow { right: 15px; }
+
+/* Mobile View */
+@media (max-width: 768px) {
+    .mp-gradient-title {
+        font-size: 28px; /* मोबाईलवर टायटल थोडे लहान */
+        padding-left: 0;
+    }
+
+    .nav-arrow {
+        display: none !important;
+    }
+
+    .menu-scroll-container {
+        padding: 10px 20px;
+        gap: 15px 20px;
+    }
+
+    .menu-card {
+        width: 100px;
+        height: 130px;
+    }
+}
