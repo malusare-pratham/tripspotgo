@@ -10,17 +10,15 @@
     max-width: 1350px;
     margin: 0 auto 12px auto;
     padding: 0 25px;
-    text-align: left; /* टायटल डावीकडेच राहील */
+    text-align: left;
 }
 
-/* Updated Title Styling with Gradient */
 .mp-gradient-title {
     font-family: 'Inter', sans-serif;
-    font-size: 40px;            /* डेस्कटॉपसाठी ४० पिक्सेल */
-    font-weight: 900;           /* एक्स्ट्रा बोल्ड */
-    letter-spacing: -1px;       /* अक्षरांमधील अंतर थोडे कमी */
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -1px;
     margin: 0;
-    
     background: linear-gradient(90deg, #5a35d6 0%, #ff4791 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -34,7 +32,6 @@
     width: 100%;
 }
 
-/* Grid for 2 Rows */
 .menu-scroll-container {
     display: grid;
     grid-template-rows: repeat(2, 1fr);
@@ -51,7 +48,6 @@
     display: none;
 }
 
-/* Exact Card Size: 120px * 156px */
 .menu-card {
     width: 120px;
     height: 156px;
@@ -82,7 +78,6 @@
     object-fit: contain;
 }
 
-/* Navigation Arrows */
 .nav-arrow {
     position: absolute;
     top: 50%;
@@ -109,10 +104,9 @@
 .left-arrow { left: 15px; }
 .right-arrow { right: 15px; }
 
-/* Mobile View */
 @media (max-width: 768px) {
     .mp-gradient-title {
-        font-size: 28px; /* मोबाईलवर टायटल थोडे लहान */
+        font-size: 15px;
         padding-left: 0;
     }
 
@@ -123,10 +117,25 @@
     .menu-scroll-container {
         padding: 10px 20px;
         gap: 15px 20px;
+        -webkit-tap-highlight-color: transparent;
+        tap-highlight-color: transparent;
     }
 
     .menu-card {
         width: 100px;
         height: 130px;
+        transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+        will-change: transform;
+        -webkit-tap-highlight-color: transparent;
+        tap-highlight-color: transparent;
+    }
+
+    .menu-card:active {
+        transform: scale(1.06);
+    }
+
+    .menu-image-wrapper img {
+        -webkit-tap-highlight-color: transparent;
+        tap-highlight-color: transparent;
     }
 }
