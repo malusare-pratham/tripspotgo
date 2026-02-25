@@ -4,6 +4,12 @@
     background-color: #ffffff;
 }
 
+.pg-root-combined .magic-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1300;
+}
+
 /* --- Navbar --- */
 .mg-nav-combined {
     background-color: #411bbf;
