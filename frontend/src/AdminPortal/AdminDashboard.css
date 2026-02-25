@@ -177,3 +177,31 @@ textarea { grid-column: span 2; height: 100px; }
     padding: 8px 12px;
     cursor: pointer;
 }
+
+.users-summary {
+    margin: 8px 0 14px;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.users-list-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+.users-list-card h4 {
+    margin: 0 0 12px;
+    color: #1f2937;
+}
+
+.users-table th,
+.users-table td {
+    vertical-align: middle;
+}
+
+.no-users-text {
+    margin: 0;
+    color: #6b7280;
+}
