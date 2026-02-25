@@ -12,7 +12,6 @@ function Signup() {
     const [formData, setFormData] = useState({ 
         name: '', email: '', mobile: '', password: '', confirmPassword: '' 
     });
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [statusMessage, setStatusMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [highlightRegistration, setHighlightRegistration] = useState(false);
@@ -47,8 +46,6 @@ function Signup() {
         }
 
         try {
-            setIsSubmitting(true);
-
             const payload = {
                 name: formData.name.trim(),
                 email: formData.email.trim(),
@@ -69,8 +66,6 @@ function Signup() {
                     ? `Unable to reach server (${API_BASE_URL}). Check Render deployment, CORS_ORIGINS, and VITE_API_BASE_URL.`
                     : 'Signup failed. Please try again.');
             setErrorMessage(message);
-        } finally {
-            setIsSubmitting(false);
         }
     };
 
@@ -216,9 +211,8 @@ function Signup() {
                             <button
                                 type="submit"
                                 className={`final-submit-btn ${activePlan === 'single' ? 'bg-blue' : 'bg-green'}`}
-                                disabled={isSubmitting}
                             >
-                                {isSubmitting ? 'Creating Account...' : 'Complete Registration & Pay'}
+                                Complete Registration & Pay
                             </button>
                         </form>
                     </div>
