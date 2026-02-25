@@ -6,7 +6,7 @@ const MenuSlider = () => {
   const scrollRef = useRef(null);
 
   const assetImages = import.meta.glob(
-    "../../assets/menuslidebar img/*.{png,jpg,jpeg,webp,avif,gif,svg}",
+    "../../assets/menuslidebarimg/*.{png,jpg,jpeg,webp,avif,gif,svg}",
     { eager: true, import: "default" }
   );
 
