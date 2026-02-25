@@ -29,6 +29,9 @@ const AdminLogin = () => {
 
     return (
         <div className="admin-login-container">
+            <button type="button" className="admin-back-btn" onClick={() => navigate('/')}>
+                Back
+            </button>
             <div className="admin-login-box">
                 <h2>MagicPoint Admin</h2>
                 <p>Please enter your credentials</p>
