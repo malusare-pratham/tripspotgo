@@ -7,12 +7,15 @@ const MenuSlider = () => {
 
   const assetImages = import.meta.glob(
     "../../assets/menuslidebarimg/*.{png,jpg,jpeg,webp,avif,gif,svg}",
-    { eager: true, import: "default" }
+    { eager: true }
   );
 
   const menuItems = Object.entries(assetImages)
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([, img]) => ({ img }));
+    .map(([, mod]) => ({
+      img: typeof mod === "string" ? mod : mod?.default || "",
+    }))
+    .filter((item) => item.img);
 
   const scroll = (direction) => {
     const { current } = scrollRef;
@@ -54,4 +57,3 @@ const MenuSlider = () => {
 };
 
 export default MenuSlider;
-
