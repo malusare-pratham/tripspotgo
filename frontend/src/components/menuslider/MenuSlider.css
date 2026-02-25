@@ -11,6 +11,7 @@
     margin: 0 auto 12px auto;
     padding: 0 25px;
     text-align: left;
+    background: transparent;
 }
 
 .mp-gradient-title {
@@ -30,6 +31,7 @@
     display: flex;
     align-items: center;
     width: 100%;
+    background: transparent;
 }
 
 .menu-scroll-container {
@@ -42,6 +44,7 @@
     scroll-behavior: smooth;
     scrollbar-width: none;
     padding: 10px 40px;
+    background: transparent;
 }
 
 .menu-scroll-container::-webkit-scrollbar {
@@ -70,6 +73,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    background: transparent;
 }
 
 .menu-image-wrapper img {
@@ -82,7 +86,7 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: white;
+    background: transparent;
     border: none;
     border-radius: 50%;
     color: #5a35d6;
@@ -91,7 +95,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: none;
     transition: all 0.2s ease;
     padding: 0;
 }
@@ -119,6 +123,7 @@
         gap: 15px 20px;
         -webkit-tap-highlight-color: transparent;
         tap-highlight-color: transparent;
+        background: transparent;
     }
 
     .menu-card {
