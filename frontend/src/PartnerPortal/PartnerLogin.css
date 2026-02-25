@@ -5,6 +5,20 @@
     justify-content: center;
     background: #f0f4f8; /* Soft background */
     font-family: 'Inter', sans-serif;
+    position: relative;
+}
+
+.partner-back-btn {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    border: 1px solid #dbe3ea;
+    background: #fff;
+    color: #2c3e50;
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-weight: 600;
+    cursor: pointer;
 }
 
 .login-card {
