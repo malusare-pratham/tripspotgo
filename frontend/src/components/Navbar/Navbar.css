@@ -147,7 +147,7 @@
   }
   .dashboard-pill {
     background: transparent;
-    padding: 0;
+    padding: 0; 
     gap: 10px;
   }
   .dashboard-pill .signin-btn {
