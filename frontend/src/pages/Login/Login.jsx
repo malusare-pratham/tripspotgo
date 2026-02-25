@@ -10,7 +10,6 @@ function Login() {
     const [isForgot, setIsForgot] = useState(false);
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({ mobile: '', password: '' });
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate();
     const location = useLocation();
@@ -25,6 +24,11 @@ function Login() {
             localStorage.removeItem('pendingSignupMobile');
         }
     }, [location.state]);
+
+    useEffect(() => {
+        if (!API_BASE_URL) return;
+        axios.get(`${API_BASE_URL}/health`, { timeout: 5000 }).catch(() => {});
+    }, []);
 
     const handleChange = (e) => {
         setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -43,7 +47,6 @@ function Login() {
         const payload = { mobile, password: formData.password };
 
         try {
-            setIsSubmitting(true);
             const response = await axios.post(`${API_BASE_URL}/api/auth/login`, payload);
             localStorage.setItem('authToken', response.data.token);
             localStorage.setItem('authUser', JSON.stringify(response.data.user));
@@ -55,8 +58,6 @@ function Login() {
                     ? `Unable to reach server (${API_BASE_URL}). Check Render deployment, CORS_ORIGINS, and VITE_API_BASE_URL.`
                     : 'Login failed. Please check credentials.');
             setErrorMessage(message);
-        } finally {
-            setIsSubmitting(false);
         }
     };
 
@@ -110,8 +111,8 @@ function Login() {
                             </label>
                             <span className="lgn-forgot-link" onClick={() => setIsForgot(true)}>Forgot Password?</span>
                         </div>
-                        <button type="submit" className="lgn-submit-btn" disabled={isSubmitting}>
-                            <span>{isSubmitting ? 'Logging in...' : 'Login to Account'}</span>
+                        <button type="submit" className="lgn-submit-btn">
+                            <span>Login to Account</span>
                             <LogIn size={20} />
                         </button>
                     </form>
