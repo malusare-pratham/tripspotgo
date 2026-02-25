@@ -61,7 +61,7 @@ function Navbar({ isAuthenticated = false, onLogout, showMobileMenu = true }) {
                     <button type="button">About us</button>
                     <button type="button">Contact us</button>
                     <button type="button">Blog</button>
-                  </div>
+                  </div> 
                 )}
               </>
             ) : (
