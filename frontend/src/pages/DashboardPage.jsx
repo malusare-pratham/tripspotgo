@@ -112,7 +112,7 @@ const DashboardPage = () => {
 
   return (
     <div className="pg-root-combined">
-      <Navbar isAuthenticated onLogout={handleLogout} showMobileMenu={false} />
+      <Navbar isAuthenticated onLogout={handleLogout} />
 
       <section className="mg-hero-combined">
         <div className="mg-hero-svg-bg"></div>
