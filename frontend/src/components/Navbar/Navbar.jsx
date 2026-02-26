@@ -1,13 +1,29 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./Navbar.css";
 
 function Navbar({ isAuthenticated = false, onLogout, showMobileMenu = true }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const openTransactionHistory = () => {
+    navigate("/transaction-history");
+    setMenuOpen(false);
+  };
+  const toggleMobileMenu = () => {
+    setMenuOpen((prev) => !prev);
+  };
+  const handleMenuLogout = () => {
+    setMenuOpen(false);
+    handleAuthAction();
+  };
 
   const handleLogoClick = () => {
     if (isAuthenticated) {
+      if (location.pathname === "/DashboardPage") {
+        window.location.reload();
+        return;
+      }
       navigate("/DashboardPage");
       return;
     }
@@ -40,19 +56,36 @@ function Navbar({ isAuthenticated = false, onLogout, showMobileMenu = true }) {
                   <li>About us</li>
                   <li>Contact us</li>
                   <li>Blog</li>
+                  <li onClick={openTransactionHistory} style={{ cursor: "pointer" }}>
+                    Trasection
+                  </li>
                 </ul>
 
                 <button className="signin-btn" onClick={handleAuthAction}>
                   Logout
                 </button>
-
+                <button
+                  type="button"
+                  className="mobile-transaction-btn"
+                  onClick={openTransactionHistory}
+                  aria-label="Open transaction history"
+                  title="Transaction History"
+                >
+                  <i className="fa-solid fa-receipt tx-receipt-icon"></i>
+                </button>
                 {showMobileMenu && (
                   <button
-                    className="premium-menu-btn"
-                    onClick={() => setMenuOpen((prev) => !prev)}
+                    type="button"
+                    className="mobile-menu-lines-btn"
+                    onClick={toggleMobileMenu}
                     aria-label="Open menu options"
+                    title="Menu"
                   >
-                    <i className="fa-solid fa-bars"></i>
+                    <span className="mobile-tx-lines" aria-hidden="true">
+                      <span className="line line-1"></span>
+                      <span className="line line-2"></span>
+                      <span className="line line-3"></span>
+                    </span>
                   </button>
                 )}
 
@@ -61,6 +94,12 @@ function Navbar({ isAuthenticated = false, onLogout, showMobileMenu = true }) {
                     <button type="button">About us</button>
                     <button type="button">Contact us</button>
                     <button type="button">Blog</button>
+                    <button type="button" onClick={openTransactionHistory}>
+                      Trasection
+                    </button>
+                    <button type="button" onClick={handleMenuLogout}>
+                      Logout
+                    </button>
                   </div> 
                 )}
               </>
@@ -70,6 +109,9 @@ function Navbar({ isAuthenticated = false, onLogout, showMobileMenu = true }) {
                   <li>About us</li>
                   <li>Contact us</li>
                   <li>Blog</li>
+                  <li onClick={openTransactionHistory} style={{ cursor: "pointer" }}>
+                    Trasection
+                  </li>
                 </ul>
                 <button className="signin-btn" onClick={handleAuthAction}>
                   Sign In/Up
