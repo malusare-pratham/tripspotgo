@@ -73,7 +73,6 @@ const OfferCard = ({ item, onClick, onOpenLocation }) => (
           <div className="mp-name-block">
             <div className="mp-name-row">
               <h3>{item.name}</h3>
-              <span className="mp-veg-badge">Veg</span>
             </div>
             <button
               type="button"
@@ -92,7 +91,10 @@ const OfferCard = ({ item, onClick, onOpenLocation }) => (
               <Star size={12} fill="white" style={{ marginRight: "3px" }} />
               {item.rating}
             </span>
-            <span className="mp-open-now">Open Now</span>
+            <div className="mp-status-line">
+              <span className="mp-veg-badge">Veg</span>
+              <span className="mp-open-now">Open Now</span>
+            </div>
           </div>
         </div>
       </div>
@@ -150,12 +152,14 @@ const MainPageContent = () => {
         {/* नवीन MenuSlider कॉम्पोनंट */}
         <MenuSlider />
 
-        <header className="mp-page-header">
-          <h1 className="mp-gradient-title">Explore nearby offers</h1>
-          <p className="mp-sub-title">Lowest prices for all your favourite Magicpoints</p>
-        </header>
+        <div className="mp-mobile-sticky">
+          <header className="mp-page-header">
+            <h1 className="mp-gradient-title">Explore nearby offers</h1>
+            <p className="mp-sub-title">Lowest prices for all your favourite Magicpoints</p>
+          </header>
 
-        <FilterBar activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
+          <FilterBar activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
+        </div>
 
         <section className="mp-section">
           <div className="mp-section-header">

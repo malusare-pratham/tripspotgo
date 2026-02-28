@@ -70,7 +70,9 @@ app.get('/health', (_req, res) => {
     });
 });
 
-app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/signup', authLimiter);
+app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/memberships', membershipRoutes);
 app.use('/api/restaurants', restaurantRoutes);

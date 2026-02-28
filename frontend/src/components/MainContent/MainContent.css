@@ -1,141 +1,199 @@
-.main-container {
-  max-width: 1300px;
+.mc-main-container {
+  --mc-primary: #5a35d6;
+  --mc-text-dark: #1f2937;
+  --mc-text-muted: #64748b;
+  --mc-card-border: #dfe4ea;
+  max-width: 1350px;
   margin: 0 auto;
-  /* चारही बाजूंनी व्यवस्थित पॅडिंग दिली आहे (Top: 40px, Right: 20px, Bottom: 40px, Left: 20px) */
-  padding: 40px 20px; 
-  background-color: transparent; 
+  padding: 40px 20px 16px;
+  background-color: transparent;
   overflow-x: hidden;
 }
 
-/* मुख्य हेडिंग - साईज वाढवली आहे */
-.main-top-heading {
+.mc-main-top-heading {
   text-align: center;
-  /* फॉन्ट साईज 1.8rem वरून 2.5rem केली आहे */
-  font-size: 2.5rem; 
-  font-weight: 850; /* अधिक बोल्ड */
+  font-size: 2.5rem;
+  font-weight: 850;
   color: #411bbf;
-  margin-bottom: 50px; /* अंडरलाईन आणि कंटेंट मध्ये जास्त गॅप दिला आहे */
+  margin: 0 0 40px;
   letter-spacing: -1px;
-  position: relative;
-  display: block;
 }
 
-/* स्टाइलिश ग्रेडियंट अंडरलाईन - हेडिंगनुसार मोठी केली */
-.main-top-heading::after {
-  content: '';
-  position: absolute;
-  bottom: -15px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80px; /* रुंदी थोडी वाढवली */
-  height: 5px; /* जाडी थोडी वाढवली */
-  background: linear-gradient(90deg, #411bbf 0%, #ff4791 100%);
-  border-radius: 10px;
-}
-
-.category-section {
-  margin-bottom: 35px; /* सेक्शनमधील अंतर वाढवले */
-}
-
-.section-title {
-  font-size: 1.6rem; /* सब-टायटल सुद्धा थोडे मोठे केले */
-  font-weight: 800;
-  color: #1a1a1a;
-  margin-bottom: 15px;
-  text-transform: capitalize;
-  padding-left: 5px; /* टायटलला डावीकडून थोडी जागा दिली */
-}
-
-.sliding-row {
+.mc-tab-row {
   display: flex;
-  gap: 15px;
+  gap: 16px;
   overflow-x: auto;
-  scroll-behavior: smooth;
-  padding: 10px 5px 20px 5px; /* कार्ड्सना श्वास घ्यायला जागा दिली */
-  scroll-snap-type: x mandatory; 
-  scrollbar-width: none; 
+  border-bottom: 1px solid #e5e7eb;
+  margin: 8px 0 24px;
+  scrollbar-width: none;
 }
 
-.sliding-row::-webkit-scrollbar {
+.mc-tab-row::-webkit-scrollbar {
   display: none;
 }
 
-.deal-card {
-  flex: 0 0 230px;
-  background: #fff;
-  border-radius: 16px;
+.mc-tab-btn {
+  border: none;
+  background: transparent;
+  color: #4b5563;
+  font-size: 1.05rem;
+  font-weight: 800;
+  padding: 12px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+}
+
+.mc-tab-btn.active {
+  color: #4f46e5;
+  border-bottom-color: #4f46e5;
+}
+
+.mc-category-section {
+  margin-bottom: 14px;
+}
+
+.mc-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.mc-section-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0;
+  text-transform: capitalize;
+  padding-left: 5px;
+}
+
+.mc-view-all {
+  border: none;
+  background: transparent;
+  color: var(--mc-primary);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mc-sliding-row {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 10px 5px 8px;
+  background: transparent;
+  scrollbar-width: none;
+}
+
+.mc-sliding-row::-webkit-scrollbar {
+  display: none;
+}
+
+.mc-deal-card {
+  flex: 0 0 305px;
+  height: 204px;
+  background: transparent;
+  border-radius: 24px;
   position: relative;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-  transition: all 0.3s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
   overflow: hidden;
-  border: 1px solid #f0f0f0;
-  scroll-snap-align: start;
+  border: 1px solid var(--mc-card-border);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.deal-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+.mc-deal-card:hover {
+  transform: translateY(-5px) scale(1.01);
+  border-color: #5a35d6;
 }
 
-.image-container {
-  height: 150px;
+.mc-deal-card:focus,
+.mc-deal-card:active {
+  outline: none;
+  border-color: #5a35d6;
+}
+
+.mc-image-container {
+  height: 128px;
   width: 100%;
   overflow: hidden;
 }
 
-.image-container img {
+.mc-image-container img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.discount-badge {
+.mc-discount-badge {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background: #ff4757;
-  color: white;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 0.75rem;
+  top: 0;
+  right: 0;
+  background: var(--mc-primary);
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: 0 0 0 20px;
+  font-size: 13px;
   font-weight: 800;
   z-index: 2;
 }
 
-.card-info {
+.mc-card-info {
   padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
-.shop-label {
-  font-size: 11px;
+.mc-shop-label {
+  font-size: 15px;
   color: #6c5ce7;
   font-weight: 700;
-  margin-bottom: 3px;
-  display: block;
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 1.1;
 }
 
-.item-name {
-  font-size: 0.95rem;
+.mc-item-name {
+  font-size: 1.08rem;
   font-weight: 700;
-  color: #2d3436;
+  color: #111827;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin: 0;
 }
 
-/* --- Responsive (Mobile) --- */
-@media (max-width: 600px) {
-  .main-container {
-    padding: 30px 12px; /* मोबाईलवर साईड स्पेस थोडी कमी केली */
+@media (max-width: 768px) {
+  .mc-main-container {
+    padding: 30px 12px 12px;
   }
-  .main-top-heading { 
-    font-size: 1.8rem; /* मोबाईलवर हेडिंग सुटसुटीत ठेवली */
-    margin-bottom: 40px;
+
+  .mc-main-top-heading {
+    font-size: 1.8rem;
+    margin-bottom: 30px;
   }
-  .deal-card { 
-    flex: 0 0 180px; 
-    scroll-snap-align: center; 
+
+  .mc-tab-btn {
+    font-size: 0.95rem;
+    padding: 10px 12px;
   }
-  .image-container { height: 120px; }
-  .category-section { margin-bottom: 25px; }
+
+  .mc-sliding-row {
+    gap: 14px;
+  }
+
+  .mc-deal-card {
+    flex: 0 0 260px;
+    height: 186px;
+  }
+
+  .mc-image-container {
+    height: 118px;
+  }
 }

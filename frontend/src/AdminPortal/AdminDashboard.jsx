@@ -23,6 +23,8 @@ const initialForm = {
 
 const AdminDashboard = () => {
     const [view, setView] = useState('list');
+    const [mobileNavOpen, setMobileNavOpen] = useState(false);
+    const [partnerCategoryFilter, setPartnerCategoryFilter] = useState('All Categories');
     const [partners, setPartners] = useState([]);
     const [loggedInUsers, setLoggedInUsers] = useState([]);
     const [dashboardStats, setDashboardStats] = useState({
@@ -64,6 +66,11 @@ const AdminDashboard = () => {
     const handleLogout = () => {
         localStorage.clear();
         window.location.href = '/admin-login';
+    };
+
+    const handleViewChange = (nextView) => {
+        setView(nextView);
+        setMobileNavOpen(false);
     };
 
     const handleStatusChange = async (id, status) => {
@@ -117,6 +124,16 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleUserDelete = async (id) => {
+        if (!window.confirm('Delete this user?')) return;
+        try {
+            await axios.delete(`${API_BASE_URL}/api/admin/delete-user/${id}`);
+            await fetchDashboard();
+        } catch (error) {
+            alert(error?.response?.data?.message || 'Error deleting user');
+        }
+    };
+
     const formattedUsers = useMemo(
         () =>
             loggedInUsers.map((user) => ({
@@ -126,28 +143,60 @@ const AdminDashboard = () => {
         [loggedInUsers]
     );
 
+    const partnerCategoryOptions = useMemo(() => {
+        const unique = Array.from(
+            new Set(
+                partners
+                    .map((partner) => String(partner?.businessCategory || '').trim())
+                    .filter(Boolean)
+            )
+        );
+        return ['All Categories', ...unique];
+    }, [partners]);
+
+    const filteredPartners = useMemo(() => {
+        if (partnerCategoryFilter === 'All Categories') return partners;
+        return partners.filter(
+            (partner) => String(partner?.businessCategory || '').trim() === partnerCategoryFilter
+        );
+    }, [partners, partnerCategoryFilter]);
+
     return (
         <div className="admin-dashboard">
-            <aside className="sidebar">
-                <h2>MagicPoint Admin</h2>
+            <aside className={`sidebar ${mobileNavOpen ? 'mobile-open' : ''}`}>
+                <div className="sidebar-top">
+                    <h2>MagicPoint Admin</h2>
+                    <button
+                        type="button"
+                        className="sidebar-toggle"
+                        aria-label="Toggle admin menu"
+                        onClick={() => setMobileNavOpen((prev) => !prev)}
+                    >
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </div>
 
-                <button
-                    onClick={() => setView('list')}
-                    className={view === 'list' ? 'active' : ''}
-                >
-                    Partner List
-                </button>
+                <div className="sidebar-nav">
+                    <button
+                        onClick={() => handleViewChange('list')}
+                        className={view === 'list' ? 'active' : ''}
+                    >
+                        Partner List
+                    </button>
 
-                <button
-                    onClick={() => setView('add')}
-                    className={view === 'add' ? 'active' : ''}
-                >
-                    Add New Partner
-                </button>
+                    <button
+                        onClick={() => handleViewChange('add')}
+                        className={view === 'add' ? 'active' : ''}
+                    >
+                        Add New Partner
+                    </button>
 
-                <button onClick={handleLogout} className="logout-btn">
-                    Logout
-                </button>
+                    <button onClick={handleLogout} className="logout-btn">
+                        Logout
+                    </button>
+                </div>
             </aside>
 
             <main className="content">
@@ -171,92 +220,119 @@ const AdminDashboard = () => {
                         </div>
 
                         <h3>Logged In Users List</h3>
-                        <table className="users-table">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Mobile</th>
-                                    <th>Email</th>
-                                    <th>Plan</th>
-                                    <th>Last Login</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {formattedUsers.length > 0 ? (
-                                    formattedUsers.map((user) => (
-                                        <tr key={user.id}>
-                                            <td>{user.name || '-'}</td>
-                                            <td>{user.mobile || '-'}</td>
-                                            <td>{user.email || '-'}</td>
-                                            <td>{user.membershipPlan || '-'}</td>
-                                            <td>{user.formattedLastLogin}</td>
-                                        </tr>
-                                    ))
-                                ) : (
+                        <div className="table-scroll">
+                            <table className="users-table">
+                                <thead>
                                     <tr>
-                                        <td colSpan="5">{loadingList ? 'Loading...' : 'No logged-in users found.'}</td>
+                                        <th>Name</th>
+                                        <th>Mobile</th>
+                                        <th>Email</th>
+                                        <th>Plan</th>
+                                        <th>Last Login</th>
+                                        <th>Actions</th>
                                     </tr>
-                                )}
-                            </tbody>
-                        </table>
-
-                        <h3>All Registered Partners</h3>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Restaurant</th>
-                                    <th>Owner</th>
-                                    <th>Area</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {partners.length > 0 ? (
-                                    partners.map((partner) => (
-                                        <tr key={partner._id}>
-                                            <td>{partner.restaurantName || '-'}</td>
-                                            <td>{partner.ownerName || '-'}</td>
-                                            <td>{partner.area || '-'}</td>
-                                            <td>
-                                                <span className={`status-badge ${partner.status}`}>{partner.status}</span>
-                                            </td>
-                                            <td>
-                                                {partner.status !== 'Active' && (
-                                                    <button
-                                                        type="button"
-                                                        className="save-btn"
-                                                        onClick={() => handleStatusChange(partner._id, 'Active')}
-                                                    >
-                                                        Activate
-                                                    </button>
-                                                )}
-                                                {partner.status !== 'Blocked' && (
+                                </thead>
+                                <tbody>
+                                    {formattedUsers.length > 0 ? (
+                                        formattedUsers.map((user) => (
+                                            <tr key={user.id}>
+                                                <td>{user.name || '-'}</td>
+                                                <td>{user.mobile || '-'}</td>
+                                                <td>{user.email || '-'}</td>
+                                                <td>{user.membershipPlan || '-'}</td>
+                                                <td>{user.formattedLastLogin}</td>
+                                                <td>
                                                     <button
                                                         type="button"
                                                         className="delete-btn"
-                                                        onClick={() => handleStatusChange(partner._id, 'Blocked')}
+                                                        onClick={() => handleUserDelete(user.id)}
                                                     >
-                                                        Block
+                                                        Delete
                                                     </button>
-                                                )}
-                                                <button
-                                                    type="button"
-                                                    className="delete-btn"
-                                                    onClick={() => handleDelete(partner._id)}
-                                                >
-                                                    Delete
-                                                </button>
-                                            </td>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="6">{loadingList ? 'Loading...' : 'No logged-in users found.'}</td>
                                         </tr>
-                                    ))
-                                ) : (
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div className="admin-partner-header">
+                            <h3>All Registered Partners</h3>
+                            <select
+                                value={partnerCategoryFilter}
+                                onChange={(e) => setPartnerCategoryFilter(e.target.value)}
+                                aria-label="Filter partners by category"
+                            >
+                                {partnerCategoryOptions.map((category) => (
+                                    <option key={category} value={category}>
+                                        {category}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="table-scroll">
+                            <table>
+                                <thead>
                                     <tr>
-                                        <td colSpan="5">{loadingList ? 'Loading...' : 'No partners available.'}</td>
+                                        <th>Restaurant</th>
+                                        <th>Owner</th>
+                                        <th>Area</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
                                     </tr>
-                                )}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {filteredPartners.length > 0 ? (
+                                        filteredPartners.map((partner) => (
+                                            <tr key={partner._id}>
+                                                <td>{partner.restaurantName || '-'}</td>
+                                                <td>{partner.ownerName || '-'}</td>
+                                                <td>{partner.area || '-'}</td>
+                                                <td>
+                                                    <span className={`status-badge ${partner.status}`}>{partner.status}</span>
+                                                </td>
+                                                <td>
+                                                    {partner.status !== 'Active' && (
+                                                        <button
+                                                            type="button"
+                                                            className="save-btn"
+                                                            onClick={() => handleStatusChange(partner._id, 'Active')}
+                                                        >
+                                                            Activate
+                                                        </button>
+                                                    )}
+                                                    {partner.status !== 'Blocked' && (
+                                                        <button
+                                                            type="button"
+                                                            className="delete-btn"
+                                                            onClick={() => handleStatusChange(partner._id, 'Blocked')}
+                                                        >
+                                                            Block
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        type="button"
+                                                        className="delete-btn"
+                                                        onClick={() => handleDelete(partner._id)}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="5">{loadingList ? 'Loading...' : 'No partners available for selected category.'}</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 ) : (
                     <div className="add-partner-view">

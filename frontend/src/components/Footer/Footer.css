@@ -72,12 +72,28 @@
   margin-bottom: 25px;
 }
 
-.social-icons svg {
-  background: #e91e63;
-  padding: 8px;
+.social-icon-link {
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  color: white;
-  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  text-decoration: none;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.social-icon-link i {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.social-icon-link:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .app-badges img {

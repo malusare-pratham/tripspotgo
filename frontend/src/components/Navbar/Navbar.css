@@ -9,6 +9,13 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
+.magic-navbar-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1300;
+}
+
 .nav-container {
   width: 92%;
   max-width: 1300px;
@@ -243,9 +250,19 @@
   .menu-pill {
     background: transparent;
     padding: 0;
+    gap: 8px;
   }
   .nav-links {
     display: none;
+  }
+  .menu-pill .mobile-menu-lines-btn {
+    display: inline-flex;
+  }
+  .menu-pill .signin-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 11px;
+    margin-left: auto;
   }
   .dashboard-pill {
     background: transparent;

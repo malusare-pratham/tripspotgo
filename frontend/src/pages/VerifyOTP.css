@@ -165,6 +165,13 @@
     box-shadow: 0 15px 30px rgba(65, 27, 191, 0.25);
 }
 
+.otp-scope .verify-btn:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 10px 20px rgba(65, 27, 191, 0.12);
+}
+
 .otp-scope .resend-link  {
     background: none;
     border: none;
@@ -185,6 +192,36 @@
     font-size: 0.8rem;
     line-height: 1.5;
     margin-bottom: 30px;
+}
+
+.otp-scope .partner-approval-note {
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 30px;
+}
+
+.otp-scope .partner-approval-note h4 {
+    color: #166534;
+    font-size: 0.95rem;
+    margin: 0 0 6px;
+}
+
+.otp-scope .partner-approval-note p {
+    color: #166534;
+    font-size: 0.88rem;
+    margin: 0;
+}
+
+.otp-scope .partner-approval-note.rejected {
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.otp-scope .partner-approval-note.rejected h4,
+.otp-scope .partner-approval-note.rejected p {
+    color: #b91c1c;
 }
 
 /* --- Savings Banner --- */

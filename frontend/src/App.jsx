@@ -85,12 +85,14 @@ const AppLayout = () => {
 const HomePage = () => {
   return (
     <div>
-      <Navbar />
-      <Hero />
-      <MainContent/>
-      <Categories /> 
-      <Benefits />
-      <Footer />
+      <Navbar fixed />
+      <div style={{ paddingTop: '70px' }}>
+        <Hero />
+        <MainContent/>
+        <Categories /> 
+        <Benefits />
+        <Footer />
+      </div>
     </div>
   );
 };

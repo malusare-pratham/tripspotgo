@@ -1,25 +1,35 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import './Confirmation.css';
+
+const formatCurrency = (value) =>
+  new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(Number(value) || 0);
 
 const Confirmation = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // डेमो डेटा
+  const payload = location?.state || {};
+
   const transactionData = {
-    amountSaved: "500.00",
-    partner: "The Grand Hotel Panchgani",
-    originalAmount: "5000.00",
-    discount: "500.00",
-    finalAmount: "4500.00",
-    transactionId: "TXN81922030",
-    dateTime: "2/14/2026, 8:42:02 PM",
-    lifetimeSavings: "2500.00"
+    amountSaved: Number(payload.amountSaved) || 500,
+    partner: String(payload.partner || 'The Grand Hotel Panchgani'),
+    originalAmount: Number(payload.originalAmount) || 5000,
+    discount: Number(payload.discount) || 500,
+    finalAmount: Number(payload.finalAmount) || 4500,
+    discountPercent: Number(payload.discountPercent) || 10,
+    transactionId: String(payload.transactionId || `TXN${Math.floor(10000000 + Math.random() * 90000000)}`),
+    dateTime: String(payload.dateTime || new Date().toLocaleString()),
+    lifetimeSavings: Number(payload.lifetimeSavings) || (Number(payload.discount) || 500)
   };
 
   return (
     <div className="conf-page-container conf-scope">
-      {/* Top Navigation */}
       <div className="conf-top-nav">
         <div className="brand-logo">
           <span className="logo-magic">Magic</span>
@@ -31,7 +41,6 @@ const Confirmation = () => {
       </div>
 
       <div className="conf-card">
-        {/* Success Animation Header */}
         <div className="success-header">
           <div className="check-animated-circle">
             <svg viewBox="0 0 52 52" className="checkmark">
@@ -43,14 +52,12 @@ const Confirmation = () => {
           <p className="success-subtitle">Your savings have been confirmed</p>
         </div>
 
-        {/* Highlight Savings Box */}
         <div className="savings-highlight-box">
           <div className="saving-label">You Saved</div>
-          <div className="saving-value">₹{transactionData.amountSaved}</div>
-          <div className="saving-tag">10% Instant Discount</div>
+          <div className="saving-value">{formatCurrency(transactionData.amountSaved)}</div>
+          <div className="saving-tag">{transactionData.discountPercent}% Instant Discount</div>
         </div>
 
-        {/* Detailed Bill Summary */}
         <div className="conf-summary-section">
           <div className="summary-item">
             <span className="s-label">Partner</span>
@@ -58,19 +65,18 @@ const Confirmation = () => {
           </div>
           <div className="summary-item">
             <span className="s-label">Original Amount</span>
-            <span className="s-value">₹{transactionData.originalAmount}</span>
+            <span className="s-value">{formatCurrency(transactionData.originalAmount)}</span>
           </div>
           <div className="summary-item discount-text">
-            <span className="s-label">Discount (10%)</span>
-            <span className="s-value">- ₹{transactionData.discount}</span>
+            <span className="s-label">Discount ({transactionData.discountPercent}%)</span>
+            <span className="s-value">- {formatCurrency(transactionData.discount)}</span>
           </div>
           <div className="summary-item total-payable">
             <span className="s-label">Final Payable Amount</span>
-            <span className="s-value">₹{transactionData.finalAmount}</span>
+            <span className="s-value">{formatCurrency(transactionData.finalAmount)}</span>
           </div>
         </div>
 
-        {/* Transaction Meta Info */}
         <div className="transaction-meta">
           <div className="meta-row">
             <span>Transaction ID</span>
@@ -85,9 +91,8 @@ const Confirmation = () => {
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="conf-action-grid">
-          <button className="action-btn secondary">
+          <button className="action-btn secondary" onClick={() => navigate('/transaction-history')}>
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             View History
           </button>
@@ -97,7 +102,6 @@ const Confirmation = () => {
           </button>
         </div>
 
-        {/* Next Steps Info */}
         <div className="next-steps-card">
           <h4>What's Next?</h4>
           <ul>
@@ -107,13 +111,12 @@ const Confirmation = () => {
           </ul>
         </div>
 
-        {/* Lifetime Savings Banner */}
         <div className="lifetime-savings-footer">
-           <div className="footer-content">
-             <p>Your Lifetime Savings</p>
-             <h3>₹{transactionData.lifetimeSavings}</h3>
-           </div>
-           <div className="footer-icon">🎉</div>
+          <div className="footer-content">
+            <p>Your Lifetime Savings</p>
+            <h3>{formatCurrency(transactionData.lifetimeSavings)}</h3>
+          </div>
+          <div className="footer-icon">🎉</div>
         </div>
       </div>
     </div>

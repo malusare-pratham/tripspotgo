@@ -1,9 +1,62 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { useLocation, useNavigate } from 'react-router-dom';
 import './BillPage.css';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const fallbackPartners = [
+  { id: 'fallback-hotel', name: 'Luxury Stay Hotel' },
+  { id: 'fallback-restaurant', name: 'The Grand Restaurant' }
+];
 
 const BillPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [partners, setPartners] = useState(fallbackPartners);
+  const [selectedPartnerId, setSelectedPartnerId] = useState('');
+  const [selectedPartnerName, setSelectedPartnerName] = useState('');
+  const [billFile, setBillFile] = useState(null);
+  const [billAmount, setBillAmount] = useState('');
+
+  useEffect(() => {
+    const fetchPartners = async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/api/admin/partners`);
+        const list = Array.isArray(res?.data) ? res.data : [];
+        const activeOpen = list
+          .filter((p) => String(p?.status || '').trim() === 'Active')
+          .filter((p) => String(p?.businessStatus || 'OPEN').toUpperCase() === 'OPEN')
+          .map((p) => ({ id: p?._id, name: p?.restaurantName || 'Partner Restaurant' }));
+
+        const nextPartners = activeOpen.length ? activeOpen : fallbackPartners;
+        setPartners(nextPartners);
+
+        const prefilledId = String(location?.state?.partnerId || '').trim();
+        const prefilledName = String(location?.state?.partnerName || '').trim();
+        if (prefilledId || prefilledName) {
+            const matched = prefilledId ? nextPartners.find((p) => String(p.id) === prefilledId) : null;
+            setSelectedPartnerId(matched?.id || prefilledId || '');
+            setSelectedPartnerName(prefilledName || matched?.name || '');
+        } else if (nextPartners.length) {
+            setSelectedPartnerId(String(nextPartners[0].id || ''));
+            setSelectedPartnerName(String(nextPartners[0].name || 'Partner Restaurant'));
+        }
+      } catch (_error) {
+        setPartners(fallbackPartners);
+        const prefilledName = String(location?.state?.partnerName || '').trim();
+        const prefilledId = String(location?.state?.partnerId || '').trim();
+        if (prefilledName || prefilledId) {
+          setSelectedPartnerName(prefilledName);
+          setSelectedPartnerId(prefilledId);
+        } else if (fallbackPartners.length) {
+          setSelectedPartnerId(String(fallbackPartners[0].id || ''));
+          setSelectedPartnerName(String(fallbackPartners[0].name || 'Partner Restaurant'));
+        }
+      }
+    };
+
+    fetchPartners();
+  }, [location?.state?.partnerId, location?.state?.partnerName]);
 
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -13,10 +66,39 @@ const BillPage = () => {
     navigate('/');
   };
 
-  const handleGenerateOTP = (e) => {
+  const handleGenerateOTP = async (e) => {
     e.preventDefault();
-    // फॉर्म सबमिट झाल्यावर OTP पेजवर नेण्यासाठी
-    navigate('/verify-otp');
+    if (!billAmount || Number(billAmount) <= 0) {
+      alert('Please enter bill amount first.');
+      return;
+    }
+    if (!billFile) {
+      alert('Please upload bill image first.');
+      return;
+    }
+    if (!selectedPartnerId) {
+      alert('Partner is missing. Please go back and try again.');
+      return;
+    }
+
+    const numericBillAmount = Number(billAmount) || 0;
+    const discountPercent = 10;
+    const discountAmount = (numericBillAmount * discountPercent) / 100;
+    const otpPayload = {
+      transactionId: `TXN${Math.floor(10000000 + Math.random() * 90000000)}`,
+      partnerId: selectedPartnerId,
+      partnerName: selectedPartnerName || 'Partner Restaurant',
+      billAmount: numericBillAmount,
+      discountPercent,
+      discountAmount,
+      finalAmount: numericBillAmount - discountAmount,
+      dateTime: new Date().toISOString(),
+      lifetimeSavings: discountAmount,
+      billFile,
+      billId: ''
+    };
+
+    navigate('/verify-otp', { state: otpPayload });
   };
 
   return (
@@ -70,32 +152,49 @@ const BillPage = () => {
 
         <form className="bill-form" onSubmit={handleGenerateOTP}>
           <div className="input-group">
-            <label>Select Partner</label>
-            <select className="bill-input" required>
-              <option value="">Choose a partner...</option>
-              <option value="hotel1">Luxury Stay Hotel</option>
-              <option value="rest1">The Grand Restaurant</option>
-            </select>
+            <label>Partner</label>
+            <input className="bill-input bill-partner-name" value={selectedPartnerName || 'Partner Restaurant'} readOnly />
           </div>
 
           <div className="input-group">
             <label>Bill Amount</label>
             <div className="amount-input-wrapper">
               <span className="currency-symbol">₹</span>
-              <input type="number" placeholder="Enter total bill amount" className="bill-input p-left" required />
+              <input
+                type="number"
+                placeholder="Enter total bill amount"
+                className="bill-input p-left"
+                required
+                min="1"
+                value={billAmount}
+                onChange={(e) => setBillAmount(e.target.value)}
+              />
             </div>
           </div>
 
-          <div className="upload-area">
-            <input type="file" id="file-upload" hidden />
-            <label htmlFor="file-upload" className="upload-label">
-              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                <circle cx="8.5" cy="8.5" r="1.5" />
-                <polyline points="21 15 16 10 5 21" />
-              </svg>
-              <h3>Click to upload bill image</h3>
-              <p>JPG, PNG up to 10MB</p>
+          <div className={`upload-area ${billFile ? 'uploaded' : ''}`}>
+            <input
+              type="file"
+              id="file-upload"
+              hidden
+              accept="image/*"
+              onChange={(e) => setBillFile(e.target.files?.[0] || null)}
+            />
+            <label htmlFor="file-upload" className={`upload-label ${billFile ? 'uploaded' : ''}`}>
+              {billFile ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="9"></circle>
+                  <path d="m8 12 2.5 2.5L16 9"></path>
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21 15 16 10 5 21" />
+                </svg>
+              )}
+              <h3>{billFile ? 'Bill image uploaded' : 'Click to upload bill image'}</h3>
+              <p>{billFile ? (billFile.name || 'Uploaded successfully') : 'JPG, PNG up to 10MB'}</p>
             </label>
           </div>
 
@@ -124,3 +223,4 @@ const BillPage = () => {
 };
 
 export default BillPage;
+

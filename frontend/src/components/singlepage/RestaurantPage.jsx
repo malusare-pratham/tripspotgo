@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Star, Camera, Video, Phone, Navigation, Plus, Leaf } from 'lucide-react';
+import { ArrowLeft, Search, Star, Camera, Video, Phone, Navigation, Leaf } from 'lucide-react';
 import './RestaurantPage.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
@@ -102,6 +102,24 @@ const RestaurantPage = () => {
     if (!partnerId) return;
     const fetchInfo = async () => {
       try {
+        const partnersRes = await axios.get(`${API_BASE_URL}/api/admin/partners`);
+        const partners = Array.isArray(partnersRes?.data) ? partnersRes.data : [];
+        const basePartner = partners.find((p) => String(p?._id || '') === String(partnerId));
+
+        if (basePartner) {
+          setRestaurantInfo((prev) => ({
+            ...prev,
+            logo: basePartner.imageUrl || prev.logo,
+            restaurantName: basePartner.restaurantName || prev.restaurantName,
+            subtitle: basePartner.businessCategory || prev.subtitle,
+            foodType: basePartner.foodType || prev.foodType,
+            location: basePartner.area || prev.location,
+            openTime: basePartner.openTime || prev.openTime,
+            closeTime: basePartner.closeTime || prev.closeTime,
+            directionLink: basePartner.locationLink || prev.directionLink
+          }));
+        }
+
         const res = await axios.get(`${API_BASE_URL}/api/admin/partner-info/${partnerId}`);
         const info = res?.data?.data;
         if (!info) return;
@@ -196,7 +214,19 @@ const RestaurantPage = () => {
             <input type="text" placeholder="Search menu..." />
           </div>
           <div className="rp-nav-right">
-            <button className="rp-redeem-nav-btn" onClick={() => navigate('/upload-bill')}>Redeem</button>
+            <button
+              className="rp-redeem-nav-btn"
+              onClick={() =>
+                navigate('/upload-bill', {
+                  state: {
+                    partnerId,
+                    partnerName: restaurantInfo.restaurantName || 'Partner Restaurant'
+                  }
+                })
+              }
+            >
+              Redeem
+            </button>
           </div>
         </div>
       </header>
@@ -219,7 +249,6 @@ const RestaurantPage = () => {
             </div>
             <p className="rp-description">{restaurantInfo.description || '-'}</p>
             {restaurantInfo.email ? <p className="rp-meta-line">Email: {restaurantInfo.email}</p> : null}
-            <p className="rp-meta-line">Member since {restaurantInfo.memberSince || '2026'}</p>
             <div className="rp-loc-pill">📍 {restaurantInfo.location || 'N/A'}</div>
           </div>
 
@@ -242,7 +271,17 @@ const RestaurantPage = () => {
               <button className="rp-btn-dir" onClick={() => window.open(restaurantInfo.directionLink || 'https://maps.google.com')}>
                 <Navigation size={18} /> Directions
               </button>
-              <button className="rp-btn-redeem" onClick={() => navigate('/upload-bill')}>
+              <button
+                className="rp-btn-redeem"
+                onClick={() =>
+                  navigate('/upload-bill', {
+                    state: {
+                      partnerId,
+                      partnerName: restaurantInfo.restaurantName || 'Partner Restaurant'
+                    }
+                  })
+                }
+              >
                 Redeem Now
               </button>
             </div>
@@ -296,7 +335,6 @@ const RestaurantPage = () => {
                             </div>
                             <div className="rp-item-price-action">
                               <span className="rp-price">₹{item.price}</span>
-                              <button className="rp-add-item"><Plus size={16} /></button>
                             </div>
                           </div>
                         </div>

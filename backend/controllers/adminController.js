@@ -5,6 +5,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const Bill = require('../models/Bill');
+const BillApprovalRequest = require('../models/BillApprovalRequest');
 const fs = require('fs/promises');
 const path = require('path');
 const { cloudinary, isCloudinaryConfigured } = require('../config/cloudinary');
@@ -222,7 +223,7 @@ exports.deletePartner = async (req, res) => {
 exports.getPartnerTransactions = async (req, res) => {
     try {
         const { partnerId } = req.params;
-        const transactions = await Bill.find({ partnerId }).sort({ createdAt: -1 });
+        const transactions = await Bill.find({ partnerId, status: 'Verified' }).sort({ createdAt: -1 });
 
         let totalRevenue = 0;
         let totalDiscount = 0;
@@ -243,6 +244,58 @@ exports.getPartnerTransactions = async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ message: 'Error fetching transactions', error: error.message });
+    }
+};
+
+exports.getPartnerPendingBills = async (req, res) => {
+    try {
+        const { partnerId } = req.params;
+        const pendingBills = await BillApprovalRequest.find({ partnerId, status: 'Pending' }).sort({ createdAt: -1 });
+        return res.status(200).json({ success: true, pendingBills });
+    } catch (error) {
+        return res.status(500).json({ message: 'Error fetching pending bills', error: error.message });
+    }
+};
+
+exports.reviewPartnerPendingBill = async (req, res) => {
+    try {
+        const { partnerId, billId } = req.params;
+        const decision = String(req.body?.decision || '').toLowerCase();
+        if (!['approve', 'reject'].includes(decision)) {
+            return res.status(400).json({ message: 'decision must be approve or reject' });
+        }
+
+        const requestDoc = await BillApprovalRequest.findOne(
+            { _id: billId, partnerId, status: 'Pending' },
+        );
+
+        if (!requestDoc) {
+            return res.status(404).json({ message: 'Pending bill not found' });
+        }
+
+        if (decision === 'reject') {
+            requestDoc.status = 'Rejected';
+            await requestDoc.save();
+            return res.status(200).json({ success: true, request: requestDoc });
+        }
+
+        const bill = await Bill.create({
+            partnerId: requestDoc.partnerId,
+            userId: requestDoc.userId,
+            userName: requestDoc.userName,
+            billAmount: Number(requestDoc.billAmount) || 0,
+            discountAmount: Number(requestDoc.discountAmount) || 0,
+            billImage: requestDoc.billImage,
+            status: 'Verified'
+        });
+
+        requestDoc.status = 'Verified';
+        requestDoc.billId = bill._id;
+        await requestDoc.save();
+
+        return res.status(200).json({ success: true, bill, request: requestDoc });
+    } catch (error) {
+        return res.status(500).json({ message: 'Error reviewing pending bill', error: error.message });
     }
 };
 
@@ -461,5 +514,20 @@ exports.getAdminDashboardStats = async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ message: 'Error fetching admin dashboard stats', error: error.message });
+    }
+};
+
+exports.deleteLoggedInUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deletedUser = await User.findByIdAndDelete(id);
+
+        if (!deletedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        return res.status(200).json({ message: 'User deleted successfully' });
+    } catch (error) {
+        return res.status(400).json({ message: 'Error deleting user', error: error.message });
     }
 };

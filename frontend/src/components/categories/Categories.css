@@ -2,7 +2,7 @@
     max-width: 1300px;
     margin: 0 auto;
     /* चारही बाजूंनी प्रॉपर पॅडिंग (Top/Bottom: 40px, Left/Right: 20px) */
-    padding: 40px 20px; 
+    padding: 18px 20px 40px; 
     background-color: transparent;
     text-align: center;
     width: 100%;
@@ -100,7 +100,7 @@
 /* --- मोबाईल फ्रेंडली (2x2 Grid) --- */
 @media (max-width: 768px) {
     .categories-container {
-        padding: 30px 12px; /* मोबाईलवर सुद्धा प्रॉपर स्पेसिंग */
+        padding: 16px 12px 30px; /* मोबाईलवर सुद्धा प्रॉपर स्पेसिंग */
     }
 
     .categories-title {

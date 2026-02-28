@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { LayoutDashboard, LogOut, TrendingUp, DollarSign, Users, FileText, Search, RefreshCw } from 'lucide-react';
+import { LogOut, TrendingUp, DollarSign, Users, FileText, Search, RefreshCw, CheckCircle2, XCircle, ExternalLink, Eye, Pencil, Power, BadgeCheck } from 'lucide-react';
 import './PartnerDashboard.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
@@ -30,6 +30,12 @@ const defaultInfoForm = {
     videos: []
 };
 
+const resolvePartnerId = (payload) => {
+    const id = String(payload?.id || payload?._id || '').trim();
+    if (id) return id;
+    return String(localStorage.getItem('selectedPartnerId') || '').trim();
+};
+
 const PartnerDashboard = () => {
     const [partnerInfo, setPartnerInfo] = useState(null);
     const [isOpen, setIsOpen] = useState(true);
@@ -41,6 +47,7 @@ const PartnerDashboard = () => {
     const [savingInfo, setSavingInfo] = useState(false);
     const [stats, setStats] = useState({ revenue: 0, discounts: 0, customers: 0, avgBill: 0 });
     const [transactions, setTransactions] = useState([]);
+    const [pendingBills, setPendingBills] = useState([]);
     const [txSearch, setTxSearch] = useState('');
     const [lastSynced, setLastSynced] = useState(null);
 
@@ -52,6 +59,39 @@ const PartnerDashboard = () => {
             setLastSynced(new Date());
         } catch (err) {
             console.error('Error loading dashboard data', err);
+        }
+    };
+
+    const fetchPendingBills = async (id) => {
+        try {
+            const res = await axios.get(`${API_BASE_URL}/api/admin/partner-pending-bills/${id}`);
+            const directPending = Array.isArray(res?.data?.pendingBills) ? res.data.pendingBills : [];
+
+            if (directPending.length > 0) {
+                setPendingBills(directPending);
+                return;
+            }
+
+            // Fallback: if stored partner id is stale, resolve fresh id by partner name.
+            const partnerName = String(partnerInfo?.name || '').trim().toLowerCase();
+            if (!partnerName) {
+                setPendingBills([]);
+                return;
+            }
+
+            const partnersRes = await axios.get(`${API_BASE_URL}/api/admin/partners`);
+            const allPartners = Array.isArray(partnersRes?.data) ? partnersRes.data : [];
+            const matched = allPartners.find((p) => String(p?.restaurantName || '').trim().toLowerCase() === partnerName);
+
+            if (!matched?._id || String(matched._id) === String(id)) {
+                setPendingBills([]);
+                return;
+            }
+
+            const fallbackRes = await axios.get(`${API_BASE_URL}/api/admin/partner-pending-bills/${matched._id}`);
+            setPendingBills(Array.isArray(fallbackRes?.data?.pendingBills) ? fallbackRes.data.pendingBills : []);
+        } catch (_err) {
+            setPendingBills([]);
         }
     };
 
@@ -103,12 +143,36 @@ const PartnerDashboard = () => {
         const savedData = localStorage.getItem('partnerInfo');
         if (savedData) {
             const parsedData = JSON.parse(savedData);
-            setPartnerInfo(parsedData);
-            setIsOpen((parsedData.businessStatus || 'OPEN') === 'OPEN');
-            fetchData(parsedData.id);
-            fetchPartnerInfoForm(parsedData.id, parsedData);
+            const resolvedId = resolvePartnerId(parsedData);
+            const normalized = { ...parsedData, id: resolvedId };
+            setPartnerInfo(normalized);
+            setIsOpen((normalized.businessStatus || 'OPEN') === 'OPEN');
+            if (resolvedId) {
+                fetchData(resolvedId);
+                fetchPendingBills(resolvedId);
+                fetchPartnerInfoForm(resolvedId, normalized);
+            }
         }
     }, []);
+
+    useEffect(() => {
+        if (!partnerInfo?.id) return undefined;
+        const intervalId = setInterval(() => {
+            fetchPendingBills(partnerInfo.id);
+        }, 4000);
+        return () => clearInterval(intervalId);
+    }, [partnerInfo?.id]);
+
+    const reviewPendingBill = async (billId, decision) => {
+        if (!partnerInfo?.id || !billId) return;
+        try {
+            await axios.put(`${API_BASE_URL}/api/admin/partner-pending-bills/${partnerInfo.id}/${billId}`, { decision });
+            await fetchPendingBills(partnerInfo.id);
+            await fetchData(partnerInfo.id);
+        } catch (_error) {
+            alert('Error updating approval');
+        }
+    };
 
     const toggleBusinessStatus = async () => {
         if (!partnerInfo?.id) return;
@@ -249,35 +313,82 @@ const PartnerDashboard = () => {
             new Date(t.createdAt).toLocaleString().toLowerCase().includes(query)
         );
     });
+    const getRevenueChangeFromYesterday = () => {
+        if (!Array.isArray(transactions) || transactions.length === 0) return 0;
+
+        const now = new Date();
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const yesterdayStart = new Date(todayStart);
+        yesterdayStart.setDate(todayStart.getDate() - 1);
+
+        let todayRevenue = 0;
+        let yesterdayRevenue = 0;
+
+        transactions.forEach((tx) => {
+            const txDate = new Date(tx.createdAt);
+            const amount = Number(tx.billAmount) || 0;
+
+            if (txDate >= todayStart) {
+                todayRevenue += amount;
+                return;
+            }
+
+            if (txDate >= yesterdayStart && txDate < todayStart) {
+                yesterdayRevenue += amount;
+            }
+        });
+
+        if (yesterdayRevenue === 0) return todayRevenue > 0 ? 100 : 0;
+        return ((todayRevenue - yesterdayRevenue) / yesterdayRevenue) * 100;
+    };
+
+    const revenueChange = getRevenueChangeFromYesterday();
+    const revenueChangePrefix = revenueChange > 0 ? '+' : '';
+    const formatCurrency = (value) => `₹${Number(value || 0).toFixed(2)}`;
 
     return (
         <div className="partner-container">
-            <nav className="partner-nav">
-                <div className="nav-left">
-                    <div className="store-icon"><LayoutDashboard size={20} /></div>
-                    <div>
-                        <h4 className="m-0">Partner Portal</h4>
-                        <small>{partnerInfo.name}</small>
+            <div className="top-partner-strip">
+                <div className="top-partner-meta">
+                    <div className="top-partner-head">
+                        <span className="name-icon"><BadgeCheck size={20} /></span>
+                        <h4 className="m-0">{infoForm.restaurantName || partnerInfo.name}</h4>
+                    </div>
+                    <div className="badges">
+                        <span className="badge hotel">Partner</span>
+                        <span className="badge active">Active</span>
+                    </div>
+                    <p className="top-partner-msg">Manage approvals faster and keep your customer experience smooth.</p>
+                </div>
+                <div className="top-strip-actions">
+                    <button type="button" className="top-edit-btn" onClick={() => setIsEditingInfo((v) => !v)}>
+                        <Pencil size={14} />
+                        {isEditingInfo ? 'Close' : 'Edit'}
+                    </button>
+                    <div className="top-action-icons">
+                        <button className="action-icon-btn refresh-btn" onClick={() => { fetchData(partnerInfo.id); fetchPendingBills(partnerInfo.id); }} title="Refresh">
+                            <RefreshCw size={18} />
+                        </button>
+                        <button className="action-icon-btn logout-btn" onClick={handleLogout} title="Logout">
+                            <LogOut size={18} />
+                        </button>
                     </div>
                 </div>
-                <div className="nav-right">
-                    <button className="icon-btn" onClick={() => fetchData(partnerInfo.id)} title="Refresh">
-                        <RefreshCw size={18} />
-                    </button>
-                    <LogOut className="nav-icon" onClick={handleLogout} style={{ cursor: 'pointer' }} />
-                </div>
-            </nav>
+            </div>
 
             <div className={`status-band ${isOpen ? 'bg-green' : 'bg-red'}`}>
                 <div className="status-info">
-                    <div className="power-icon">⏻</div>
+                    <div className="power-icon"><Power size={18} /></div>
                     <div>
                         <strong>Business Status: {isOpen ? 'OPEN' : 'CLOSED'}</strong>
                         <p>{isOpen ? 'You are currently accepting discount redemptions' : 'You are currently not accepting redemptions'}</p>
                     </div>
                 </div>
                 <div className="toggle-container">
-                    <span>{isOpen ? 'Open' : 'Closed'}</span>
+                    <span className="status-chip">
+                        {isOpen ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
+                        {isOpen ? 'Open' : 'Closed'}
+                    </span>
                     <label className="switch">
                         <input type="checkbox" checked={isOpen} onChange={toggleBusinessStatus} />
                         <span className="slider round"></span>
@@ -285,31 +396,70 @@ const PartnerDashboard = () => {
                 </div>
             </div>
 
-            <div className="partner-card profile-card">
-                <div className="profile-info">
-                    <div className="store-big-icon"><LayoutDashboard size={40} /></div>
-                    <div className="profile-editor">
-                        <div className="profile-head-row">
-                            <h3>{infoForm.restaurantName || partnerInfo.name}</h3>
-                            <button type="button" className="edit-info-btn" onClick={() => setIsEditingInfo((v) => !v)}>
-                                {isEditingInfo ? 'Cancel' : 'Edit'}
-                            </button>
-                        </div>
-                        <div className="badges">
-                            <span className="badge hotel">Partner</span>
-                            <span className="badge active">Active</span>
-                        </div>
-
-                        {!isEditingInfo ? (
-                            <div className="pi-view-grid">
-                                <div><label>Email</label><p>{infoForm.email || '-'}</p></div>
-                                <div><label>Member since</label><p>{infoForm.memberSince || '-'}</p></div>
-                                <div className="pi-span-2">
-                                    <label>Logo</label>
-                                    {infoForm.logo ? <img src={infoForm.logo} alt="Logo" className="pi-logo-preview" /> : <p>-</p>}
+            <div className="partner-card pending-under-status">
+                <div className="card-header">
+                    <h4 className="recent-heading">Pending Approval Requests</h4>
+                    <span className="pending-count">{pendingBills.length}</span>
+                </div>
+                <div className="transaction-list">
+                    {pendingBills.length > 0 ? (
+                        pendingBills.map((bill) => (
+                            <div key={bill._id} className="transaction-item pending-item pending-detail-item">
+                                <div className="pending-left">
+                                    <div className="user-avatar">{bill.userName ? bill.userName[0] : 'U'}</div>
+                                    <div className="user-details">
+                                        <strong className="pending-title">{bill.userName || 'Customer'}</strong>
+                                        <small className="pending-meta">{new Date(bill.createdAt).toLocaleString()}</small>
+                                    </div>
+                                </div>
+                                <div className="pending-center">
+                                    <div className="pending-line pending-stat-card">
+                                        <span>Bill Amount</span>
+                                        <strong className="pending-amount">{formatCurrency(bill.billAmount)}</strong>
+                                    </div>
+                                    <div className="pending-line pending-stat-card">
+                                        <span>Discount</span>
+                                        <strong className="pending-discount">- {formatCurrency(bill.discountAmount)}</strong>
+                                    </div>
+                                    <div className="pending-line pending-stat-card">
+                                        <span>Final Amount</span>
+                                        <strong className="pending-final">{formatCurrency((Number(bill.billAmount) || 0) - (Number(bill.discountAmount) || 0))}</strong>
+                                    </div>
+                                </div>
+                                <div className="pending-right">
+                                    <button
+                                        type="button"
+                                        className="pending-preview-btn"
+                                        onClick={() => bill.billImage && window.open(bill.billImage, '_blank', 'noopener,noreferrer')}
+                                        disabled={!bill.billImage}
+                                    >
+                                        <span className="preview-icon-wrap">
+                                            <Eye size={14} />
+                                        </span>
+                                        Bill Preview
+                                        <ExternalLink size={13} />
+                                    </button>
+                                    <div className="approval-actions">
+                                        <button type="button" className="approve-btn" onClick={() => reviewPendingBill(bill._id, 'approve')}>
+                                            <CheckCircle2 size={14} /> Approve
+                                        </button>
+                                        <button type="button" className="reject-btn" onClick={() => reviewPendingBill(bill._id, 'reject')}>
+                                            <XCircle size={14} /> Reject
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        ) : (
+                        ))
+                    ) : (
+                        <p style={{ textAlign: 'center', padding: '20px', color: '#999' }}>No pending approvals.</p>
+                    )}
+                </div>
+            </div>
+
+            {isEditingInfo ? (
+                <div className="partner-card profile-card">
+                    <div className="profile-info">
+                        <div className="profile-editor">
                             <div className="pi-edit-wrap">
                                 <div className="pi-grid">
                                     <div><label>Email</label><input className="pi-input" value={infoForm.email} onChange={(e) => setField('email', e.target.value)} /></div>
@@ -375,37 +525,36 @@ const PartnerDashboard = () => {
                                     {savingInfo ? 'Saving...' : 'Save PartnersInfo'}
                                 </button>
                             </div>
-                        )}
+                        </div>
                     </div>
                 </div>
-            </div>
+            ) : null}
 
             <div className="stats-grid">
-                <div className="stat-card">
-                    <div className="stat-header"><span>Total Revenue</span> <TrendingUp size={18} color="green" /></div>
+                <div className="stat-card stat-revenue">
+                    <div className="stat-header"><span>Total Revenue</span> <span className="stat-icon revenue"><TrendingUp size={18} color="#16a34a" /></span></div>
                     <h2>₹{stats.revenue}</h2>
-                    <small className="text-green">+0% from yesterday</small>
+                    <small className={revenueChange >= 0 ? 'text-green' : ''}>{revenueChangePrefix}{revenueChange.toFixed(1)}% from yesterday</small>
                 </div>
-                <div className="stat-card">
-                    <div className="stat-header"><span>Discounts Given</span> <DollarSign size={18} color="gold" /></div>
+                <div className="stat-card stat-discount">
+                    <div className="stat-header"><span>Discounts Given</span> <span className="stat-icon discount"><DollarSign size={18} color="#ca8a04" /></span></div>
                     <h2>₹{stats.discounts}</h2>
                     <small>{stats.revenue > 0 ? ((stats.discounts / stats.revenue) * 100).toFixed(1) : 0}% of revenue</small>
                 </div>
-                <div className="stat-card">
-                    <div className="stat-header"><span>Customers</span> <Users size={18} color="blue" /></div>
+                <div className="stat-card stat-customers">
+                    <div className="stat-header"><span>Customers</span> <span className="stat-icon customers"><Users size={18} color="#2563eb" /></span></div>
                     <h2>{stats.customers}</h2>
                     <small className="text-green">Total transactions</small>
                 </div>
-                <div className="stat-card">
-                    <div className="stat-header"><span>Avg. Bill</span> <FileText size={18} color="purple" /></div>
+                <div className="stat-card stat-avgbill">
+                    <div className="stat-header"><span>Avg. Bill</span> <span className="stat-icon avgbill"><FileText size={18} color="#7c3aed" /></span></div>
                     <h2>₹{stats.avgBill}</h2>
                     <small>Per transaction</small>
                 </div>
             </div>
-
             <div className="partner-card">
                 <div className="card-header">
-                    <h4>Recent Transactions</h4>
+                    <h4 className="recent-heading">Recent Transactions</h4>
                     <div className="tx-search">
                         <Search size={14} />
                         <input
@@ -416,18 +565,44 @@ const PartnerDashboard = () => {
                         />
                     </div>
                 </div>
-                <div className="transaction-list">
+                <div className="transaction-list recent-transactions-list">
                     {filteredTransactions.length > 0 ? (
                         filteredTransactions.map((t, i) => (
-                            <div key={i} className="transaction-item">
-                                <div className="user-avatar">{t.userName ? t.userName[0] : 'U'}</div>
-                                <div className="user-details">
-                                    <strong>{t.userName || 'Customer'}</strong>
-                                    <small>{new Date(t.createdAt).toLocaleString()}</small>
-                                </div>
-                                <div className="price-details">
-                                    <strong>₹{t.billAmount}</strong>
-                                    <span className="text-green">-₹{t.discountAmount} Saved</span>
+                            <div key={i} className="transaction-item recent-item">
+                                <div className="recent-row">
+                                    <div className="recent-user-wrap">
+                                        <div className="user-avatar">{t.userName ? t.userName[0] : 'U'}</div>
+                                        <div className="user-details">
+                                            <strong className="recent-title">{t.userName || 'Customer'}</strong>
+                                            <small className="recent-sub">{new Date(t.createdAt).toLocaleString()}</small>
+                                        </div>
+                                    </div>
+                                    <span className={`recent-status ${String(t.status || '').toLowerCase() === 'verified' ? 'ok' : ''}`}>{t.status || 'Verified'}</span>
+
+                                    <div className="recent-inline-metric">
+                                        <span>Original</span>
+                                        <strong>{formatCurrency(t.billAmount)}</strong>
+                                    </div>
+                                    <div className="recent-inline-metric">
+                                        <span>Discount</span>
+                                        <strong className="recent-discount">- {formatCurrency(t.discountAmount)}</strong>
+                                    </div>
+                                    <div className="recent-inline-metric">
+                                        <span>Final Pay</span>
+                                        <strong className="recent-final">{formatCurrency((Number(t.billAmount) || 0) - (Number(t.discountAmount) || 0))}</strong>
+                                    </div>
+                                    <div className="recent-inline-metric txid">
+                                        <span>Transaction</span>
+                                        <strong>{String(t._id || '').slice(-10)}</strong>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className="recent-bill-btn"
+                                        onClick={() => t.billImage && window.open(t.billImage, '_blank', 'noopener,noreferrer')}
+                                        disabled={!t.billImage}
+                                    >
+                                        Bill
+                                    </button>
                                 </div>
                             </div>
                         ))
@@ -441,3 +616,7 @@ const PartnerDashboard = () => {
 };
 
 export default PartnerDashboard;
+
+
+
+

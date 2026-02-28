@@ -46,7 +46,7 @@
 }
 
 .mp-sub-title {
-  color: var(--text-muted);
+  color: #1f2937;
   font-weight: 500;
   margin-top: 8px;
 }
@@ -192,7 +192,7 @@
 .mp-name-block {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0;
   margin-top: 0;
   align-items: flex-start;
 }
@@ -213,7 +213,7 @@
 .mp-status-line {
   display: flex;
   align-items: center;
-  gap: 0;
+  gap: 6px;
 }
 
 .mp-open-now {
@@ -221,11 +221,22 @@
   align-self: flex-start;
   padding: 3px 10px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 800;
   color: #0f8a3c;
   background: #e8f8ee;
   border: 1px solid #b7e7c7;
+  line-height: 1.1;
+}
+
+.mp-status-line .mp-open-now {
+  margin-top: 0;
+}
+
+.mp-status-line .mp-veg-badge {
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 800;
   line-height: 1.1;
 }
 
@@ -244,7 +255,7 @@
   border: none;
   background: transparent;
   padding: 0;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: #4b5563;
   line-height: 1.2;
@@ -252,7 +263,7 @@
 }
 
 .mp-card-header h3 {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: -0.2px;
   margin: 0;
@@ -266,7 +277,7 @@
   justify-content: center;
   padding: 2px 8px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   color: #166534;
   background: #dcfce7;
@@ -276,7 +287,7 @@
 .mp-rating {
   color: #fff;
   padding: 4px 9px;
-  font-size: 13px;
+  font-size: 12px;
   border-radius: 6px;
   font-weight: 700;
   display: flex;
@@ -361,35 +372,81 @@
 
 /* ६. मीडिया क्वेरीज */
 @media (max-width: 1023px) {
+  .mp-mobile-sticky {
+    position: sticky;
+    top: 70px;
+    z-index: 40;
+    background: #fcfcfc;
+    padding-top: 6px;
+    border-bottom: 1px solid #eceef3;
+  }
+
+  .mp-mobile-sticky .mp-page-header {
+    margin: 12px 0 10px;
+  }
+
+  .mp-mobile-sticky .mp-filter-section {
+    margin: 6px 0 10px;
+    padding: 0 12px;
+  }
+
   .mp-offer-card {
-    width: 100%;
-    max-width: 420px;
-    height: 230px;
+    width: clamp(350px, 98.5vw, 458px);
+    max-width: none;
+    height: clamp(182px, 48vw, 212px);
   }
   .mp-offers-container {
     flex-direction: column;
     align-items: center;
-    gap: 14px;
+    gap: 24px;
     overflow-x: visible;
     padding: 10px 12px 20px;
+  }
+  .mp-image-box { height: 122px; }
+  .mp-card-content { padding: 4px 10px 1px; }
+  .mp-name-block { gap: 9px; }
+  .mp-name-row { margin-top: 3px; }
+  .mp-card-header h3 { font-size: 16px; line-height: 1.05; margin: 0; }
+  .mp-veg-badge { font-size: 9px; padding: 2px 7px; }
+  .mp-location-below { font-size: 15px; }
+  .mp-rating { font-size: 11px; min-width: 64px; min-height: 22px; }
+  .mp-open-now { font-size: 11px; padding: 3px 10px; }
+}
+
+@media (max-width: 480px) {
+  .mp-offer-card {
+    width: clamp(270px, 95vw, 350px);
+    height: clamp(176px, 50vw, 204px);
+  }
+}
+
+@media (max-width: 430px) {
+  .mp-offer-card {
+    width: clamp(255px, 95vw, 335px);
+    height: clamp(170px, 52vw, 198px);
   }
 }
 
 @media (min-width: 1024px) {
   .mp-offers-container {
     display: flex;
-    gap: 24px;
-    overflow-x: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: stretch;
+    justify-content: center;
+    gap: 14px;
+    overflow-x: visible;
+    overflow-y: visible;
     scrollbar-width: none;
   }
   .mp-offers-container::-webkit-scrollbar { display: none; }
   .mp-offer-card {
-    width: 380px;
+    width: 305px;
     height: 228px;
     flex-shrink: 0;
   }
   .mp-image-box { height: 128px; }
-  .mp-card-header h3 { font-size: 24px; font-weight: 700; }
+  .mp-card-header h3 { font-size: 18px; font-weight: 700; }
 }
 
 /* Filter Bar Styling */

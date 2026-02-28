@@ -8,6 +8,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 function Signup() {
     const navigate = useNavigate();
+    const singlePlanRef = useRef(null);
     const [activePlan, setActivePlan] = useState(null);
     const [formData, setFormData] = useState({ 
         name: '', email: '', mobile: '', password: '', confirmPassword: '' 
@@ -20,6 +21,10 @@ function Signup() {
     useEffect(() => {
         // Warm up backend on page open to reduce first submit latency (Render cold start).
         axios.get(`${API_BASE_URL}/health`, { timeout: 8000 }).catch(() => {});
+    }, []);
+
+    useEffect(() => {
+        singlePlanRef.current?.focus();
     }, []);
 
     const handleChange = (e) => {
@@ -103,6 +108,8 @@ function Signup() {
 
                     {/* Single Plan */}
                     <div
+                        ref={singlePlanRef}
+                        tabIndex={-1}
                         className={`premium-plan-card ${activePlan === 'single' ? 'selected-single' : ''} ${!activePlan ? 'default-point-out' : ''}`}
                         onClick={() => setActivePlan('single')}
                     >

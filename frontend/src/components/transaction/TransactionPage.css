@@ -98,10 +98,35 @@
 .price-item span { font-size: 0.9rem; font-weight: 700; }
 .c-green { color: var(--mint); }
 .c-navy { color: var(--blue); font-size: 1rem !important; }
+.money-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
 
 .btn-icon-dl {
   background: #f8fafc; border: none; width: 35px; height: 35px;
   border-radius: 8px; color: var(--slate); cursor: pointer;
+}
+
+/* Desktop: keep transaction cards in a vertical list without scroll strip behavior */
+@media (min-width: 1024px) {
+  .tx-premium-root,
+  .tx-wrapper {
+    overflow-x: hidden;
+  }
+
+  .tx-list-area {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    width: 100%;
+  }
+
+  .tx-row-card {
+    width: 100%;
+    display: block;
+  }
 }
 
 /* Responsive Fix */

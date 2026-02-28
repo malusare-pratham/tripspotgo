@@ -45,7 +45,7 @@
 }
 
 /* --- Hero --- */
-.rp-hero-cover { height: 260px; width: 100%; position: relative; }
+.rp-hero-cover { height: 230px; width: 100%; position: relative; }
 .rp-hero-cover img { width: 100%; height: 100%; object-fit: cover; }
 .rp-offer-badge {
   position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%);
@@ -62,10 +62,10 @@
 }
 .rp-brand-content h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 8px; }
 .rp-logo-preview {
-  width: 72px;
-  height: 72px;
+  width: 136px;
+  height: 136px;
   object-fit: cover;
-  border-radius: 16px;
+  border-radius: 24px;
   border: 1px solid #e2e8f0;
   margin-bottom: 10px;
 }
@@ -141,14 +141,14 @@
 }
 .rp-cat-header { font-size: 1.25rem; margin: 25px 0 15px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
 .rp-cat-header::after { content: ''; flex: 1; height: 1px; background: #e2e8f0; }
-.rp-menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+.rp-menu-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .rp-menu-card { 
   background: #fff; border-radius: 20px; overflow: hidden; 
   border: 1px solid #f1f5f9; display: flex; flex-direction: column;
   transition: 0.3s;
 }
 .rp-menu-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.05); }
-.rp-menu-img-box { height: 160px; position: relative; }
+.rp-menu-img-box { height: 132px; position: relative; }
 .rp-menu-img-box img { width: 100%; height: 100%; object-fit: cover; }
 .rp-item-discount {
   position: absolute; top: 10px; left: 10px; background: #ef4444; color: white;
@@ -279,8 +279,13 @@
 /* --- Mobile Responsive --- */
 @media (max-width: 600px) {
   .rp-logo { display: none; }
+  .rp-menu-grid { grid-template-columns: 1fr; }
   .rp-rating-summary-card { flex-direction: column; text-align: center; gap: 20px; }
   .rp-rating-big { border-right: none; border-bottom: 1px solid #f1f5f9; padding-right: 0; padding-bottom: 20px; width: 100%; }
   .rp-photo-gallery { column-count: 2; column-gap: 10px; }
   .rp-btn-redeem { width: 100%; justify-content: center; }
+}
+
+@media (max-width: 900px) and (min-width: 601px) {
+  .rp-menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
