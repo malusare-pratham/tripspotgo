@@ -5,9 +5,40 @@ import './PartnerDashboard.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
+const emptyMenuItem = () => ({ name: '', description: '', price: '', image: '', file: null });
+
+const defaultInfoForm = {
+    email: '',
+    memberSince: '2026',
+    logo: '',
+    restaurantName: '',
+    subtitle: '',
+    foodType: 'Veg',
+    description: '',
+    rating: '4.2',
+    location: '',
+    openTime: '',
+    closeTime: '',
+    callNumber: '',
+    directionLink: '',
+    menu: {
+        vegMenu: [],
+        nonVegMenu: [],
+        cafeMenu: []
+    },
+    photos: [],
+    videos: []
+};
+
 const PartnerDashboard = () => {
     const [partnerInfo, setPartnerInfo] = useState(null);
     const [isOpen, setIsOpen] = useState(true);
+    const [isEditingInfo, setIsEditingInfo] = useState(false);
+    const [infoForm, setInfoForm] = useState(defaultInfoForm);
+    const [logoFile, setLogoFile] = useState(null);
+    const [photoFiles, setPhotoFiles] = useState([]);
+    const [videoFiles, setVideoFiles] = useState([]);
+    const [savingInfo, setSavingInfo] = useState(false);
     const [stats, setStats] = useState({ revenue: 0, discounts: 0, customers: 0, avgBill: 0 });
     const [transactions, setTransactions] = useState([]);
     const [txSearch, setTxSearch] = useState('');
@@ -24,6 +55,50 @@ const PartnerDashboard = () => {
         }
     };
 
+    const fetchPartnerInfoForm = async (id, basePartner) => {
+        try {
+            const res = await axios.get(`${API_BASE_URL}/api/admin/partner-info/${id}`);
+            const info = res?.data?.data;
+            if (!info) {
+                setInfoForm({
+                    ...defaultInfoForm,
+                    email: basePartner?.email || '',
+                    restaurantName: basePartner?.name || ''
+                });
+                return;
+            }
+
+            setInfoForm({
+                email: info.email || basePartner?.email || '',
+                memberSince: info.memberSince || '2026',
+                logo: info.logo || '',
+                restaurantName: info.restaurantName || basePartner?.name || '',
+                subtitle: info.subtitle || '',
+                foodType: info.foodType || 'Veg',
+                description: info.description || '',
+                rating: String(info.rating ?? '4.2'),
+                location: info.location || '',
+                openTime: info.openTime || '',
+                closeTime: info.closeTime || '',
+                callNumber: info.callNumber || '',
+                directionLink: info.directionLink || '',
+                menu: {
+                    vegMenu: Array.isArray(info?.menu?.vegMenu) ? info.menu.vegMenu.map((x) => ({ ...x, file: null })) : [],
+                    nonVegMenu: Array.isArray(info?.menu?.nonVegMenu) ? info.menu.nonVegMenu.map((x) => ({ ...x, file: null })) : [],
+                    cafeMenu: Array.isArray(info?.menu?.cafeMenu) ? info.menu.cafeMenu.map((x) => ({ ...x, file: null })) : []
+                },
+                photos: Array.isArray(info.photos) ? info.photos : [],
+                videos: Array.isArray(info.videos) ? info.videos : []
+            });
+        } catch (_err) {
+            setInfoForm({
+                ...defaultInfoForm,
+                email: basePartner?.email || '',
+                restaurantName: basePartner?.name || ''
+            });
+        }
+    };
+
     useEffect(() => {
         const savedData = localStorage.getItem('partnerInfo');
         if (savedData) {
@@ -31,6 +106,7 @@ const PartnerDashboard = () => {
             setPartnerInfo(parsedData);
             setIsOpen((parsedData.businessStatus || 'OPEN') === 'OPEN');
             fetchData(parsedData.id);
+            fetchPartnerInfoForm(parsedData.id, parsedData);
         }
     }, []);
 
@@ -59,6 +135,107 @@ const PartnerDashboard = () => {
     const handleLogout = () => {
         localStorage.clear();
         window.location.href = '/partner-login';
+    };
+
+    const setField = (key, value) => {
+        setInfoForm((prev) => ({ ...prev, [key]: value }));
+    };
+
+    const setMenuField = (section, idx, key, value) => {
+        setInfoForm((prev) => {
+            const next = { ...prev, menu: { ...prev.menu } };
+            const items = [...(next.menu[section] || [])];
+            items[idx] = { ...items[idx], [key]: value };
+            next.menu[section] = items;
+            return next;
+        });
+    };
+
+    const addMenuItem = (section) => {
+        setInfoForm((prev) => ({
+            ...prev,
+            menu: {
+                ...prev.menu,
+                [section]: [...(prev.menu[section] || []), emptyMenuItem()]
+            }
+        }));
+    };
+
+    const removeMenuItem = (section, idx) => {
+        setInfoForm((prev) => ({
+            ...prev,
+            menu: {
+                ...prev.menu,
+                [section]: (prev.menu[section] || []).filter((_, i) => i !== idx)
+            }
+        }));
+    };
+
+    const handleSavePartnersInfo = async () => {
+        if (!partnerInfo?.id) return;
+        try {
+            setSavingInfo(true);
+            const formData = new FormData();
+
+            formData.append('email', infoForm.email.trim());
+            formData.append('memberSince', infoForm.memberSince.trim());
+            formData.append('logo', infoForm.logo.trim());
+            formData.append('restaurantName', infoForm.restaurantName.trim());
+            formData.append('subtitle', infoForm.subtitle.trim());
+            formData.append('foodType', infoForm.foodType);
+            formData.append('description', infoForm.description.trim());
+            formData.append('rating', String(Number(infoForm.rating) || 0));
+            formData.append('location', infoForm.location.trim());
+            formData.append('openTime', infoForm.openTime.trim());
+            formData.append('closeTime', infoForm.closeTime.trim());
+            formData.append('callNumber', infoForm.callNumber.trim());
+            formData.append('directionLink', infoForm.directionLink.trim());
+
+            if (logoFile) {
+                formData.append('logoFile', logoFile);
+            }
+
+            const encodeMenu = (items, prefix) =>
+                (items || []).map((item, idx) => {
+                    const payload = {
+                        name: item.name || '',
+                        description: item.description || '',
+                        price: Number(item.price) || 0,
+                        image: item.image || ''
+                    };
+                    if (item.file) {
+                        const key = `menuImage_${prefix}_${idx}`;
+                        formData.append(key, item.file);
+                        payload.image = `upload:${key}`;
+                    }
+                    return payload;
+                });
+
+            formData.append('vegMenu', JSON.stringify(encodeMenu(infoForm.menu.vegMenu, 'veg')));
+            formData.append('nonVegMenu', JSON.stringify(encodeMenu(infoForm.menu.nonVegMenu, 'nonVeg')));
+            formData.append('cafeMenu', JSON.stringify(encodeMenu(infoForm.menu.cafeMenu, 'cafe')));
+
+            formData.append('photos', JSON.stringify(infoForm.photos || []));
+            formData.append('videos', JSON.stringify(infoForm.videos || []));
+
+            photoFiles.forEach((file) => formData.append('photoFiles', file));
+            videoFiles.forEach((file) => formData.append('videoFiles', file));
+
+            await axios.put(`${API_BASE_URL}/api/admin/partner-info/${partnerInfo.id}`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            alert('PartnersInfo saved');
+            await fetchPartnerInfoForm(partnerInfo.id, partnerInfo);
+            setLogoFile(null);
+            setPhotoFiles([]);
+            setVideoFiles([]);
+            setIsEditingInfo(false);
+        } catch (error) {
+            alert(error?.response?.data?.message || 'Error saving PartnersInfo');
+        } finally {
+            setSavingInfo(false);
+        }
     };
 
     if (!partnerInfo) return <div className="loading">Loading Dashboard...</div>;
@@ -111,17 +288,96 @@ const PartnerDashboard = () => {
             <div className="partner-card profile-card">
                 <div className="profile-info">
                     <div className="store-big-icon"><LayoutDashboard size={40} /></div>
-                    <div>
-                        <h3>{partnerInfo.name}</h3>
+                    <div className="profile-editor">
+                        <div className="profile-head-row">
+                            <h3>{infoForm.restaurantName || partnerInfo.name}</h3>
+                            <button type="button" className="edit-info-btn" onClick={() => setIsEditingInfo((v) => !v)}>
+                                {isEditingInfo ? 'Cancel' : 'Edit'}
+                            </button>
+                        </div>
                         <div className="badges">
                             <span className="badge hotel">Partner</span>
                             <span className="badge active">Active</span>
                         </div>
-                        <p>Email: {partnerInfo.email}</p>
-                        <p>Member since 2026</p>
+
+                        {!isEditingInfo ? (
+                            <div className="pi-view-grid">
+                                <div><label>Email</label><p>{infoForm.email || '-'}</p></div>
+                                <div><label>Member since</label><p>{infoForm.memberSince || '-'}</p></div>
+                                <div className="pi-span-2">
+                                    <label>Logo</label>
+                                    {infoForm.logo ? <img src={infoForm.logo} alt="Logo" className="pi-logo-preview" /> : <p>-</p>}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="pi-edit-wrap">
+                                <div className="pi-grid">
+                                    <div><label>Email</label><input className="pi-input" value={infoForm.email} onChange={(e) => setField('email', e.target.value)} /></div>
+                                    <div><label>Member since</label><input className="pi-input" value={infoForm.memberSince} onChange={(e) => setField('memberSince', e.target.value)} /></div>
+                                    <div><label>Restaurant Name</label><input className="pi-input" value={infoForm.restaurantName} onChange={(e) => setField('restaurantName', e.target.value)} /></div>
+                                    <div><label>Subtitle</label><input className="pi-input" value={infoForm.subtitle} onChange={(e) => setField('subtitle', e.target.value)} /></div>
+                                    <div>
+                                        <label>Food Type</label>
+                                        <select className="pi-input" value={infoForm.foodType} onChange={(e) => setField('foodType', e.target.value)}>
+                                            <option value="Veg">Veg</option>
+                                            <option value="Non-Veg">Non-Veg</option>
+                                            <option value="Both">Both</option>
+                                        </select>
+                                    </div>
+                                    <div><label>Rating</label><input type="number" step="0.1" min="0" max="5" className="pi-input" value={infoForm.rating} onChange={(e) => setField('rating', e.target.value)} /></div>
+                                    <div><label>Location</label><input className="pi-input" value={infoForm.location} onChange={(e) => setField('location', e.target.value)} /></div>
+                                    <div><label>Open Time</label><input className="pi-input" value={infoForm.openTime} onChange={(e) => setField('openTime', e.target.value)} /></div>
+                                    <div><label>Close Time</label><input className="pi-input" value={infoForm.closeTime} onChange={(e) => setField('closeTime', e.target.value)} /></div>
+                                    <div><label>Call Number</label><input className="pi-input" value={infoForm.callNumber} onChange={(e) => setField('callNumber', e.target.value)} /></div>
+                                    <div><label>Direction Link</label><input className="pi-input" value={infoForm.directionLink} onChange={(e) => setField('directionLink', e.target.value)} /></div>
+                                </div>
+
+                                <label>Description</label>
+                                <textarea className="pi-textarea" rows={3} value={infoForm.description} onChange={(e) => setField('description', e.target.value)} />
+
+                                <div className="upload-row">
+                                    <div>
+                                        <label>Logo Image Upload</label>
+                                        <input type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} />
+                                    </div>
+                                    <div>
+                                        <label>Photos Upload</label>
+                                        <input type="file" accept="image/*" multiple onChange={(e) => setPhotoFiles(Array.from(e.target.files || []))} />
+                                    </div>
+                                    <div>
+                                        <label>Videos Upload</label>
+                                        <input type="file" accept="video/*" multiple onChange={(e) => setVideoFiles(Array.from(e.target.files || []))} />
+                                    </div>
+                                </div>
+
+                                <div className="menu-editor">
+                                    {['vegMenu', 'nonVegMenu', 'cafeMenu'].map((section) => (
+                                        <div key={section} className="menu-section">
+                                            <div className="menu-head">
+                                                <h4>{section === 'vegMenu' ? 'Veg Menu' : section === 'nonVegMenu' ? 'Non-Veg Menu' : 'Cafe Menu'}</h4>
+                                                <button type="button" className="mini-btn" onClick={() => addMenuItem(section)}>+ Add Item</button>
+                                            </div>
+                                            {(infoForm.menu[section] || []).map((item, idx) => (
+                                                <div key={`${section}-${idx}`} className="menu-item-row">
+                                                    <input className="pi-input" placeholder="Item name" value={item.name || ''} onChange={(e) => setMenuField(section, idx, 'name', e.target.value)} />
+                                                    <input className="pi-input" placeholder="Description" value={item.description || ''} onChange={(e) => setMenuField(section, idx, 'description', e.target.value)} />
+                                                    <input type="number" className="pi-input" placeholder="Rate" value={item.price ?? ''} onChange={(e) => setMenuField(section, idx, 'price', e.target.value)} />
+                                                    <input className="pi-input" placeholder="Image URL (optional)" value={item.image || ''} onChange={(e) => setMenuField(section, idx, 'image', e.target.value)} />
+                                                    <input type="file" accept="image/*" onChange={(e) => setMenuField(section, idx, 'file', e.target.files?.[0] || null)} />
+                                                    <button type="button" className="mini-btn danger" onClick={() => removeMenuItem(section, idx)}>Remove</button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <button type="button" className="save-info-btn" onClick={handleSavePartnersInfo} disabled={savingInfo}>
+                                    {savingInfo ? 'Saving...' : 'Save PartnersInfo'}
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
-                {lastSynced && <span className="sync-chip">Last sync: {lastSynced.toLocaleTimeString()}</span>}
             </div>
 
             <div className="stats-grid">
@@ -185,4 +441,3 @@ const PartnerDashboard = () => {
 };
 
 export default PartnerDashboard;
-

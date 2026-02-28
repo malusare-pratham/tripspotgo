@@ -25,11 +25,20 @@
 }
 
 .logo {
-  font-size: 28px; /* Slightly larger as requested */
+  font-size: 30px; /* Slightly larger as requested */
   font-weight: 900;
   margin: 0;
   line-height: 1;
   letter-spacing: -1px;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.logo:focus,
+.logo:focus-visible,
+.logo:active {
+  outline: none;
+  box-shadow: none;
 }
 
 .tagline {
@@ -92,16 +101,106 @@
   gap: 25px;
 }
 
-.premium-menu-btn {
+.mobile-menu-lines-btn {
   display: none;
   align-items: center;
   justify-content: center;
+  width: auto;
+  height: auto;
   border: none;
+  outline: none;
   background: transparent;
   color: #ffffff;
   border-radius: 8px;
-  padding: 8px;
+  padding: 6px;
   cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-menu-lines-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.85;
+}
+
+.mobile-menu-lines-btn:focus,
+.mobile-menu-lines-btn:focus-visible,
+.mobile-menu-lines-btn:active {
+  outline: none;
+  box-shadow: none;
+}
+
+.mobile-transaction-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: auto;
+  height: auto;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 6px;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-transaction-btn i {
+  font-size: 30px;
+}
+
+.mobile-tx-lines {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  filter: drop-shadow(0 0 6px rgba(255, 63, 108, 0.65));
+}
+
+.mobile-tx-lines .line {
+  display: block;
+  height: 5px;
+  background: #ffffff;
+  border-radius: 999px;
+}
+
+.mobile-tx-lines .line-1 {
+  width: 38px;
+}
+
+.mobile-tx-lines .line-2 {
+  width: 32px;
+}
+
+.mobile-tx-lines .line-3 {
+  width: 26px;
+}
+
+.tx-receipt-icon {
+  font-size: 30px;
+  display: inline-block;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  filter: drop-shadow(0 0 6px rgba(255, 63, 108, 0.65));
+}
+
+.mobile-transaction-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.85;
+}
+
+.mobile-transaction-btn:focus,
+.mobile-transaction-btn:focus-visible,
+.mobile-transaction-btn:active {
+  outline: none;
+  box-shadow: none;
 }
 
 .premium-dropdown {
@@ -138,6 +237,9 @@
 
 /* Responsive: Hide menu on mobile */
 @media (max-width: 850px) {
+  .logo {
+    font-size: 26px;
+  }
   .menu-pill {
     background: transparent;
     padding: 0;
@@ -151,10 +253,12 @@
     gap: 10px;
   }
   .dashboard-pill .signin-btn {
-    padding: 8px 16px;
-    font-size: 14px;
+    display: none;
   }
-  .premium-menu-btn {
+  .dashboard-pill .mobile-menu-lines-btn {
+    display: inline-flex;
+  }
+  .dashboard-pill .mobile-transaction-btn {
     display: inline-flex;
   }
   .premium-dropdown {

@@ -7,14 +7,14 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://magicpoint.onrender.com',
+        target: 'http://localhost:5000',
         changeOrigin: true,
-        secure: true
+        secure: false
       },
       '/uploads': {
-        target: 'https://magicpoint.onrender.com',
+        target: 'http://localhost:5000',
         changeOrigin: true,
-        secure: true
+        secure: false
       }
     }
   }

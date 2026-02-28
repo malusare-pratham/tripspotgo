@@ -15,6 +15,9 @@ import MainContent from './components/MainContent/MainContent';
 import Dashboard from './pages/DashboardPage'; 
 import Restaurant from './components/singlepage/RestaurantPage'; 
 
+// --- Transaction Page Import ---
+import TransactionPage from './components/transaction/TransactionPage'; 
+
 // --- Admin Portal Components ---
 import AdminLogin from './AdminPortal/AdminLogin';
 import AdminDashboard from './AdminPortal/AdminDashboard';
@@ -35,12 +38,13 @@ const AppLayout = () => {
     location.pathname === '/DashboardPage' || 
     location.pathname === '/signup' ||
     location.pathname === '/restaurant' ||
+    location.pathname === '/transaction-history' || // Transaction Page sathi header/footer hide kela
     location.pathname === '/admin-login' ||
     location.pathname === '/admin-dashboard' ||
     location.pathname === '/admin/dashboard' ||
-    location.pathname === '/partner-login' ||    // Partner Login साठी लपवले
+    location.pathname === '/partner-login' ||    
     location.pathname === '/partner-dashboard' ||
-    location.pathname === '/partner/dashboard';  // Partner Dashboard साठी लपवले
+    location.pathname === '/partner/dashboard';  
 
   return (
     <div className="app-container">
@@ -57,6 +61,9 @@ const AppLayout = () => {
           <Route path="/confirmation" element={<Confirmation />} />
           <Route path="/DashboardPage" element={<Dashboard />} />
           <Route path="/restaurant" element={<Restaurant />} />
+          
+          {/* --- New Transaction Route --- */}
+          <Route path="/transaction-history" element={<TransactionPage />} />
 
           {/* --- Admin Portal Routes --- */}
           <Route path="/admin-login" element={<AdminLogin />} />

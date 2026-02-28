@@ -361,10 +361,17 @@
 
 /* ६. मीडिया क्वेरीज */
 @media (max-width: 1023px) {
-  .mp-offer-card { width: 330px; height: 230px; }
+  .mp-offer-card {
+    width: 100%;
+    max-width: 420px;
+    height: 230px;
+  }
   .mp-offers-container {
+    flex-direction: column;
+    align-items: center;
     gap: 14px;
-    padding: 10px max(12px, calc((100vw - 330px) / 2)) 20px;
+    overflow-x: visible;
+    padding: 10px 12px 20px;
   }
 }
 

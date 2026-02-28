@@ -1,29 +1,84 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import axios from 'axios';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Star, Camera, Video, Phone, Navigation, Plus, Leaf } from 'lucide-react';
 import './RestaurantPage.css';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+
+const defaultGallery = [
+  { type: 'image', src: 'https://images.unsplash.com/photo-1513104890138-7c749659a591' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1573140247632-f8fd74997d5c' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1544025162-d76694265947' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1528137871618-79d2761e3fd5' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1482049016688-2d3e1b311543' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1499028344343-cd173ffc68a9' },
+  { type: 'image', src: 'https://images.unsplash.com/photo-1466978913421-dad2ebd01d17' }
+];
+
+const defaultInfo = {
+  email: '',
+  memberSince: '2026',
+  logo: '',
+  restaurantName: 'Pizza Hut',
+  subtitle: 'Pizza • Italian • Fast Food',
+  foodType: 'Veg',
+  description: "Experience the world's favorite pan pizza. Serving happiness one slice at a time.",
+  rating: 4.2,
+  location: 'Connaught Place, New Delhi',
+  openTime: '11:00 AM',
+  closeTime: '11:00 PM',
+  callNumber: '+919876543210',
+  directionLink: 'https://maps.google.com',
+  menu: { vegMenu: [], nonVegMenu: [], cafeMenu: [] },
+  photos: [],
+  videos: []
+};
+
+const fallbackMenu = [
+  {
+    category: 'Signature Pizzas',
+    items: [
+      { name: 'Personal Pan Pizza', price: 299, desc: 'Fresh dough with signature sauce', img: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=400&q=80', type: 'nonveg' },
+      { name: 'Tandoori Paneer Pizza', price: 449, desc: 'Spiced paneer with capsicum', img: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=400&q=80', type: 'veg' }
+    ]
+  },
+  {
+    category: 'Sides & Desserts',
+    items: [
+      { name: 'Garlic Breadstix', price: 149, desc: 'Buttery & cheesy garlic sticks', img: 'https://images.unsplash.com/photo-1573140247632-f8fd74997d5c?auto=format&fit=crop&w=400&q=80', type: 'veg' },
+      { name: 'Choco Lava Cake', price: 99, desc: 'Warm cake with molten chocolate', img: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=400&q=80', type: 'veg' }
+    ]
+  }
+];
 
 const RestaurantPage = () => {
   const [activeTab, setActiveTab] = useState('MENU');
   const navigate = useNavigate();
+  const location = useLocation();
   const [userRating, setUserRating] = useState(0);
   const [foodFilter, setFoodFilter] = useState('all');
   const photoInputRef = useRef(null);
   const videoInputRef = useRef(null);
-  const [galleryItems, setGalleryItems] = useState([
-    { type: 'image', src: 'https://images.unsplash.com/photo-1513104890138-7c749659a591' },
-    { type: 'image', src: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38' },
-    { type: 'image', src: 'https://images.unsplash.com/photo-1573140247632-f8fd74997d5c' },
-    { type: 'image', src: 'https://images.unsplash.com/photo-1544025162-d76694265947' },
-    { type: 'image', src: 'https://images.unsplash.com/photo-1528137871618-79d2761e3fd5' },
-    { type: 'image', src: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836' },
-    { type: 'image', src: 'https://images.unsplash.com/photo-1482049016688-2d3e1b311543' },
-    { type: 'image', src: 'https://images.unsplash.com/photo-1499028344343-cd173ffc68a9' },
-    { type: 'image', src: 'https://images.unsplash.com/photo-1466978913421-dad2ebd01d17' }
-  ]);
+  const [restaurantInfo, setRestaurantInfo] = useState(defaultInfo);
+  const [galleryItems, setGalleryItems] = useState(defaultGallery);
 
   const tabs = ['MENU', 'REVIEWS', 'PHOTOS'];
   const foodFilters = ['all', 'veg', 'nonveg'];
+
+  const partnerIdFromState = location?.state?.partnerId;
+  const partnerIdFromQuery = new URLSearchParams(location.search).get('partnerId');
+  const partnerIdFromStorage = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('partnerInfo') || '{}')?.id;
+    } catch (_error) {
+      return '';
+    }
+  })();
+  const partnerIdFromSelection = localStorage.getItem('selectedPartnerId') || '';
+  const partnerId = partnerIdFromState || partnerIdFromQuery || partnerIdFromSelection || partnerIdFromStorage;
 
   const handleBack = () => {
     navigate('/DashboardPage');
@@ -43,6 +98,52 @@ const RestaurantPage = () => {
     };
   }, [galleryItems]);
 
+  useEffect(() => {
+    if (!partnerId) return;
+    const fetchInfo = async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/api/admin/partner-info/${partnerId}`);
+        const info = res?.data?.data;
+        if (!info) return;
+
+        setRestaurantInfo((prev) => ({
+          ...prev,
+          email: info.email || '',
+          memberSince: info.memberSince || '2026',
+          logo: info.logo || '',
+          restaurantName: info.restaurantName || prev.restaurantName,
+          subtitle: info.subtitle || prev.subtitle,
+          foodType: info.foodType || prev.foodType,
+          description: info.description || prev.description,
+          rating: Number(info.rating ?? prev.rating),
+          location: info.location || prev.location,
+          openTime: info.openTime || prev.openTime,
+          closeTime: info.closeTime || prev.closeTime,
+          callNumber: info.callNumber || prev.callNumber,
+          directionLink: info.directionLink || prev.directionLink,
+          menu: {
+            vegMenu: Array.isArray(info?.menu?.vegMenu) ? info.menu.vegMenu : [],
+            nonVegMenu: Array.isArray(info?.menu?.nonVegMenu) ? info.menu.nonVegMenu : [],
+            cafeMenu: Array.isArray(info?.menu?.cafeMenu) ? info.menu.cafeMenu : []
+          },
+          photos: Array.isArray(info.photos) ? info.photos : [],
+          videos: Array.isArray(info.videos) ? info.videos : []
+        }));
+
+        const mediaItems = [
+          ...(Array.isArray(info.photos) ? info.photos : []).map((src) => ({ type: 'image', src })),
+          ...(Array.isArray(info.videos) ? info.videos : []).map((src) => ({ type: 'video', src }))
+        ];
+        if (mediaItems.length > 0) {
+          setGalleryItems(mediaItems);
+        }
+      } catch (_error) {
+        // Keep fallback UI data
+      }
+    };
+    fetchInfo();
+  }, [partnerId]);
+
   const addFilesToGallery = (fileList, type) => {
     const files = Array.from(fileList || []);
     if (!files.length) return;
@@ -56,26 +157,32 @@ const RestaurantPage = () => {
     setGalleryItems((prev) => [...newItems, ...prev]);
   };
 
-  const menuData = [
-    {
-      category: "Signature Pizzas",
-      items: [
-        { name: 'Personal Pan Pizza', price: '₹299', desc: 'Fresh dough with signature sauce', img: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=400&q=80', type: 'nonveg' },
-        { name: 'Tandoori Paneer Pizza', price: '₹449', desc: 'Spiced paneer with capsicum', img: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=400&q=80', type: 'veg' }
-      ]
-    },
-    {
-      category: "Sides & Desserts",
-      items: [
-        { name: 'Garlic Breadstix', price: '₹149', desc: 'Buttery & cheesy garlic sticks', img: 'https://images.unsplash.com/photo-1573140247632-f8fd74997d5c?auto=format&fit=crop&w=400&q=80', type: 'veg' },
-        { name: 'Choco Lava Cake', price: '₹99', desc: 'Warm cake with molten chocolate', img: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=400&q=80', type: 'veg' }
-      ]
-    }
-  ];
+  const menuData = useMemo(() => {
+    const menu = restaurantInfo.menu || {};
+    const vegItems = Array.isArray(menu.vegMenu) ? menu.vegMenu : [];
+    const nonVegItems = Array.isArray(menu.nonVegMenu) ? menu.nonVegMenu : [];
+    const cafeItems = Array.isArray(menu.cafeMenu) ? menu.cafeMenu : [];
+
+    const hasCustom = vegItems.length || nonVegItems.length || cafeItems.length;
+    if (!hasCustom) return fallbackMenu;
+
+    const normalizeItem = (item, type) => ({
+      name: item?.name || 'Menu Item',
+      price: Number(item?.price) || 0,
+      desc: item?.description || '',
+      img: item?.image || defaultGallery[0].src,
+      type
+    });
+
+    const sections = [];
+    if (vegItems.length) sections.push({ category: 'Veg Menu', items: vegItems.map((it) => normalizeItem(it, 'veg')) });
+    if (nonVegItems.length) sections.push({ category: 'Non-Veg Menu', items: nonVegItems.map((it) => normalizeItem(it, 'nonveg')) });
+    if (cafeItems.length) sections.push({ category: 'Cafe Menu', items: cafeItems.map((it) => normalizeItem(it, 'veg')) });
+    return sections;
+  }, [restaurantInfo.menu]);
 
   return (
     <div className="rp-main-wrapper">
-      {/* --- NAVBAR --- */}
       <header className="rp-header">
         <div className="rp-header-content">
           <div className="rp-nav-left">
@@ -94,7 +201,6 @@ const RestaurantPage = () => {
         </div>
       </header>
 
-      {/* --- HERO --- */}
       <div className="rp-hero-cover">
         <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=80" alt="Cover" />
       </div>
@@ -102,37 +208,38 @@ const RestaurantPage = () => {
       <main className="rp-content-container">
         <section className="rp-restaurant-card">
           <div className="rp-brand-content">
-            <h1>Pizza Hut</h1>
+            {restaurantInfo.logo ? <img src={restaurantInfo.logo} alt="Logo" className="rp-logo-preview" /> : null}
+            <h1>{restaurantInfo.restaurantName || 'Restaurant'}</h1>
             <div className="rp-tags">
-              <span>Pizza • Italian • Fast Food</span>
+              <span>{restaurantInfo.subtitle || '-'}</span>
               <span className="rp-veg-badge">
                 <Leaf size={13} />
-                Veg
+                {restaurantInfo.foodType || 'Veg'}
               </span>
             </div>
-            <p className="rp-description">
-              Experience the world's favorite pan pizza. Serving happiness one slice at a time.
-            </p>
-            <div className="rp-loc-pill">📍 Connaught Place, New Delhi</div>
+            <p className="rp-description">{restaurantInfo.description || '-'}</p>
+            {restaurantInfo.email ? <p className="rp-meta-line">Email: {restaurantInfo.email}</p> : null}
+            <p className="rp-meta-line">Member since {restaurantInfo.memberSince || '2026'}</p>
+            <div className="rp-loc-pill">📍 {restaurantInfo.location || 'N/A'}</div>
           </div>
 
           <div className="rp-info-footer">
             <div className="rp-stats-grid">
               <div className="rp-stat-item">
-                <div className="rp-rating-box">4.2 <Star size={14} fill="white" /></div>
-                <span className="rp-stat-label">2,300+ Reviews</span>
+                <div className="rp-rating-box">{Number(restaurantInfo.rating || 0).toFixed(1)} <Star size={14} fill="white" /></div>
+                <span className="rp-stat-label">Live Rating</span>
               </div>
               <div className="rp-stat-item">
                 <span className="rp-stat-val rp-open-text">Open Now</span>
-                <span className="rp-stat-label">11:00 AM - 11:00 PM</span>
+                <span className="rp-stat-label">{restaurantInfo.openTime || '-'} - {restaurantInfo.closeTime || '-'}</span>
               </div>
             </div>
-            
+
             <div className="rp-cta-buttons">
-              <button className="rp-btn-call" onClick={() => window.open('tel:+919876543210')}>
+              <button className="rp-btn-call" onClick={() => window.open(`tel:${restaurantInfo.callNumber || ''}`)}>
                 <Phone size={18} /> Call
               </button>
-              <button className="rp-btn-dir" onClick={() => window.open('https://maps.google.com')}>
+              <button className="rp-btn-dir" onClick={() => window.open(restaurantInfo.directionLink || 'https://maps.google.com')}>
                 <Navigation size={18} /> Directions
               </button>
               <button className="rp-btn-redeem" onClick={() => navigate('/upload-bill')}>
@@ -172,28 +279,28 @@ const RestaurantPage = () => {
                     {section.items
                       .filter((item) => foodFilter === 'all' || item.type === foodFilter)
                       .map((item, i) => (
-                      <div key={i} className="rp-menu-card">
-                        <div className="rp-menu-img-box">
-                          <img src={item.img} alt={item.name} />
-                          <div className="rp-item-discount">10% OFF</div>
-                        </div>
-                        <div className="rp-menu-details">
-                          <div className="rp-item-info">
-                            <h3>
-                              {item.name}
-                              <span className={`rp-food-badge ${item.type}`}>
-                                {item.type === 'veg' ? 'Veg' : 'Non-Veg'}
-                              </span>
-                            </h3>
-                            <p>{item.desc}</p>
+                        <div key={i} className="rp-menu-card">
+                          <div className="rp-menu-img-box">
+                            <img src={item.img} alt={item.name} />
+                            <div className="rp-item-discount">10% OFF</div>
                           </div>
-                          <div className="rp-item-price-action">
-                            <span className="rp-price">{item.price}</span>
-                            <button className="rp-add-item"><Plus size={16} /></button>
+                          <div className="rp-menu-details">
+                            <div className="rp-item-info">
+                              <h3>
+                                {item.name}
+                                <span className={`rp-food-badge ${item.type}`}>
+                                  {item.type === 'veg' ? 'Veg' : 'Non-Veg'}
+                                </span>
+                              </h3>
+                              <p>{item.desc}</p>
+                            </div>
+                            <div className="rp-item-price-action">
+                              <span className="rp-price">₹{item.price}</span>
+                              <button className="rp-add-item"><Plus size={16} /></button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
                   </div>
                 </div>
               ))}
@@ -203,47 +310,33 @@ const RestaurantPage = () => {
           {activeTab === 'REVIEWS' && (
             <div className="rp-reviews-section">
               <div className="rp-rating-summary-card">
-                 <div className="rp-rating-big">
-                    <span className="rp-big-num">4.2</span>
-                    <div className="rp-stars-row">
-                        {[1,2,3,4,5].map(s => <Star key={s} size={16} fill={s <= 4 ? "#f59e0b" : "none"} stroke="#f59e0b" />)}
-                    </div>
-                    <p>Overall Rating</p>
-                 </div>
-                 <div className="rp-rate-action">
-                    <h3>Rate your experience</h3>
-                    <div className="rp-star-input">
-                        {[1, 2, 3, 4, 5].map((s) => (
-                            <Star key={s} size={28} onClick={() => setUserRating(s)} 
-                                  fill={userRating >= s ? "#6d28d9" : "none"} 
-                                  stroke={userRating >= s ? "#6d28d9" : "#cbd5e1"} 
-                                  style={{cursor:'pointer', transition: '0.2s'}} />
-                        ))}
-                    </div>
-                 </div>
+                <div className="rp-rating-big">
+                  <span className="rp-big-num">{Number(restaurantInfo.rating || 0).toFixed(1)}</span>
+                  <div className="rp-stars-row">
+                    {[1, 2, 3, 4, 5].map((s) => <Star key={s} size={16} fill={s <= Math.round(Number(restaurantInfo.rating || 0)) ? '#f59e0b' : 'none'} stroke="#f59e0b" />)}
+                  </div>
+                  <p>Overall Rating</p>
+                </div>
+                <div className="rp-rate-action">
+                  <h3>Rate your experience</h3>
+                  <div className="rp-star-input">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star
+                        key={s}
+                        size={28}
+                        onClick={() => setUserRating(s)}
+                        fill={userRating >= s ? '#6d28d9' : 'none'}
+                        stroke={userRating >= s ? '#6d28d9' : '#cbd5e1'}
+                        style={{ cursor: 'pointer', transition: '0.2s' }}
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
 
               <div className="rp-review-input-box">
                 <textarea placeholder="Tell others about the food and service..."></textarea>
                 <button className="rp-btn-submit">Post Review</button>
-              </div>
-
-              <div className="rp-reviews-list">
-                {[{ name: "Rahul S.", text: "Best pizza in CP! The crust was perfect and the service was super fast.", stars: 5, date: "2 days ago" }].map((rev, i) => (
-                  <div key={i} className="rp-review-item">
-                    <div className="rp-rev-head">
-                      <div className="rp-avatar">{rev.name[0]}</div>
-                      <div className="rp-user-info">
-                        <strong>{rev.name}</strong>
-                        <span className="rp-rev-date">{rev.date}</span>
-                      </div>
-                      <div className="rp-rev-stars">
-                        {Array(rev.stars).fill().map((_, i) => <Star key={i} size={12} fill="#f59e0b" stroke="#f59e0b" />)}
-                      </div>
-                    </div>
-                    <p className="rp-rev-text">{rev.text}</p>
-                  </div>
-                ))}
               </div>
             </div>
           )}
@@ -252,12 +345,12 @@ const RestaurantPage = () => {
             <div className="rp-photos-wrap">
               <div className="rp-photo-actions">
                 <button type="button" className="rp-upload-card" onClick={() => photoInputRef.current?.click()}>
-                    <div className="rp-up-icon-box"><Camera size={24} /></div>
-                    <span>Add Photo</span>
+                  <div className="rp-up-icon-box"><Camera size={24} /></div>
+                  <span>Add Photo</span>
                 </button>
                 <button type="button" className="rp-upload-card" onClick={() => videoInputRef.current?.click()}>
-                    <div className="rp-up-icon-box"><Video size={24} /></div>
-                    <span>Add Video</span>
+                  <div className="rp-up-icon-box"><Video size={24} /></div>
+                  <span>Add Video</span>
                 </button>
                 <input
                   ref={photoInputRef}
@@ -302,4 +395,3 @@ const RestaurantPage = () => {
 };
 
 export default RestaurantPage;
-

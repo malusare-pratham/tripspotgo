@@ -1,14 +1,20 @@
 const Partner = require('../models/Partner');
+const PartnersInfo = require('../models/PartnersInfo');
 const Admin = require('../models/Admin');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const Bill = require('../models/Bill');
+const fs = require('fs/promises');
+const path = require('path');
+const { cloudinary, isCloudinaryConfigured } = require('../config/cloudinary');
 
 const buildImageUrl = (req, rawPath) => {
     if (!rawPath) return null;
+    const stringPath = String(rawPath).trim();
+    if (/^https?:\/\//i.test(stringPath)) return stringPath;
 
-    const normalized = String(rawPath)
+    const normalized = stringPath
         .replace(/\\/g, '/')
         .replace(/^\.?\//, '')
         .replace(/^backend\//i, '');
@@ -18,6 +24,64 @@ const buildImageUrl = (req, rawPath) => {
         : `uploads/${normalized.split('/').pop()}`;
 
     return `${req.protocol}://${req.get('host')}/${publicPath}`;
+};
+
+const removeLocalFile = async (filePath) => {
+    if (!filePath) return;
+    try {
+        await fs.unlink(filePath);
+    } catch (_error) {
+        // Best effort cleanup only.
+    }
+};
+
+const toUploadedUrl = async (req, file) => {
+    if (!file) return null;
+    const filePath = file.path;
+
+    if (isCloudinaryConfigured && filePath) {
+        try {
+            const uploaded = await cloudinary.uploader.upload(filePath, {
+                folder: 'magicpoint',
+                resource_type: 'auto'
+            });
+            return uploaded?.secure_url || uploaded?.url || null;
+        } finally {
+            await removeLocalFile(filePath);
+        }
+    }
+
+    return buildImageUrl(req, filePath);
+};
+
+const toAbsoluteUploadPath = (rawPath) => {
+    const normalized = String(rawPath || '')
+        .trim()
+        .replace(/\\/g, '/')
+        .replace(/^\.?\//, '')
+        .replace(/^backend\//i, '');
+    const relative = normalized.startsWith('uploads/')
+        ? normalized
+        : `uploads/${normalized.split('/').pop()}`;
+    return path.resolve(__dirname, '..', relative);
+};
+
+const migrateLocalImageToCloud = async (rawPath) => {
+    if (!rawPath || /^https?:\/\//i.test(String(rawPath))) return rawPath;
+    if (!isCloudinaryConfigured) return null;
+
+    const absolutePath = toAbsoluteUploadPath(rawPath);
+    try {
+        await fs.access(absolutePath);
+    } catch (_error) {
+        return null;
+    }
+
+    const uploaded = await cloudinary.uploader.upload(absolutePath, {
+        folder: 'magicpoint',
+        resource_type: 'auto'
+    });
+    return uploaded?.secure_url || uploaded?.url || null;
 };
 
 exports.adminLogin = async (req, res) => {
@@ -99,7 +163,7 @@ exports.addPartner = async (req, res) => {
         partnerData.password = await bcrypt.hash(partnerData.password, salt);
 
         if (req.file) {
-            partnerData.resImage = req.file.path;
+            partnerData.resImage = await toUploadedUrl(req, req.file);
         }
 
         const newPartner = new Partner(partnerData);
@@ -113,11 +177,16 @@ exports.addPartner = async (req, res) => {
 exports.getAllPartners = async (req, res) => {
     try {
         const partners = await Partner.find();
-        const shapedPartners = partners.map((partner) => {
+        const shapedPartners = await Promise.all(partners.map(async (partner) => {
             const item = partner.toObject();
+            const migratedUrl = await migrateLocalImageToCloud(item.resImage);
+            if (migratedUrl && migratedUrl !== item.resImage) {
+                item.resImage = migratedUrl;
+                await Partner.findByIdAndUpdate(partner._id, { $set: { resImage: migratedUrl } });
+            }
             item.imageUrl = buildImageUrl(req, item.resImage);
             return item;
-        });
+        }));
         res.status(200).json(shapedPartners);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching partners' });
@@ -207,6 +276,140 @@ exports.updatePartnerBusinessStatus = async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ message: 'Error updating business status', error: error.message });
+    }
+};
+
+const toArray = (value) => {
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string' && value.trim()) {
+        try {
+            const parsed = JSON.parse(value);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (_error) {
+            return [];
+        }
+    }
+    return [];
+};
+
+const toStringOrUndefined = (value) => {
+    if (value === undefined || value === null) return undefined;
+    const str = String(value).trim();
+    return str.length ? str : '';
+};
+
+const toNumberOrUndefined = (value) => {
+    if (value === undefined || value === null || value === '') return undefined;
+    const num = Number(value);
+    return Number.isFinite(num) ? num : undefined;
+};
+
+const resolveUploadedFiles = async (req) => {
+    const files = Array.isArray(req.files) ? req.files : [];
+    const byField = {};
+    for (const file of files) {
+        const key = String(file.fieldname || '').trim();
+        if (!key) continue;
+        if (!byField[key]) byField[key] = [];
+        const uploadedUrl = await toUploadedUrl(req, file);
+        if (uploadedUrl) byField[key].push(uploadedUrl);
+    }
+    return byField;
+};
+
+const mapMenuItems = (items, uploadedByField) =>
+    toArray(items).map((entry) => {
+        const item = entry && typeof entry === 'object' ? { ...entry } : {};
+        const imageValue = String(item.image || '').trim();
+        if (imageValue.startsWith('upload:')) {
+            const uploadKey = imageValue.slice('upload:'.length);
+            const uploaded = uploadedByField[uploadKey];
+            item.image = Array.isArray(uploaded) && uploaded.length ? uploaded[0] : '';
+        }
+        return item;
+    });
+
+exports.getPartnerInfo = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const info = await PartnersInfo.findOne({ partnerId: id }).lean();
+
+        if (!info) {
+            return res.status(200).json({ success: true, data: null });
+        }
+
+        return res.status(200).json({ success: true, data: info });
+    } catch (error) {
+        return res.status(500).json({ message: 'Error fetching partner info', error: error.message });
+    }
+};
+
+exports.upsertPartnerInfo = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const uploadedByField = await resolveUploadedFiles(req);
+        const existingPhotos = toArray(req.body.photos);
+        const existingVideos = toArray(req.body.videos);
+        const uploadedPhotos = uploadedByField.photoFiles || [];
+        const uploadedVideos = uploadedByField.videoFiles || [];
+
+        const payload = {
+            logo: (uploadedByField.logoFile && uploadedByField.logoFile[0]) || toStringOrUndefined(req.body.logo),
+            email: toStringOrUndefined(req.body.email),
+            memberSince: toStringOrUndefined(req.body.memberSince),
+            restaurantName: toStringOrUndefined(req.body.restaurantName),
+            subtitle: toStringOrUndefined(req.body.subtitle),
+            foodType: toStringOrUndefined(req.body.foodType),
+            description: toStringOrUndefined(req.body.description),
+            rating: toNumberOrUndefined(req.body.rating),
+            location: toStringOrUndefined(req.body.location),
+            openTime: toStringOrUndefined(req.body.openTime),
+            closeTime: toStringOrUndefined(req.body.closeTime),
+            callNumber: toStringOrUndefined(req.body.callNumber),
+            directionLink: toStringOrUndefined(req.body.directionLink),
+            menu: {
+                vegMenu: mapMenuItems(req.body?.menu?.vegMenu ?? req.body.vegMenu, uploadedByField),
+                nonVegMenu: mapMenuItems(req.body?.menu?.nonVegMenu ?? req.body.nonVegMenu, uploadedByField),
+                cafeMenu: mapMenuItems(req.body?.menu?.cafeMenu ?? req.body.cafeMenu, uploadedByField)
+            },
+            photos: [...existingPhotos, ...uploadedPhotos],
+            videos: [...existingVideos, ...uploadedVideos]
+        };
+
+        const cleanedPayload = Object.fromEntries(
+            Object.entries(payload).filter(([, value]) => value !== undefined)
+        );
+
+        const doc = await PartnersInfo.findOneAndUpdate(
+            { partnerId: id },
+            { $set: cleanedPayload, $setOnInsert: { partnerId: id } },
+            { new: true, upsert: true, runValidators: true }
+        );
+
+        const partnerSyncPayload = {};
+        if (Object.prototype.hasOwnProperty.call(cleanedPayload, 'restaurantName')) {
+            partnerSyncPayload.restaurantName = cleanedPayload.restaurantName;
+        }
+        if (Object.prototype.hasOwnProperty.call(cleanedPayload, 'foodType')) {
+            partnerSyncPayload.foodType = cleanedPayload.foodType;
+        }
+        if (Object.prototype.hasOwnProperty.call(cleanedPayload, 'openTime')) {
+            partnerSyncPayload.openTime = cleanedPayload.openTime;
+        }
+        if (Object.prototype.hasOwnProperty.call(cleanedPayload, 'closeTime')) {
+            partnerSyncPayload.closeTime = cleanedPayload.closeTime;
+        }
+        if (Object.prototype.hasOwnProperty.call(cleanedPayload, 'directionLink')) {
+            partnerSyncPayload.locationLink = cleanedPayload.directionLink;
+        }
+
+        if (Object.keys(partnerSyncPayload).length > 0) {
+            await Partner.findByIdAndUpdate(id, { $set: partnerSyncPayload });
+        }
+
+        return res.status(200).json({ success: true, data: doc });
+    } catch (error) {
+        return res.status(400).json({ message: 'Error saving partner info', error: error.message });
     }
 };
 

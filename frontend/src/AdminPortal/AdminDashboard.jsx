@@ -109,7 +109,9 @@ const AdminDashboard = () => {
             setView('list');
             await fetchDashboard();
         } catch (error) {
-            alert(error?.response?.data?.message || 'Error adding partner');
+            const backendMessage = error?.response?.data?.message;
+            const backendError = error?.response?.data?.error;
+            alert(backendError ? `${backendMessage}: ${backendError}` : (backendMessage || 'Error adding partner'));
         } finally {
             setSavingPartner(false);
         }

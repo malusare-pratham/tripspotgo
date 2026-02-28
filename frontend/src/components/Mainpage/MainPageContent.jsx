@@ -6,6 +6,29 @@ import MenuSlider from "../menuslider/MenuSlider"; // MenuSlider इम्पॉ
 import "./MainPageContent.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const DEFAULT_OFFER_IMAGE = "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=600&q=80";
+
+const normalizeImageUrl = (rawUrl) => {
+  if (!rawUrl) return DEFAULT_OFFER_IMAGE;
+  const value = String(rawUrl).trim();
+  if (!value) return DEFAULT_OFFER_IMAGE;
+
+  if (/^https?:\/\//i.test(value)) {
+    if (typeof window !== "undefined" && window.location.protocol === "https:" && value.startsWith("http://")) {
+      return value.replace(/^http:\/\//i, "https://");
+    }
+    return value;
+  }
+
+  if (value.startsWith("//")) {
+    return `${typeof window !== "undefined" ? window.location.protocol : "https:"}${value}`;
+  }
+
+  if (!API_BASE_URL) return value;
+  const base = API_BASE_URL.replace(/\/+$/, "");
+  const path = value.replace(/^\/+/, "");
+  return `${base}/${path}`;
+};
 
 const FilterBar = ({ activeCategory, setActiveCategory }) => {
   const categories = ["Food & Dining", "Activities & Adventure", "Local Stores & Gift House", "Stay & Hotels"];
@@ -30,7 +53,16 @@ const FilterBar = ({ activeCategory, setActiveCategory }) => {
 const OfferCard = ({ item, onClick, onOpenLocation }) => (
     <div className="mp-offer-card" onClick={onClick}>
       <div className="mp-image-box">
-        <img src={item.image} alt={item.name} loading="eager" />
+        <img
+          src={item.image}
+          alt={item.name}
+          loading="eager"
+          decoding="async"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = DEFAULT_OFFER_IMAGE;
+          }}
+        />
         <div className="mp-save-badge">
           <span>Save</span>
           <strong>{item.discountValue}</strong>
@@ -72,6 +104,13 @@ const MainPageContent = () => {
   const [partners, setPartners] = useState([]);
   const [activeCategory, setActiveCategory] = useState("Food & Dining");
 
+  const openRestaurant = (partnerId) => {
+    if (partnerId) {
+      localStorage.setItem("selectedPartnerId", String(partnerId));
+    }
+    navigate("/restaurant", { state: { partnerId } });
+  };
+
   useEffect(() => {
     const fetchPartners = async () => {
       try {
@@ -79,12 +118,19 @@ const MainPageContent = () => {
         setPartners(Array.isArray(response.data) ? response.data : []);
       } catch (_error) { setPartners([]); }
     };
+
     fetchPartners();
+    const refreshTimer = setInterval(fetchPartners, 10000);
+    return () => clearInterval(refreshTimer);
   }, []);
 
   const filteredItems = useMemo(() => {
     return partners
-      .filter(p => p.status === "Active" && (p.businessStatus || "OPEN") === "OPEN")
+      .filter((p) => {
+        const approvalStatus = String(p.status || "").trim();
+        const businessStatus = String(p.businessStatus || "OPEN").trim().toUpperCase();
+        return approvalStatus === "Active" && businessStatus === "OPEN";
+      })
       .map((partner, index) => ({
         id: partner._id || index,
         name: partner.restaurantName || "Partner Restaurant",
@@ -92,7 +138,7 @@ const MainPageContent = () => {
         distanceLabel: `4km, ${partner.area || "Panchgani"}`,
         locationUrl: partner.locationLink || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(partner.area || "Panchgani")}`,
         discountValue: "10%",
-        image: partner.imageUrl || "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=600&q=80",
+        image: normalizeImageUrl(partner.imageUrl),
         businessCategory: partner.businessCategory || "Food & Dining",
       }))
       .filter(item => item.businessCategory === activeCategory);
@@ -122,7 +168,7 @@ const MainPageContent = () => {
                 <OfferCard
                   key={item.id}
                   item={item}
-                  onClick={() => navigate("/restaurant")}
+                  onClick={() => openRestaurant(item.id)}
                   onOpenLocation={() => window.open(item.locationUrl, "_blank", "noopener,noreferrer")}
                 />
               ))

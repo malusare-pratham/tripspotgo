@@ -1,0 +1,112 @@
+:root {
+  --navy: #0f172a;
+  --blue: #3b82f6;
+  --mint: #10b981;
+  --slate: #64748b;
+  --bg: #f8fafc;
+}
+
+.tx-premium-root {
+  background-color: var(--bg);
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  color: var(--navy);
+}
+
+.tx-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 15px;
+}
+
+/* Header */
+.tx-header-compact {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+.back-circle {
+  width: 40px; height: 40px; border-radius: 50%; border: 1px solid #e2e8f0;
+  background: white; cursor: pointer; display: grid; place-items: center;
+}
+.header-text h1 { font-size: 1.4rem; margin: 0; }
+.header-text p { font-size: 0.8rem; color: var(--slate); margin: 0; }
+
+/* 1. Stats Grid - Compact & Responsive */
+.tx-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 25px;
+}
+.stat-card-mini {
+  background: white; padding: 12px; border-radius: 16px;
+  border: 1px solid #f1f5f9; text-align: center;
+}
+.stat-icon { margin-bottom: 8px; color: var(--blue); opacity: 0.8; }
+.stat-card-mini h3 { font-size: 0.95rem; margin: 0; font-weight: 800; }
+.stat-card-mini label { font-size: 0.6rem; color: var(--slate); font-weight: 600; text-transform: uppercase; }
+
+.s-mint .stat-icon { color: var(--mint); }
+.s-navy .stat-icon { color: var(--navy); }
+
+/* 2. Filter Pills - Essential for Responsive */
+.tx-filter-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  scrollbar-width: none; /* Hide scrollbar Firefox */
+}
+.tx-filter-scroll::-webkit-scrollbar { display: none; } /* Hide scrollbar Chrome */
+
+.filter-pill {
+  white-space: nowrap; padding: 8px 16px; border-radius: 50px;
+  border: 1px solid #e2e8f0; background: white; color: var(--slate);
+  font-size: 0.8rem; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; gap: 6px; transition: 0.2s;
+}
+.filter-pill.active { background: var(--navy); color: white; border-color: var(--navy); }
+
+/* 3. Transaction Card - Slim & Attractive */
+.tx-row-card {
+  background: white; border-radius: 18px; padding: 15px;
+  margin-bottom: 12px; border: 1px solid #f1f5f9;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.row-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  border-bottom: 1px dashed #f1f5f9; padding-bottom: 12px; margin-bottom: 12px;
+}
+.brand-box { display: flex; gap: 12px; align-items: center; }
+.brand-img { width: 38px; height: 38px; background: #f1f5f9; border-radius: 10px; display: grid; place-items: center; color: var(--navy); }
+.brand-box h4 { margin: 0; font-size: 0.9rem; }
+.sub-type { font-size: 0.7rem; color: var(--slate); }
+
+.status-tag {
+  font-size: 0.65rem; font-weight: 700; color: var(--mint);
+  background: #ecfdf5; padding: 4px 10px; border-radius: 50px;
+  display: flex; align-items: center; gap: 4px;
+}
+
+.row-bottom-info { display: flex; justify-content: space-between; align-items: center; }
+.price-item { display: flex; flex-direction: column; }
+.price-item label { font-size: 0.65rem; color: var(--slate); }
+.price-item span { font-size: 0.9rem; font-weight: 700; }
+.c-green { color: var(--mint); }
+.c-navy { color: var(--blue); font-size: 1rem !important; }
+
+.btn-icon-dl {
+  background: #f8fafc; border: none; width: 35px; height: 35px;
+  border-radius: 8px; color: var(--slate); cursor: pointer;
+}
+
+/* Responsive Fix */
+@media (max-width: 480px) {
+  .stat-card-mini h3 { font-size: 0.8rem; }
+  .stat-card-mini label { font-size: 0.55rem; }
+  .price-item span { font-size: 0.8rem; }
+}
