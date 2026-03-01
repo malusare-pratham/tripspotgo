@@ -130,7 +130,6 @@
 .mp-offer-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 16px 34px rgba(15, 23, 42, 0.12);
-  border-color: #6d28d9;
 }
 
 .mp-image-box {
@@ -443,13 +442,17 @@
 
 /* ६. मीडिया क्वेरीज */
 @media (max-width: 1023px) {
+  .mp-section-header h2 {
+    font-size: 24px;
+  }
+
   .mp-mobile-sticky {
     position: sticky;
     top: 70px;
     z-index: 40;
     background: #fcfcfc;
     padding-top: 6px;
-    border-bottom: 1px solid #eceef3;
+    border-bottom: none;
   }
 
   .mp-mobile-sticky .mp-page-header {
