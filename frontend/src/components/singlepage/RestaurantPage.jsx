@@ -5,6 +5,29 @@ import { ArrowLeft, Search, Star, Camera, Video, Phone, Navigation, Leaf } from 
 import './RestaurantPage.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const DEFAULT_LOGO = 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=320&q=80';
+
+const normalizeAssetUrl = (rawUrl) => {
+  if (!rawUrl) return '';
+  const value = String(rawUrl).trim();
+  if (!value) return '';
+
+  if (/^https?:\/\//i.test(value)) {
+    if (typeof window !== 'undefined' && window.location.protocol === 'https:' && value.startsWith('http://')) {
+      return value.replace(/^http:\/\//i, 'https://');
+    }
+    return value;
+  }
+
+  if (value.startsWith('//')) {
+    return `${typeof window !== 'undefined' ? window.location.protocol : 'https:'}${value}`;
+  }
+
+  if (!API_BASE_URL) return value;
+  const base = API_BASE_URL.replace(/\/+$/, '');
+  const path = value.replace(/^\/+/, '');
+  return `${base}/${path}`;
+};
 
 const defaultGallery = [
   { type: 'image', src: 'https://images.unsplash.com/photo-1513104890138-7c749659a591' },
@@ -109,7 +132,7 @@ const RestaurantPage = () => {
         if (basePartner) {
           setRestaurantInfo((prev) => ({
             ...prev,
-            logo: basePartner.imageUrl || prev.logo,
+            logo: normalizeAssetUrl(basePartner.imageUrl) || prev.logo,
             restaurantName: basePartner.restaurantName || prev.restaurantName,
             subtitle: basePartner.businessCategory || prev.subtitle,
             foodType: basePartner.foodType || prev.foodType,
@@ -128,7 +151,7 @@ const RestaurantPage = () => {
           ...prev,
           email: info.email || '',
           memberSince: info.memberSince || '2026',
-          logo: info.logo || '',
+          logo: normalizeAssetUrl(info.logo) || prev.logo,
           restaurantName: info.restaurantName || prev.restaurantName,
           subtitle: info.subtitle || prev.subtitle,
           foodType: info.foodType || prev.foodType,
@@ -144,13 +167,13 @@ const RestaurantPage = () => {
             nonVegMenu: Array.isArray(info?.menu?.nonVegMenu) ? info.menu.nonVegMenu : [],
             cafeMenu: Array.isArray(info?.menu?.cafeMenu) ? info.menu.cafeMenu : []
           },
-          photos: Array.isArray(info.photos) ? info.photos : [],
-          videos: Array.isArray(info.videos) ? info.videos : []
+          photos: Array.isArray(info.photos) ? info.photos.map((src) => normalizeAssetUrl(src) || src) : [],
+          videos: Array.isArray(info.videos) ? info.videos.map((src) => normalizeAssetUrl(src) || src) : []
         }));
 
         const mediaItems = [
-          ...(Array.isArray(info.photos) ? info.photos : []).map((src) => ({ type: 'image', src })),
-          ...(Array.isArray(info.videos) ? info.videos : []).map((src) => ({ type: 'video', src }))
+          ...(Array.isArray(info.photos) ? info.photos : []).map((src) => ({ type: 'image', src: normalizeAssetUrl(src) || src })),
+          ...(Array.isArray(info.videos) ? info.videos : []).map((src) => ({ type: 'video', src: normalizeAssetUrl(src) || src }))
         ];
         if (mediaItems.length > 0) {
           setGalleryItems(mediaItems);
@@ -188,7 +211,7 @@ const RestaurantPage = () => {
       name: item?.name || 'Menu Item',
       price: Number(item?.price) || 0,
       desc: item?.description || '',
-      img: item?.image || defaultGallery[0].src,
+      img: normalizeAssetUrl(item?.image) || defaultGallery[0].src,
       type
     });
 
@@ -238,7 +261,17 @@ const RestaurantPage = () => {
       <main className="rp-content-container">
         <section className="rp-restaurant-card">
           <div className="rp-brand-content">
-            {restaurantInfo.logo ? <img src={restaurantInfo.logo} alt="Logo" className="rp-logo-preview" /> : null}
+            {restaurantInfo.logo ? (
+              <img
+                src={restaurantInfo.logo}
+                alt="Logo"
+                className="rp-logo-preview"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = DEFAULT_LOGO;
+                }}
+              />
+            ) : null}
             <h1>{restaurantInfo.restaurantName || 'Restaurant'}</h1>
             <div className="rp-tags">
               <span>{restaurantInfo.subtitle || '-'}</span>

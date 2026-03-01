@@ -92,7 +92,7 @@ const OfferCard = ({ item, onClick, onOpenLocation }) => (
               {item.rating}
             </span>
             <div className="mp-status-line">
-              <span className="mp-veg-badge">Veg</span>
+              <span className={`mp-food-badge ${item.foodTypeVariant}`}>{item.foodTypeLabel}</span>
               <span className="mp-open-now">Open Now</span>
             </div>
           </div>
@@ -127,6 +127,14 @@ const MainPageContent = () => {
   }, []);
 
   const filteredItems = useMemo(() => {
+    const resolveFoodType = (raw) => {
+      const value = String(raw || '').trim().toLowerCase();
+      if (!value) return { label: 'Veg', variant: 'veg' };
+      if (value.includes('both')) return { label: 'Veg/Non-Veg', variant: 'both' };
+      if (value.includes('non')) return { label: 'Non-Veg', variant: 'nonveg' };
+      return { label: 'Veg', variant: 'veg' };
+    };
+
     return partners
       .filter((p) => {
         const approvalStatus = String(p.status || "").trim();
@@ -134,6 +142,13 @@ const MainPageContent = () => {
         return approvalStatus === "Active" && businessStatus === "OPEN";
       })
       .map((partner, index) => ({
+        ...(() => {
+          const foodType = resolveFoodType(partner.foodType);
+          return {
+            foodTypeLabel: foodType.label,
+            foodTypeVariant: foodType.variant
+          };
+        })(),
         id: partner._id || index,
         name: partner.restaurantName || "Partner Restaurant",
         rating: "4.2",
