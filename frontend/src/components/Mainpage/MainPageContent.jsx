@@ -74,17 +74,10 @@ const OfferCard = ({ item, onClick, onOpenLocation }) => (
             <div className="mp-name-row">
               <h3>{item.name}</h3>
             </div>
-            <button
-              type="button"
-              className="mp-location-below"
-              onClick={(e) => {
-                e.stopPropagation();
-                onOpenLocation();
-              }}
-            >
-              <MapPin size={13} />
-              <span>{item.distanceLabel}</span>
-            </button>
+            <span className={`mp-food-badge ${item.foodTypeVariant}`}>
+              <i className="fa-solid fa-leaf" aria-hidden="true"></i>
+              {item.foodTypeLabel}
+            </span>
           </div>
           <div className="mp-status-rating">
             <span className={`mp-rating ${parseFloat(item.rating) >= 4 ? "high" : "mid"}`}>
@@ -92,11 +85,24 @@ const OfferCard = ({ item, onClick, onOpenLocation }) => (
               {item.rating}
             </span>
             <div className="mp-status-line">
-              <span className={`mp-food-badge ${item.foodTypeVariant}`}>{item.foodTypeLabel}</span>
-              <span className="mp-open-now">Open Now</span>
+              <span className="mp-open-now">
+                <i className="fa-solid fa-circle-check" aria-hidden="true"></i>
+                Open Now
+              </span>
             </div>
           </div>
         </div>
+        <button
+          type="button"
+          className="mp-location-below"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenLocation();
+          }}
+        >
+          <MapPin size={13} />
+          <span>{item.distanceLabel}</span>
+        </button>
       </div>
     </div>
 );
@@ -152,7 +158,7 @@ const MainPageContent = () => {
         id: partner._id || index,
         name: partner.restaurantName || "Partner Restaurant",
         rating: "4.2",
-        distanceLabel: `4km, ${partner.area || "Panchgani"}`,
+        distanceLabel: `${partner.area || "Panchgani"}`,
         locationUrl: partner.locationLink || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(partner.area || "Panchgani")}`,
         discountValue: "10%",
         image: normalizeImageUrl(partner.imageUrl),

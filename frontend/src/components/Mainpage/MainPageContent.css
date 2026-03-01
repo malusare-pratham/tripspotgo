@@ -115,8 +115,8 @@
 
 /* ५. कार्ड स्टायलिंग */
 .mp-offer-card {
-  width: 330px;
-  height: 214px;
+  width: 360px;
+  height: 238px;
   background: #fff;
   border-radius: 24px;
   overflow: hidden;
@@ -130,11 +130,12 @@
 .mp-offer-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 16px 34px rgba(15, 23, 42, 0.12);
+  border-color: #6d28d9;
 }
 
 .mp-image-box {
   position: relative;
-  height: 108px;
+  height: 124px;
   margin: 0;
   border-radius: 22px;
   overflow: hidden;
@@ -142,7 +143,10 @@
 .mp-image-box img {
   width: 100%;
   height: 100%;
+  display: block;
   object-fit: cover;
+  object-position: center;
+  image-rendering: auto;
 }
 
 .mp-save-badge {
@@ -164,12 +168,12 @@
 }
 
 .mp-save-badge span {
-  font-size: 15px;
+  font-size: 11px;
   font-weight: 700;
 }
 
 .mp-save-badge strong {
-  font-size: 26px;
+  font-size: 20px;
   line-height: 0.9;
   letter-spacing: -1px;
 }
@@ -177,14 +181,16 @@
 .mp-card-content {
   padding: 10px 14px 4px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
 }
 
 .mp-card-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 14px;
+  align-items: flex-start;
+  gap: 8px;
   margin-bottom: 2px;
   width: 100%;
 }
@@ -192,41 +198,66 @@
 .mp-name-block {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 5px;
   margin-top: 0;
   align-items: flex-start;
+  min-width: 0;
+  flex: 1 1 auto;
+  max-width: 62%;
 }
 
 .mp-name-row {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
+  min-width: 0;
 }
 
 .mp-status-rating {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 7px;
+  gap: 4px;
+  flex-shrink: 0;
+  max-width: 38%;
 }
 
 .mp-status-line {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 6px;
+  gap: 3px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .mp-open-now {
-  margin-top: 6px;
-  align-self: flex-start;
+  margin-top: 0;
+  align-self: center;
   padding: 3px 10px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 800;
   color: #0f8a3c;
   background: #e8f8ee;
   border: 1px solid #b7e7c7;
   line-height: 1.1;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.mp-open-now i,
+.mp-food-badge i,
+.mp-location-below svg {
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
+  flex-shrink: 0;
 }
 
 .mp-status-line .mp-open-now {
@@ -269,16 +300,29 @@
   margin: 0;
   color: #1f2937;
   text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .mp-food-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 2px 8px;
+  gap: 3px;
+  padding: 3px 10px;
   border-radius: 999px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  align-self: flex-start;
+}
+
+.mp-food-badge i {
+  font-size: 14px;
 }
 
 .mp-food-badge.veg {
@@ -329,12 +373,24 @@
   background: transparent;
   padding: 0;
   margin: 0;
-  color: #4b5563;
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 1.2;
+  color: #6d28d9;
+  font-size: clamp(11px, 2.2vw, 16px);
+  font-weight: 600;
+  line-height: 1.25;
   text-align: left;
   cursor: pointer;
+  max-width: 100%;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+  word-break: normal;
+  width: 100%;
+  min-width: 0;
+  margin-top: 3px;
+}
+
+.mp-location-below span {
+  min-width: 0;
 }
 
 .mp-delivery-line {
@@ -408,7 +464,7 @@
   .mp-offer-card {
     width: clamp(350px, 98.5vw, 458px);
     max-width: none;
-    height: clamp(182px, 48vw, 212px);
+    height: clamp(224px, 56vw, 258px);
   }
   .mp-offers-container {
     flex-direction: column;
@@ -417,28 +473,31 @@
     overflow-x: visible;
     padding: 10px 12px 20px;
   }
-  .mp-image-box { height: 122px; }
+  .mp-image-box { height: 132px; }
   .mp-card-content { padding: 4px 10px 1px; }
-  .mp-name-block { gap: 9px; }
+  .mp-name-block { gap: 8px; }
   .mp-name-row { margin-top: 3px; }
   .mp-card-header h3 { font-size: 16px; line-height: 1.05; margin: 0; }
   .mp-veg-badge { font-size: 9px; padding: 2px 7px; }
-  .mp-location-below { font-size: 15px; }
-  .mp-rating { font-size: 11px; min-width: 64px; min-height: 22px; }
-  .mp-open-now { font-size: 11px; padding: 3px 10px; }
+  .mp-location-below { font-size: 15px; max-width: 100%; }
+  .mp-location-below svg { width: 15px; height: 15px; font-size: 15px; }
+  .mp-location-below { margin-top: 8px; }
+  .mp-rating { font-size: 11px; min-width: 64px; min-height: 22px; padding: 4px 9px; }
+  .mp-open-now { font-size: 11px; padding: 3px 9px; }
+  .mp-food-badge { font-size: 10px; padding: 2px 8px; }
 }
 
 @media (max-width: 480px) {
   .mp-offer-card {
     width: clamp(270px, 95vw, 350px);
-    height: clamp(176px, 50vw, 204px);
+    height: clamp(212px, 60vw, 242px);
   }
 }
 
 @media (max-width: 430px) {
   .mp-offer-card {
     width: clamp(255px, 95vw, 335px);
-    height: clamp(170px, 52vw, 198px);
+    height: clamp(206px, 61vw, 236px);
   }
 }
 
@@ -448,7 +507,7 @@
     flex-direction: row;
     flex-wrap: wrap;
     align-items: stretch;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 14px;
     overflow-x: visible;
     overflow-y: visible;
@@ -456,12 +515,19 @@
   }
   .mp-offers-container::-webkit-scrollbar { display: none; }
   .mp-offer-card {
-    width: 305px;
-    height: 228px;
+    width: 335px;
+    height: 252px;
     flex-shrink: 0;
   }
-  .mp-image-box { height: 128px; }
+  .mp-image-box { height: 142px; }
   .mp-card-header h3 { font-size: 18px; font-weight: 700; }
+  .mp-name-row h3 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+  }
+  .mp-location-below { max-width: 100%; }
 }
 
 /* Filter Bar Styling */
