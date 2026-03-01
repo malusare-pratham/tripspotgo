@@ -69,16 +69,51 @@ const VerifyOTP = () => {
     formData.append('discountAmount', String(discountAmount));
     formData.append('billImage', mergedData.billFile);
 
-    axios.post(`${API_BASE_URL}/api/auth/bills/request`, formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data'
+    const authHeaders = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'multipart/form-data'
+    };
+
+    const submitApprovalRequest = async () => {
+      try {
+        return await axios.post(`${API_BASE_URL}/api/auth/bills/request`, formData, {
+          headers: authHeaders
+        });
+      } catch (error) {
+        if (error?.response?.status === 404) {
+          return axios.post(`${API_BASE_URL}/api/auth/bills`, formData, {
+            headers: authHeaders
+          });
+        }
+        throw error;
       }
-    }).then((res) => {
+    };
+
+    submitApprovalRequest().then((res) => {
       const txn = res?.data?.transaction || {};
+      const txnStatus = String(txn.status || 'Pending');
+
+      if (txnStatus === 'Verified') {
+        navigate('/confirmation', {
+          state: {
+            billId: txn.id || '',
+            amountSaved: Number(txn.discount || discountAmount),
+            partner: String(txn.partner || partnerName),
+            originalAmount: Number(txn.originalAmount || billAmount),
+            discount: Number(txn.discount || discountAmount),
+            finalAmount: Number(txn.finalAmount || finalAmount),
+            discountPercent: Number(txn.discountPercent || discountPercent),
+            transactionId: String(txn.transactionId || `TXN${Math.floor(10000000 + Math.random() * 90000000)}`),
+            dateTime: String(txn.dateTime || new Date().toLocaleString()),
+            lifetimeSavings: Number(txn.discount || discountAmount)
+          }
+        });
+        return;
+      }
+
       setApprovalRequest({
         billId: txn.id || '',
-        status: txn.status || 'Pending',
+        status: txnStatus,
         message: 'Approval request sent. Waiting for partner confirmation...'
       });
     }).catch((error) => {
