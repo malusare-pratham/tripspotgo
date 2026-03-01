@@ -52,7 +52,7 @@ const toTransactionPayload = (bill, partner) => ({
 
 exports.createBill = async (req, res) => {
     try {
-        const { partnerId, billAmount, discountAmount } = req.body;
+        const { partnerId, billAmount, discountAmount, approvalMode } = req.body;
 
         if (!partnerId) {
             return res.status(400).json({ message: 'partnerId is required' });
@@ -75,6 +75,40 @@ exports.createBill = async (req, res) => {
         const safeDiscount = Number.isFinite(numericDiscount) && numericDiscount >= 0
             ? numericDiscount
             : Math.round(numericBillAmount * 0.1 * 100) / 100;
+
+        // Backward compatibility: when frontend falls back to /bills from verify-otp,
+        // still create a pending partner-approval request instead of auto-verifying.
+        if (String(approvalMode || '').toLowerCase() === 'partnerapproval') {
+            const approvalRequest = await BillApprovalRequest.create({
+                partnerId,
+                userId: req.user._id,
+                userName: req.user.name,
+                billAmount: numericBillAmount,
+                discountAmount: safeDiscount,
+                billImage: uploadedImage,
+                status: 'Pending'
+            });
+
+            return res.status(201).json({
+                success: true,
+                message: 'Approval request sent to partner',
+                transaction: {
+                    id: approvalRequest._id,
+                    partner: partner.restaurantName || 'Partner Restaurant',
+                    partnerId: partner._id,
+                    category: partner.businessCategory || 'Food & Dining',
+                    originalAmount: approvalRequest.billAmount,
+                    discount: approvalRequest.discountAmount,
+                    discountPercent: approvalRequest.billAmount > 0
+                        ? Math.round((approvalRequest.discountAmount / approvalRequest.billAmount) * 10000) / 100
+                        : 0,
+                    finalAmount: approvalRequest.billAmount - approvalRequest.discountAmount,
+                    billImage: approvalRequest.billImage,
+                    status: approvalRequest.status,
+                    dateTime: approvalRequest.createdAt
+                }
+            });
+        }
 
         const bill = await Bill.create({
             partnerId,

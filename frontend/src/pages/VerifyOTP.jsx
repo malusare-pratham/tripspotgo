@@ -67,6 +67,7 @@ const VerifyOTP = () => {
     formData.append('partnerId', String(mergedData.partnerId));
     formData.append('billAmount', String(billAmount));
     formData.append('discountAmount', String(discountAmount));
+    formData.append('approvalMode', 'partnerApproval');
     formData.append('billImage', mergedData.billFile);
 
     const authHeaders = {
