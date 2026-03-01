@@ -39,7 +39,7 @@
     align-items: stretch; /* सर्व कार्ड्स एकाच उंचीचे राहतील */
     gap: 20px; /* कार्ड्समधील अंतर थोडे वाढवले */
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 1px auto 0;
     flex-wrap: nowrap;
 }
 
@@ -52,14 +52,14 @@
     gap: 15px;
     flex: 1;
     border: 1px solid #f1f5f9;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: none;
+    transition: border-color 0.2s ease;
 }
 
 .benefit-card:hover {
-    transform: translateY(-8px);
+    transform: none;
     border-color: #411bbf33;
-    box-shadow: 0 15px 30px rgba(65, 27, 191, 0.1);
+    box-shadow: none;
 }
 
 .benefit-icon-box {
@@ -101,36 +101,59 @@
 /* --- मोबाईल फ्रेंडली (2x2 Grid) --- */
 @media (max-width: 768px) {
     .benefits-container {
-        padding: 30px 12px; /* मोबाईलवर व्यवस्थित स्पेसिंग */
+        padding: 30px 12px;
     }
 
     .benefits-title {
-        font-size: 1.8rem; /* मोबाईलसाठी सुटसुटीत मोठी साईज */
+        font-size: 1.8rem;
         margin-bottom: 40px;
     }
 
     .benefits-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
         gap: 12px;
+        justify-content: flex-start;
+    }
+
+    .benefits-grid::-webkit-scrollbar {
+        display: none;
     }
 
     .benefit-card {
-        padding: 20px 10px;
-        flex-direction: column;
-        text-align: center;
-        gap: 12px;
+        flex: 0 0 210px;
+        padding: 14px 10px;
+        flex-direction: row;
+        text-align: left;
+        gap: 10px;
+        border-radius: 16px;
     }
 
     .benefit-info {
-        text-align: center;
+        text-align: left;
     }
 
     .benefit-info h3 {
-        font-size: 0.9rem;
+        font-size: 0.86rem;
     }
 
     .benefit-info p {
-        display: none; /* मोबाईलवर सुटसुटीत दिसण्यासाठी डिस्क्रिप्शन हाईड केले */
+        display: block;
+        font-size: 0.68rem;
+        line-height: 1.35;
+        margin-top: 4px;
+    }
+
+    .benefit-icon-box {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+    }
+
+    .benefit-icon-box svg {
+        width: 16px;
+        height: 16px;
     }
 }

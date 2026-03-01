@@ -15,6 +15,9 @@ import MainContent from './components/MainContent/MainContent';
 import Dashboard from './pages/DashboardPage'; 
 import Restaurant from './components/singlepage/RestaurantPage'; 
 
+// नवीन Advertisement कंपोनंट Import केला
+import Advertisement from './components/addvertisment/addvertisment';
+
 // --- Transaction Page Import ---
 import TransactionPage from './components/transaction/TransactionPage'; 
 
@@ -38,7 +41,7 @@ const AppLayout = () => {
     location.pathname === '/DashboardPage' || 
     location.pathname === '/signup' ||
     location.pathname === '/restaurant' ||
-    location.pathname === '/transaction-history' || // Transaction Page sathi header/footer hide kela
+    location.pathname === '/transaction-history' || 
     location.pathname === '/admin-login' ||
     location.pathname === '/admin-dashboard' ||
     location.pathname === '/admin/dashboard' ||
@@ -62,15 +65,12 @@ const AppLayout = () => {
           <Route path="/DashboardPage" element={<Dashboard />} />
           <Route path="/restaurant" element={<Restaurant />} />
           
-          {/* --- New Transaction Route --- */}
           <Route path="/transaction-history" element={<TransactionPage />} />
 
-          {/* --- Admin Portal Routes --- */}
           <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
-          {/* --- Partner Portal Routes --- */}
           <Route path="/partner-login" element={<PartnerLogin />} />
           <Route path="/partner-dashboard" element={<PartnerDashboard />} />
           <Route path="/partner/dashboard" element={<PartnerDashboard />} />
@@ -89,6 +89,8 @@ const HomePage = () => {
       <div style={{ paddingTop: '70px' }}>
         <Hero />
         <MainContent/>
+        {/* --- इथे तुझा जाहिरात कंपोनंट टाकला आहे --- */}
+        <Advertisement />
         <Categories /> 
         <Benefits />
         <Footer />

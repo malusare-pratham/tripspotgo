@@ -82,11 +82,13 @@ const MainContent = () => {
                 <img src={item.img} alt={item.name} loading="lazy" />
               </div>
               <div className="mc-card-info">
-                <span className="mc-shop-label">
-                  <MapPin size={12} />
-                  Mahabaleshwer
-                </span>
                 <h3 className="mc-item-name">{item.name}</h3>
+                <span className="mc-shop-label">
+                  <span className="mc-shop-left">
+                    <MapPin size={12} />
+                    Mahabaleshwer
+                  </span>
+                </span>
               </div>
             </div>
           ))}

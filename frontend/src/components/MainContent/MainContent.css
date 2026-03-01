@@ -107,18 +107,17 @@
 
 .mc-deal-card:hover {
   transform: translateY(-5px) scale(1.01);
-  border-color: #5a35d6;
 }
 
 .mc-deal-card:focus,
 .mc-deal-card:active {
   outline: none;
-  border-color: #5a35d6;
 }
 
 .mc-image-container {
   height: 128px;
   width: 100%;
+  border-radius: 0 0 20px 20px;
   overflow: hidden;
 }
 
@@ -155,8 +154,32 @@
   margin-bottom: 0;
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: space-between;
+  gap: 8px;
   line-height: 1.1;
+  width: 100%;
+}
+
+.mc-shop-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.mc-open-now {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #16a34a;
+  flex-shrink: 0;
+  border: 1px solid #86efac;
+  background: #e8f8ee;
+  border-radius: 999px;
+  padding: 2px 8px;
+  line-height: 1;
 }
 
 .mc-item-name {
@@ -177,11 +200,18 @@
   .mc-main-top-heading {
     font-size: 1.8rem;
     margin-bottom: 30px;
+    line-height: 1.2;
   }
 
   .mc-tab-btn {
-    font-size: 0.95rem;
-    padding: 10px 12px;
+    font-size: 0.86rem;
+    padding: 9px 10px;
+    flex: 0 0 auto;
+  }
+
+  .mc-tab-row {
+    flex-wrap: nowrap;
+    white-space: nowrap;
   }
 
   .mc-sliding-row {
