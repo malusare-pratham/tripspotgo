@@ -176,7 +176,7 @@ const BillPage = () => {
             <input
               type="file"
               id="file-upload"
-              hidden
+              style={{ display: 'none' }}
               accept="image/*"
               onChange={(e) => setBillFile(e.target.files?.[0] || null)}
             />

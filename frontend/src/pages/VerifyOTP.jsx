@@ -244,6 +244,9 @@ const VerifyOTP = () => {
                 key={index}
                 ref={(el) => { otpRefs.current[index - 1] = el; }}
                 type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                autoComplete={index === 1 ? 'one-time-code' : 'off'}
                 maxLength="1"
                 className="otp-box"
                 value={otpValues[index - 1]}
