@@ -4,7 +4,33 @@ import { useNavigate } from 'react-router-dom';
 import { User, Mail, Phone, Lock, QrCode, CreditCard, CheckCircle2, Users, ArrowRight } from 'lucide-react';
 import './Signup.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || '';
+
+const loadRazorpayCheckoutScript = () =>
+    new Promise((resolve) => {
+        if (window.Razorpay) {
+            resolve(true);
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+    });
+
+const postWithFallback = async (primaryUrl, fallbackUrl, payload, options) => {
+    try {
+        return await axios.post(primaryUrl, payload, options);
+    } catch (error) {
+        if (error?.response?.status === 404 && fallbackUrl) {
+            return axios.post(fallbackUrl, payload, options);
+        }
+        throw error;
+    }
+};
 
 function Signup() {
     const navigate = useNavigate();
@@ -15,6 +41,7 @@ function Signup() {
     });
     const [statusMessage, setStatusMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [highlightRegistration, setHighlightRegistration] = useState(false);
     const registrationRef = useRef(null);
 
@@ -50,27 +77,103 @@ function Signup() {
             return;
         }
 
+        const payload = {
+            name: formData.name.trim(),
+            email: formData.email.trim(),
+            mobile: formData.mobile.trim(),
+            password: formData.password,
+            membershipPlan: activePlan === 'single' ? 'Single Plan' : 'Family Plan'
+        };
+
+        setIsSubmitting(true);
         try {
-            const payload = {
-                name: formData.name.trim(),
-                email: formData.email.trim(),
-                mobile: formData.mobile.trim(),
-                password: formData.password,
-                membershipPlan: activePlan === 'single' ? 'Single Plan' : 'Family Plan'
+            const orderResponse = await postWithFallback(
+                `${API_BASE_URL}/api/auth/signup/create-order`,
+                `${API_BASE_URL}/api/auth/create-order`,
+                payload,
+                { timeout: 15000 }
+            );
+
+            const order = orderResponse?.data?.order;
+            const keyId = orderResponse?.data?.keyId || RAZORPAY_KEY_ID;
+
+            if (!order?.id || !keyId) {
+                setErrorMessage('Unable to initialize payment. Please try again.');
+                setIsSubmitting(false);
+                return;
+            }
+
+            const isScriptLoaded = await loadRazorpayCheckoutScript();
+            if (!isScriptLoaded || !window.Razorpay) {
+                setErrorMessage('Payment SDK could not be loaded. Please try again.');
+                setIsSubmitting(false);
+                return;
+            }
+
+            const options = {
+                key: keyId,
+                amount: order.amount,
+                currency: order.currency || 'INR',
+                name: 'MagicPoint',
+                description: `${payload.membershipPlan} Membership`,
+                order_id: order.id,
+                prefill: {
+                    name: payload.name,
+                    email: payload.email,
+                    contact: payload.mobile
+                },
+                notes: {
+                    membershipPlan: payload.membershipPlan
+                },
+                handler: async (paymentResult) => {
+                    try {
+                        const verifyResponse = await postWithFallback(
+                            `${API_BASE_URL}/api/auth/signup/verify-payment`,
+                            `${API_BASE_URL}/api/auth/verify-payment`,
+                            {
+                                ...paymentResult,
+                                registrationData: payload
+                            },
+                            { timeout: 15000 }
+                        );
+
+                        localStorage.setItem('authToken', verifyResponse.data.token);
+                        localStorage.setItem('authUser', JSON.stringify(verifyResponse.data.user));
+                        setStatusMessage('Registration and payment completed successfully.');
+                        navigate('/DashboardPage', { replace: true });
+                    } catch (verifyError) {
+                        const verifyMessage =
+                            verifyError?.response?.data?.message || 'Payment verification failed. Please contact support.';
+                        setErrorMessage(verifyMessage);
+                    } finally {
+                        setIsSubmitting(false);
+                    }
+                },
+                modal: {
+                    ondismiss: () => {
+                        setErrorMessage('Payment was cancelled.');
+                        setIsSubmitting(false);
+                    }
+                },
+                theme: {
+                    color: activePlan === 'single' ? '#3b82f6' : '#22c55e'
+                }
             };
 
-            const response = await axios.post(`${API_BASE_URL}/api/auth/signup`, payload, { timeout: 15000 });
-            const message = response?.data?.message || 'Signup successful';
-            setStatusMessage(`${message}. Please login now.`);
-
-            localStorage.setItem('pendingSignupMobile', payload.mobile);
-            navigate('/login', { state: { mobile: payload.mobile } });
+            const razorpay = new window.Razorpay(options);
+            razorpay.on('payment.failed', (event) => {
+                const failedMessage = event?.error?.description || 'Payment failed. Please try again.';
+                setErrorMessage(failedMessage);
+                setIsSubmitting(false);
+            });
+            razorpay.open();
         } catch (error) {
             const message = error?.response?.data?.message ||
                 (error?.request
                     ? `Unable to reach server (${API_BASE_URL}). Check Render deployment, CORS_ORIGINS, and VITE_API_BASE_URL.`
                     : 'Signup failed. Please try again.');
             setErrorMessage(message);
+            setIsSubmitting(false);
         }
     };
 
@@ -217,9 +320,10 @@ function Signup() {
 
                             <button
                                 type="submit"
+                                disabled={isSubmitting}
                                 className={`final-submit-btn ${activePlan === 'single' ? 'bg-blue' : 'bg-green'}`}
                             >
-                                Complete Registration & Pay
+                                {isSubmitting ? 'Processing Payment...' : 'Complete Registration & Pay'}
                             </button>
                         </form>
                     </div>

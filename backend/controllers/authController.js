@@ -1,6 +1,13 @@
+const crypto = require('crypto');
+const axios = require('axios');
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 const asyncHandler = require('../middleware/asyncHandler');
+
+const MEMBERSHIP_PLAN_AMOUNT_MAP = {
+    'Single Plan': 5000,
+    'Family Plan': 9900
+};
 
 const normalizeIdentifier = (email, mobile) => {
     if (email) {
@@ -13,8 +20,8 @@ const normalizeIdentifier = (email, mobile) => {
     return null;
 };
 
-const registerUser = asyncHandler(async (req, res) => {
-    const { name, email, mobile, password, membershipPlan } = req.body;
+const validateAndBuildUserPayload = (rawData = {}) => {
+    const { name, email, mobile, password, membershipPlan } = rawData;
 
     if (!name || !mobile || !password || !membershipPlan) {
         const error = new Error('name, mobile, password and membershipPlan are required');
@@ -22,8 +29,9 @@ const registerUser = asyncHandler(async (req, res) => {
         throw error;
     }
 
-    const allowedPlans = ['Single Plan', 'Family Plan'];
-    if (!allowedPlans.includes(String(membershipPlan).trim())) {
+    const normalizedPlan = String(membershipPlan).trim();
+    const allowedPlans = Object.keys(MEMBERSHIP_PLAN_AMOUNT_MAP);
+    if (!allowedPlans.includes(normalizedPlan)) {
         const error = new Error('membershipPlan must be Single Plan or Family Plan');
         error.statusCode = 400;
         throw error;
@@ -33,7 +41,7 @@ const registerUser = asyncHandler(async (req, res) => {
         name: String(name).trim(),
         password: String(password),
         mobileNumber: String(mobile).trim(),
-        membershipPlan: String(membershipPlan).trim(),
+        membershipPlan: normalizedPlan,
         ...(email ? { email: String(email).trim().toLowerCase() } : {})
     };
 
@@ -49,19 +57,29 @@ const registerUser = asyncHandler(async (req, res) => {
         throw error;
     }
 
+    return userPayload;
+};
+
+const findExistingUser = async (userPayload) => {
     const query = [
         { mobileNumber: userPayload.mobileNumber },
         { mobile: userPayload.mobileNumber }
     ];
-    if (userPayload.email) query.push({ email: userPayload.email });
+    if (userPayload.email) {
+        query.push({ email: userPayload.email });
+    }
 
-    if (query.length > 0) {
-        const existingUser = await User.findOne({ $or: query });
-        if (existingUser) {
-            const error = new Error('User already exists with the given email/mobile');
-            error.statusCode = 409;
-            throw error;
-        }
+    return User.findOne({ $or: query });
+};
+
+const registerUser = asyncHandler(async (req, res) => {
+    const userPayload = validateAndBuildUserPayload(req.body || {});
+
+    const existingUser = await findExistingUser(userPayload);
+    if (existingUser) {
+        const error = new Error('User already exists with the given email/mobile');
+        error.statusCode = 409;
+        throw error;
     }
 
     const user = await User.create(userPayload);
@@ -70,6 +88,109 @@ const registerUser = asyncHandler(async (req, res) => {
     res.status(201).json({
         success: true,
         message: 'User registered successfully',
+        token,
+        user: user.toSafeObject()
+    });
+});
+
+const createSignupOrder = asyncHandler(async (req, res) => {
+    const userPayload = validateAndBuildUserPayload(req.body || {});
+
+    const existingUser = await findExistingUser(userPayload);
+    if (existingUser) {
+        const error = new Error('User already exists with the given email/mobile');
+        error.statusCode = 409;
+        throw error;
+    }
+
+    const razorpayKeyId = String(process.env.RAZORPAY_KEY_ID || '').trim();
+    const razorpayKeySecret = String(process.env.RAZORPAY_KEY_SECRET || '').trim();
+
+    if (!razorpayKeyId || !razorpayKeySecret) {
+        const error = new Error('Razorpay is not configured on server');
+        error.statusCode = 500;
+        throw error;
+    }
+
+    const amount = MEMBERSHIP_PLAN_AMOUNT_MAP[userPayload.membershipPlan];
+    const orderPayload = {
+        amount,
+        currency: 'INR',
+        receipt: `signup_${Date.now()}_${userPayload.mobileNumber}`,
+        payment_capture: 1,
+        notes: {
+            mobile: userPayload.mobileNumber,
+            membershipPlan: userPayload.membershipPlan
+        }
+    };
+
+    const { data } = await axios.post('https://api.razorpay.com/v1/orders', orderPayload, {
+        auth: { username: razorpayKeyId, password: razorpayKeySecret },
+        timeout: 15000
+    });
+
+    res.status(200).json({
+        success: true,
+        keyId: razorpayKeyId,
+        order: data,
+        amount,
+        currency: 'INR'
+    });
+});
+
+const verifySignupPaymentAndRegister = asyncHandler(async (req, res) => {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, registrationData } = req.body || {};
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+        const error = new Error('Missing payment verification fields');
+        error.statusCode = 400;
+        throw error;
+    }
+
+    const razorpayKeySecret = String(process.env.RAZORPAY_KEY_SECRET || '').trim();
+    if (!razorpayKeySecret) {
+        const error = new Error('Razorpay is not configured on server');
+        error.statusCode = 500;
+        throw error;
+    }
+
+    const expectedSignature = crypto
+        .createHmac('sha256', razorpayKeySecret)
+        .update(`${String(razorpay_order_id)}|${String(razorpay_payment_id)}`)
+        .digest('hex');
+
+    const signatureText = String(razorpay_signature);
+    const isValidSignature =
+        expectedSignature.length === signatureText.length &&
+        crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(signatureText));
+
+    if (!isValidSignature) {
+        const error = new Error('Payment signature verification failed');
+        error.statusCode = 400;
+        throw error;
+    }
+
+    const userPayload = validateAndBuildUserPayload(registrationData || {});
+    const existingUser = await findExistingUser(userPayload);
+    if (existingUser) {
+        const error = new Error('User already exists with the given email/mobile');
+        error.statusCode = 409;
+        throw error;
+    }
+
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+    const user = await User.create({
+        ...userPayload,
+        membershipActivatedAt: now,
+        membershipExpiresAt: expiresAt
+    });
+
+    const token = generateToken(user._id.toString());
+
+    res.status(201).json({
+        success: true,
+        message: 'Payment verified and user registered successfully',
         token,
         user: user.toSafeObject()
     });
@@ -143,6 +264,8 @@ const getProfile = asyncHandler(async (req, res) => {
 
 module.exports = {
     registerUser,
+    createSignupOrder,
+    verifySignupPaymentAndRegister,
     loginUser,
     getProfile
 };

@@ -1,5 +1,11 @@
 const express = require('express');
-const { registerUser, loginUser, getProfile } = require('../controllers/authController');
+const {
+    registerUser,
+    createSignupOrder,
+    verifySignupPaymentAndRegister,
+    loginUser,
+    getProfile
+} = require('../controllers/authController');
 const { createBill, createBillApprovalRequest, getBillStatus, getMyTransactions } = require('../controllers/billController');
 const protect = require('../middleware/auth');
 const upload = require('../middleware/upload');
@@ -7,6 +13,10 @@ const upload = require('../middleware/upload');
 const router = express.Router();
 
 router.post('/signup', registerUser);
+router.post('/signup/create-order', createSignupOrder);
+router.post('/signup/verify-payment', verifySignupPaymentAndRegister);
+router.post('/create-order', createSignupOrder);
+router.post('/verify-payment', verifySignupPaymentAndRegister);
 router.post('/login', loginUser);
 router.get('/me', protect, getProfile);
 router.post('/bills', protect, upload.single('billImage'), createBill);
