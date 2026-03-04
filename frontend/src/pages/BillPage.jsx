@@ -215,7 +215,7 @@ const BillPage = () => {
               accept="image/*"
               onChange={handleFileSelect}
             />
-            <label htmlFor="file-upload" className={`upload-label ${billFile ? 'uploaded' : ''}`}>
+            <div className={`upload-label ${billFile ? 'uploaded' : ''}`}>
               {billFile ? (
                 <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="9"></circle>
@@ -230,7 +230,7 @@ const BillPage = () => {
               )}
               <h3>{billFile ? 'Bill image uploaded' : 'Click to upload bill image'}</h3>
               <p>{billFile ? (billFile.name || 'Uploaded successfully') : 'JPG, PNG up to 10MB'}</p>
-            </label>
+            </div>
           </div>
 
           <button type="submit" className="generate-btn">
