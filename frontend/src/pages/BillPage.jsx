@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './BillPage.css';
@@ -17,6 +17,7 @@ const BillPage = () => {
   const [selectedPartnerName, setSelectedPartnerName] = useState('');
   const [billFile, setBillFile] = useState(null);
   const [billAmount, setBillAmount] = useState('');
+  const billFileInputRef = useRef(null);
 
   useEffect(() => {
     const fetchPartners = async () => {
@@ -172,8 +173,20 @@ const BillPage = () => {
             </div>
           </div>
 
-          <div className={`upload-area ${billFile ? 'uploaded' : ''}`}>
+          <div
+            className={`upload-area ${billFile ? 'uploaded' : ''}`}
+            onClick={() => billFileInputRef.current?.click()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                billFileInputRef.current?.click();
+              }
+            }}
+            role="button"
+            tabIndex={0}
+          >
             <input
+              ref={billFileInputRef}
               type="file"
               id="file-upload"
               style={{ display: 'none' }}
