@@ -113,13 +113,7 @@ const BillPage = () => {
       billFileInputRef.current?.click();
       return;
     }
-
-    const openCamera = window.confirm('Open Camera?\nPress Cancel for Gallery/Files.');
-    if (openCamera) {
-      cameraInputRef.current?.click();
-      return;
-    }
-    billFileInputRef.current?.click();
+    cameraInputRef.current?.click();
   };
 
   return (
