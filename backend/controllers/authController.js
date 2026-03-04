@@ -124,10 +124,24 @@ const createSignupOrder = asyncHandler(async (req, res) => {
         }
     };
 
-    const { data } = await axios.post('https://api.razorpay.com/v1/orders', orderPayload, {
-        auth: { username: razorpayKeyId, password: razorpayKeySecret },
-        timeout: 15000
-    });
+    let data;
+    try {
+        const orderResponse = await axios.post('https://api.razorpay.com/v1/orders', orderPayload, {
+            auth: { username: razorpayKeyId, password: razorpayKeySecret },
+            timeout: 15000
+        });
+        data = orderResponse.data;
+    } catch (error) {
+        if (error?.response?.status === 401) {
+            const authError = new Error('Invalid Razorpay credentials on server. Check RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in Render env.');
+            authError.statusCode = 500;
+            throw authError;
+        }
+
+        const gatewayError = new Error('Unable to create Razorpay order right now. Please try again.');
+        gatewayError.statusCode = 502;
+        throw gatewayError;
+    }
 
     res.status(200).json({
         success: true,
