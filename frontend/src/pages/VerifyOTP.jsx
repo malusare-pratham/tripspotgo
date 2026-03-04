@@ -96,6 +96,7 @@ const VerifyOTP = () => {
 
       if (txnStatus === 'Verified') {
         navigate('/confirmation', {
+          replace: true,
           state: {
             billId: txn.id || '',
             amountSaved: Number(txn.discount || discountAmount),
@@ -144,6 +145,7 @@ const VerifyOTP = () => {
 
         if (txn.status === 'Verified') {
           navigate('/confirmation', {
+            replace: true,
             state: {
               billId: txn.id || '',
               amountSaved: Number(txn.discount || discountAmount),

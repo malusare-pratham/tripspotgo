@@ -100,7 +100,7 @@ const BillPage = () => {
       billId: ''
     };
 
-    navigate('/verify-otp', { state: otpPayload });
+    navigate('/verify-otp', { state: otpPayload, replace: true });
   };
 
   const handleFileSelect = (e) => {
