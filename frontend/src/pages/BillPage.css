@@ -195,6 +195,13 @@
     color: #16a34a;
 }
 
+.bill-scope .upload-label p {
+    max-width: 100%;
+    margin: 0 auto;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
 /* Submit Button */
 .bill-scope .generate-btn {
     width: 100%;
