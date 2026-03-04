@@ -18,6 +18,7 @@ const BillPage = () => {
   const [billFile, setBillFile] = useState(null);
   const [billAmount, setBillAmount] = useState('');
   const billFileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
 
   useEffect(() => {
     const fetchPartners = async () => {
@@ -102,6 +103,25 @@ const BillPage = () => {
     navigate('/verify-otp', { state: otpPayload });
   };
 
+  const handleFileSelect = (e) => {
+    setBillFile(e.target.files?.[0] || null);
+  };
+
+  const handleUploadAreaClick = () => {
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    if (!isMobile) {
+      billFileInputRef.current?.click();
+      return;
+    }
+
+    const openCamera = window.confirm('Open Camera?\nPress Cancel for Gallery/Files.');
+    if (openCamera) {
+      cameraInputRef.current?.click();
+      return;
+    }
+    billFileInputRef.current?.click();
+  };
+
   return (
     <div className="bill-page-container bill-scope">
       {/* --- Top Navigation: Logo Left & Back Button Right --- */}
@@ -175,23 +195,31 @@ const BillPage = () => {
 
           <div
             className={`upload-area ${billFile ? 'uploaded' : ''}`}
-            onClick={() => billFileInputRef.current?.click()}
+            onClick={handleUploadAreaClick}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                billFileInputRef.current?.click();
+                handleUploadAreaClick();
               }
             }}
             role="button"
             tabIndex={0}
           >
             <input
+              ref={cameraInputRef}
+              type="file"
+              style={{ display: 'none' }}
+              accept="image/*"
+              capture="environment"
+              onChange={handleFileSelect}
+            />
+            <input
               ref={billFileInputRef}
               type="file"
               id="file-upload"
               style={{ display: 'none' }}
               accept="image/*"
-              onChange={(e) => setBillFile(e.target.files?.[0] || null)}
+              onChange={handleFileSelect}
             />
             <label htmlFor="file-upload" className={`upload-label ${billFile ? 'uploaded' : ''}`}>
               {billFile ? (
