@@ -32,6 +32,17 @@ const postWithFallback = async (primaryUrl, fallbackUrl, payload, options) => {
     }
 };
 
+const getApiErrorMessage = (error, fallbackMessage, apiBaseUrl) => {
+    if (error?.response?.status === 401) {
+        return 'Payment authentication failed. Please verify Razorpay keys on Render (RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET) and redeploy backend.';
+    }
+
+    return error?.response?.data?.message ||
+        (error?.request
+            ? `Unable to reach server (${apiBaseUrl}). Check Render deployment, CORS_ORIGINS, and VITE_API_BASE_URL.`
+            : fallbackMessage);
+};
+
 function Signup() {
     const navigate = useNavigate();
     const singlePlanRef = useRef(null);
@@ -142,8 +153,11 @@ function Signup() {
                         setStatusMessage('Registration and payment completed successfully.');
                         navigate('/DashboardPage', { replace: true });
                     } catch (verifyError) {
-                        const verifyMessage =
-                            verifyError?.response?.data?.message || 'Payment verification failed. Please contact support.';
+                        const verifyMessage = getApiErrorMessage(
+                            verifyError,
+                            'Payment verification failed. Please contact support.',
+                            API_BASE_URL
+                        );
                         setErrorMessage(verifyMessage);
                     } finally {
                         setIsSubmitting(false);
@@ -168,10 +182,7 @@ function Signup() {
             });
             razorpay.open();
         } catch (error) {
-            const message = error?.response?.data?.message ||
-                (error?.request
-                    ? `Unable to reach server (${API_BASE_URL}). Check Render deployment, CORS_ORIGINS, and VITE_API_BASE_URL.`
-                    : 'Signup failed. Please try again.');
+            const message = getApiErrorMessage(error, 'Signup failed. Please try again.', API_BASE_URL);
             setErrorMessage(message);
             setIsSubmitting(false);
         }
