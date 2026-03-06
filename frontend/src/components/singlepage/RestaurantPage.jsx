@@ -60,6 +60,15 @@ const defaultInfo = {
   videos: []
 };
 
+const buildGalleryItems = (photos = [], videos = []) => {
+  const normalizedPhotos = Array.isArray(photos) ? photos.map((src) => normalizeAssetUrl(src) || src).filter(Boolean) : [];
+  const normalizedVideos = Array.isArray(videos) ? videos.map((src) => normalizeAssetUrl(src) || src).filter(Boolean) : [];
+  return [
+    ...normalizedPhotos.map((src) => ({ type: 'image', src })),
+    ...normalizedVideos.map((src) => ({ type: 'video', src }))
+  ];
+};
+
 const fallbackMenu = [
   {
     category: 'Signature Pizzas',
@@ -87,6 +96,7 @@ const RestaurantPage = () => {
   const videoInputRef = useRef(null);
   const [restaurantInfo, setRestaurantInfo] = useState(defaultInfo);
   const [galleryItems, setGalleryItems] = useState(defaultGallery);
+  const [isUploadingMedia, setIsUploadingMedia] = useState(false);
 
   const tabs = ['MENU', 'REVIEWS', 'PHOTOS'];
   const foodFilters = ['all', 'veg', 'nonveg'];
@@ -171,10 +181,7 @@ const RestaurantPage = () => {
           videos: Array.isArray(info.videos) ? info.videos.map((src) => normalizeAssetUrl(src) || src) : []
         }));
 
-        const mediaItems = [
-          ...(Array.isArray(info.photos) ? info.photos : []).map((src) => ({ type: 'image', src: normalizeAssetUrl(src) || src })),
-          ...(Array.isArray(info.videos) ? info.videos : []).map((src) => ({ type: 'video', src: normalizeAssetUrl(src) || src }))
-        ];
+        const mediaItems = buildGalleryItems(info.photos, info.videos);
         if (mediaItems.length > 0) {
           setGalleryItems(mediaItems);
         }
@@ -185,17 +192,61 @@ const RestaurantPage = () => {
     fetchInfo();
   }, [partnerId]);
 
-  const addFilesToGallery = (fileList, type) => {
+  const addFilesToGallery = async (fileList, type) => {
     const files = Array.from(fileList || []);
     if (!files.length) return;
 
-    const newItems = files.map((file) => ({
-      type,
-      src: URL.createObjectURL(file),
-      isLocal: true
-    }));
+    if (!partnerId) {
+      const newItems = files.map((file) => ({
+        type,
+        src: URL.createObjectURL(file),
+        isLocal: true
+      }));
+      setGalleryItems((prev) => [...newItems, ...prev]);
+      return;
+    }
 
-    setGalleryItems((prev) => [...newItems, ...prev]);
+    setIsUploadingMedia(true);
+    try {
+      const formData = new FormData();
+      formData.append('photos', JSON.stringify(Array.isArray(restaurantInfo.photos) ? restaurantInfo.photos : []));
+      formData.append('videos', JSON.stringify(Array.isArray(restaurantInfo.videos) ? restaurantInfo.videos : []));
+
+      files.forEach((file) => {
+        if (type === 'image') {
+          formData.append('photoFiles', file);
+        } else {
+          formData.append('videoFiles', file);
+        }
+      });
+
+      const res = await axios.put(`${API_BASE_URL}/api/admin/partner-info/${partnerId}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      const savedInfo = res?.data?.data;
+      const nextPhotos = Array.isArray(savedInfo?.photos) ? savedInfo.photos.map((src) => normalizeAssetUrl(src) || src) : [];
+      const nextVideos = Array.isArray(savedInfo?.videos) ? savedInfo.videos.map((src) => normalizeAssetUrl(src) || src) : [];
+      setRestaurantInfo((prev) => ({
+        ...prev,
+        photos: nextPhotos,
+        videos: nextVideos
+      }));
+
+      const mediaItems = buildGalleryItems(nextPhotos, nextVideos);
+      if (mediaItems.length > 0) {
+        setGalleryItems(mediaItems);
+      }
+    } catch (_error) {
+      const newItems = files.map((file) => ({
+        type,
+        src: URL.createObjectURL(file),
+        isLocal: true
+      }));
+      setGalleryItems((prev) => [...newItems, ...prev]);
+    } finally {
+      setIsUploadingMedia(false);
+    }
   };
 
   const menuData = useMemo(() => {
@@ -415,13 +466,13 @@ const RestaurantPage = () => {
           {activeTab === 'PHOTOS' && (
             <div className="rp-photos-wrap">
               <div className="rp-photo-actions">
-                <button type="button" className="rp-upload-card" onClick={() => photoInputRef.current?.click()}>
+                <button type="button" className="rp-upload-card" disabled={isUploadingMedia} onClick={() => photoInputRef.current?.click()}>
                   <div className="rp-up-icon-box"><Camera size={24} /></div>
-                  <span>Add Photo</span>
+                  <span>{isUploadingMedia ? 'Uploading...' : 'Add Photo'}</span>
                 </button>
-                <button type="button" className="rp-upload-card" onClick={() => videoInputRef.current?.click()}>
+                <button type="button" className="rp-upload-card" disabled={isUploadingMedia} onClick={() => videoInputRef.current?.click()}>
                   <div className="rp-up-icon-box"><Video size={24} /></div>
-                  <span>Add Video</span>
+                  <span>{isUploadingMedia ? 'Uploading...' : 'Add Video'}</span>
                 </button>
                 <input
                   ref={photoInputRef}

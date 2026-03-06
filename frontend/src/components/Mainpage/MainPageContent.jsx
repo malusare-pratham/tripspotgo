@@ -1,12 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Star, MapPin } from "lucide-react";
-import MenuSlider from "../menuslider/MenuSlider"; // MenuSlider इम्पॉर्ट केला
+import MenuSlider from "../menuslider/MenuSlider";
 import "./MainPageContent.css";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
-const DEFAULT_OFFER_IMAGE = "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=600&q=80";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+const DEFAULT_OFFER_IMAGE = "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80";
 
 const normalizeImageUrl = (rawUrl) => {
   if (!rawUrl) return DEFAULT_OFFER_IMAGE;
@@ -37,9 +36,9 @@ const FilterBar = ({ activeCategory, setActiveCategory }) => {
     <div className="mp-filter-section">
       <div className="mp-category-tabs">
         {categories.map((cat) => (
-          <button 
-            key={cat} 
-            className={`mp-tab ${activeCategory === cat ? 'active' : ''}`}
+          <button
+            key={cat}
+            className={`mp-tab ${activeCategory === cat ? "active" : ""}`}
             onClick={() => setActiveCategory(cat)}
           >
             {cat}
@@ -50,67 +49,66 @@ const FilterBar = ({ activeCategory, setActiveCategory }) => {
   );
 };
 
-const OfferCard = ({ item, onClick, onOpenLocation }) => (
-    <div className="mp-offer-card" onClick={onClick}>
-      <div className="mp-image-box">
-        <img
-          src={item.image}
-          alt={item.name}
-          loading="eager"
-          decoding="async"
-          onError={(e) => {
-            e.currentTarget.onerror = null;
-            e.currentTarget.src = DEFAULT_OFFER_IMAGE;
-          }}
-        />
-        <div className="mp-save-badge">
-          <span>Save</span>
-          <strong>{item.discountValue}</strong>
+const OfferCard = ({ item, onClick, isPressed, onPressStart, onPressEnd }) => (
+  <div
+    className={`mpc-restaurant-card ${isPressed ? "mpc-press" : ""}`}
+    onClick={onClick}
+    onTouchStart={onPressStart}
+    onTouchEnd={onPressEnd}
+    onTouchCancel={onPressEnd}
+  >
+    <div className="mpc-img-wrapper">
+      <div className="mpc-offer-badge">
+        <strong>10%</strong>
+        <span>OFF</span>
+      </div>
+      <img
+        src={item.image}
+        alt={item.name}
+        loading="eager"
+        decoding="async"
+        onError={(e) => {
+          e.currentTarget.onerror = null;
+          e.currentTarget.src = DEFAULT_OFFER_IMAGE;
+        }}
+      />
+    </div>
+    <div className="mpc-info-section">
+      <div className="mpc-title-row">
+        <h4 className="mpc-res-name">{item.name}</h4>
+        <div className="mpc-food-type-icons" aria-label={`Food type: ${item.foodType}`}>
+          <span className="mpc-rating-mini">
+            <i className="fas fa-star mpc-rating-star" aria-hidden="true"></i>
+            {item.rating}
+          </span>
+          {item.foodType.includes("both") ? (
+            <>
+              <span className="mpc-food-type-logo veg" />
+              <span className="mpc-food-type-logo nonveg" />
+            </>
+          ) : (
+            <span className={`mpc-food-type-logo ${item.foodType.includes("non") ? "nonveg" : "veg"}`} />
+          )}
         </div>
       </div>
-      <div className="mp-card-content">
-        <div className="mp-card-header">
-          <div className="mp-name-block">
-            <div className="mp-name-row">
-              <h3>{item.name}</h3>
-            </div>
-            <span className={`mp-food-badge ${item.foodTypeVariant}`}>
-              <i className="fa-solid fa-leaf" aria-hidden="true"></i>
-              {item.foodTypeLabel}
-            </span>
-          </div>
-          <div className="mp-status-rating">
-            <span className={`mp-rating ${parseFloat(item.rating) >= 4 ? "high" : "mid"}`}>
-              <Star size={12} fill="white" style={{ marginRight: "3px" }} />
-              {item.rating}
-            </span>
-            <div className="mp-status-line">
-              <span className="mp-open-now">
-                <i className="fa-solid fa-circle-check" aria-hidden="true"></i>
-                Open Now
-              </span>
-            </div>
-          </div>
-        </div>
-        <button
-          type="button"
-          className="mp-location-below"
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpenLocation();
-          }}
-        >
-          <MapPin size={13} />
-          <span>{item.distanceLabel}</span>
-        </button>
+      <div className="mpc-desc-row">
+        <span className="mpc-cuisine-txt">{item.description}</span>
+      </div>
+      <div className="mpc-loc-row">
+        <span className="mpc-loc-txt">{item.location}</span>
+        <span className="mpc-dist-txt">{item.distance}</span>
       </div>
     </div>
+  </div>
 );
 
 const MainPageContent = () => {
   const navigate = useNavigate();
   const [partners, setPartners] = useState([]);
+  const [partnerInfoById, setPartnerInfoById] = useState({});
   const [activeCategory, setActiveCategory] = useState("Food & Dining");
+  const [pressedCardId, setPressedCardId] = useState(null);
+  const pressResetTimer = useRef(null);
 
   const openRestaurant = (partnerId) => {
     if (partnerId) {
@@ -119,12 +117,30 @@ const MainPageContent = () => {
     navigate("/restaurant", { state: { partnerId } });
   };
 
+  const handlePressStart = (id) => {
+    if (pressResetTimer.current) {
+      clearTimeout(pressResetTimer.current);
+      pressResetTimer.current = null;
+    }
+    setPressedCardId(id);
+  };
+
+  const handlePressEnd = () => {
+    if (pressResetTimer.current) clearTimeout(pressResetTimer.current);
+    pressResetTimer.current = setTimeout(() => {
+      setPressedCardId(null);
+      pressResetTimer.current = null;
+    }, 180);
+  };
+
   useEffect(() => {
     const fetchPartners = async () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/api/admin/partners`);
         setPartners(Array.isArray(response.data) ? response.data : []);
-      } catch (_error) { setPartners([]); }
+      } catch (_error) {
+        setPartners([]);
+      }
     };
 
     fetchPartners();
@@ -132,45 +148,87 @@ const MainPageContent = () => {
     return () => clearInterval(refreshTimer);
   }, []);
 
-  const filteredItems = useMemo(() => {
-    const resolveFoodType = (raw) => {
-      const value = String(raw || '').trim().toLowerCase();
-      if (!value) return { label: 'Veg', variant: 'veg' };
-      if (value.includes('both')) return { label: 'Veg/Non-Veg', variant: 'both' };
-      if (value.includes('non')) return { label: 'Non-Veg', variant: 'nonveg' };
-      return { label: 'Veg', variant: 'veg' };
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchPartnerInfo = async () => {
+      const partnerIds = partners
+        .map((partner) => String(partner?._id || "").trim())
+        .filter(Boolean);
+
+      if (!partnerIds.length) {
+        if (isMounted) setPartnerInfoById({});
+        return;
+      }
+
+      const responses = await Promise.all(
+        partnerIds.map(async (partnerId) => {
+          try {
+            const res = await axios.get(`${API_BASE_URL}/api/admin/partner-info/${partnerId}`);
+            return [partnerId, res?.data?.data || null];
+          } catch (_error) {
+            return [partnerId, null];
+          }
+        })
+      );
+
+      if (!isMounted) return;
+      setPartnerInfoById(Object.fromEntries(responses));
     };
 
-    return partners
-      .filter((p) => {
-        const approvalStatus = String(p.status || "").trim();
-        const businessStatus = String(p.businessStatus || "OPEN").trim().toUpperCase();
-        return approvalStatus === "Active" && businessStatus === "OPEN";
-      })
-      .map((partner, index) => ({
-        ...(() => {
-          const foodType = resolveFoodType(partner.foodType);
+    fetchPartnerInfo();
+    return () => {
+      isMounted = false;
+    };
+  }, [partners]);
+
+  const filteredItems = useMemo(
+    () =>
+      partners
+        .filter((p) => {
+          const approvalStatus = String(p.status || "").trim();
+          const businessStatus = String(p.businessStatus || "OPEN").trim().toUpperCase();
+          return approvalStatus === "Active" && businessStatus === "OPEN";
+        })
+        .map((partner, index) => {
+          const partnerId = String(partner?._id || "").trim();
+          const info = partnerInfoById[partnerId];
+          const descriptionFromInfo = String(info?.description || "").trim();
+          const descriptionFromPartner = String(partner?.description || "").trim();
+          const addressFromPartner = String(partner?.address || "").trim();
+          const categoryFromPartner = String(partner?.businessCategory || "").trim();
+
           return {
-            foodTypeLabel: foodType.label,
-            foodTypeVariant: foodType.variant
+            id: partner._id || index,
+            name: partner.restaurantName || "Partner Restaurant",
+            rating: Number(partner?.rating || 4.5).toFixed(1),
+            foodType: String(partner?.foodType || "Veg").trim().toLowerCase(),
+            description:
+              descriptionFromInfo ||
+              descriptionFromPartner ||
+              addressFromPartner ||
+              categoryFromPartner ||
+              "Great food and service",
+            location: partner.area || "Panchgani",
+            distance: partner.distance || "1.2 km",
+            image: normalizeImageUrl(partner.imageUrl),
+            businessCategory: partner.businessCategory || "Food & Dining",
           };
-        })(),
-        id: partner._id || index,
-        name: partner.restaurantName || "Partner Restaurant",
-        rating: "4.2",
-        distanceLabel: `${partner.area || "Panchgani"}`,
-        locationUrl: partner.locationLink || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(partner.area || "Panchgani")}`,
-        discountValue: "10%",
-        image: normalizeImageUrl(partner.imageUrl),
-        businessCategory: partner.businessCategory || "Food & Dining",
-      }))
-      .filter(item => item.businessCategory === activeCategory);
-  }, [partners, activeCategory]);
+        })
+        .filter((item) => item.businessCategory === activeCategory),
+    [partners, partnerInfoById, activeCategory]
+  );
+
+  useEffect(
+    () => () => {
+      if (pressResetTimer.current) clearTimeout(pressResetTimer.current);
+    },
+    []
+  );
 
   return (
     <div className="mp-scope">
       <div className="mp-main-container">
-        {/* नवीन MenuSlider कॉम्पोनंट */}
         <MenuSlider />
 
         <div className="mp-mobile-sticky">
@@ -185,20 +243,38 @@ const MainPageContent = () => {
         <section className="mp-section">
           <div className="mp-section-header">
             <h2>{activeCategory}</h2>
+            <button
+              type="button"
+              className="mp-view-all"
+              onClick={() => navigate("/restaurant-list")}
+            >
+              See All
+            </button>
           </div>
 
-          <div className="mp-offers-container">
+          <div className="mpc-card-grid">
             {filteredItems.length > 0 ? (
               filteredItems.map((item) => (
                 <OfferCard
                   key={item.id}
                   item={item}
+                  isPressed={pressedCardId === item.id}
+                  onPressStart={() => handlePressStart(item.id)}
+                  onPressEnd={handlePressEnd}
                   onClick={() => openRestaurant(item.id)}
-                  onOpenLocation={() => window.open(item.locationUrl, "_blank", "noopener,noreferrer")}
                 />
               ))
-            ) : ( <p className="no-data">No offers available.</p> )}
+            ) : (
+              <p className="no-data">No offers available.</p>
+            )}
           </div>
+          <button
+            type="button"
+            className="mpc-explore-more"
+            onClick={() => navigate("/restaurant-list")}
+          >
+            Explore more..
+          </button>
         </section>
       </div>
     </div>
@@ -206,5 +282,4 @@ const MainPageContent = () => {
 };
 
 export default MainPageContent;
-
 

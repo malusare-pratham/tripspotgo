@@ -15,6 +15,9 @@ import MainContent from './components/MainContent/MainContent';
 import Dashboard from './pages/DashboardPage'; 
 import Restaurant from './components/singlepage/RestaurantPage'; 
 
+// --- नवीन RestaurantPagelist कंपोनंट Import केला ---
+import RestaurantPagelist from './components/singlepage/RestaurantPagelist';
+
 // नवीन Advertisement कंपोनंट Import केला
 import Advertisement from './components/addvertisment/addvertisment';
 
@@ -41,6 +44,7 @@ const AppLayout = () => {
     location.pathname === '/DashboardPage' || 
     location.pathname === '/signup' ||
     location.pathname === '/restaurant' ||
+    location.pathname === '/restaurant-list' || 
     location.pathname === '/transaction-history' || 
     location.pathname === '/admin-login' ||
     location.pathname === '/admin-dashboard' ||
@@ -64,6 +68,9 @@ const AppLayout = () => {
           <Route path="/confirmation" element={<Confirmation />} />
           <Route path="/DashboardPage" element={<Dashboard />} />
           <Route path="/restaurant" element={<Restaurant />} />
+          
+          {/* नवीन RestaurantPagelist रूट */}
+          <Route path="/restaurant-list" element={<RestaurantPagelist />} />
           
           <Route path="/transaction-history" element={<TransactionPage />} />
 

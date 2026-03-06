@@ -401,10 +401,16 @@ exports.upsertPartnerInfo = async (req, res) => {
     try {
         const { id } = req.params;
         const uploadedByField = await resolveUploadedFiles(req);
-        const existingPhotos = toArray(req.body.photos);
-        const existingVideos = toArray(req.body.videos);
         const uploadedPhotos = uploadedByField.photoFiles || [];
         const uploadedVideos = uploadedByField.videoFiles || [];
+        const hasPhotosPayload = Object.prototype.hasOwnProperty.call(req.body, 'photos');
+        const hasVideosPayload = Object.prototype.hasOwnProperty.call(req.body, 'videos');
+        const existingPhotos = hasPhotosPayload ? toArray(req.body.photos) : [];
+        const existingVideos = hasVideosPayload ? toArray(req.body.videos) : [];
+        const hasMenuPayload =
+            Object.prototype.hasOwnProperty.call(req.body, 'vegMenu') ||
+            Object.prototype.hasOwnProperty.call(req.body, 'nonVegMenu') ||
+            Object.prototype.hasOwnProperty.call(req.body, 'cafeMenu');
 
         const payload = {
             logo: (uploadedByField.logoFile && uploadedByField.logoFile[0]) || toStringOrUndefined(req.body.logo),
@@ -420,13 +426,15 @@ exports.upsertPartnerInfo = async (req, res) => {
             closeTime: toStringOrUndefined(req.body.closeTime),
             callNumber: toStringOrUndefined(req.body.callNumber),
             directionLink: toStringOrUndefined(req.body.directionLink),
-            menu: {
-                vegMenu: mapMenuItems(req.body?.menu?.vegMenu ?? req.body.vegMenu, uploadedByField),
-                nonVegMenu: mapMenuItems(req.body?.menu?.nonVegMenu ?? req.body.nonVegMenu, uploadedByField),
-                cafeMenu: mapMenuItems(req.body?.menu?.cafeMenu ?? req.body.cafeMenu, uploadedByField)
-            },
-            photos: [...existingPhotos, ...uploadedPhotos],
-            videos: [...existingVideos, ...uploadedVideos]
+            menu: hasMenuPayload
+                ? {
+                    vegMenu: mapMenuItems(req.body.vegMenu, uploadedByField),
+                    nonVegMenu: mapMenuItems(req.body.nonVegMenu, uploadedByField),
+                    cafeMenu: mapMenuItems(req.body.cafeMenu, uploadedByField)
+                }
+                : undefined,
+            photos: (hasPhotosPayload || uploadedPhotos.length) ? [...existingPhotos, ...uploadedPhotos] : undefined,
+            videos: (hasVideosPayload || uploadedVideos.length) ? [...existingVideos, ...uploadedVideos] : undefined
         };
 
         const cleanedPayload = Object.fromEntries(

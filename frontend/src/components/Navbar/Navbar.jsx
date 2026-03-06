@@ -6,7 +6,7 @@ function Navbar({ isAuthenticated = false, onLogout, showMobileMenu = true, fixe
   const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
-  const showTransactionMenu = location.pathname === "/DashboardPage";
+  const showTransactionMenu = isAuthenticated;
   const openTransactionHistory = () => {
     navigate("/transaction-history");
     setMenuOpen(false);

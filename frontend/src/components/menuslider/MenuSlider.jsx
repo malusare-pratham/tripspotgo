@@ -1,9 +1,11 @@
 import React, { useRef } from "react";
 import { ArrowLeftCircle, ArrowRightCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import "./MenuSlider.css";
 
 const MenuSlider = () => {
   const scrollRef = useRef(null);
+  const navigate = useNavigate();
 
   const assetImages = import.meta.glob(
     "../../assets/menuslidebarimg/*.{png,jpg,jpeg,webp,avif,gif,svg}",
@@ -40,7 +42,12 @@ const MenuSlider = () => {
 
         <div className="menu-scroll-container" ref={scrollRef}>
           {menuItems.map((item, index) => (
-            <div key={index} className="menu-card">
+            <div
+              key={index}
+              className="menu-card"
+              onClick={() => navigate("/restaurant-list")}
+              style={{ cursor: "pointer" }}
+            >
               <div className="menu-image-wrapper">
                 <img src={item.img} alt="cuisine" />
               </div>
