@@ -173,6 +173,13 @@
   -webkit-text-fill-color: transparent;
 }
 
+.city-subtitle {
+  margin: -10px 0 18px;
+  color: #111111;
+  font-size: 15px;
+  font-weight: 500;
+}
+
 .res-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
@@ -182,7 +189,9 @@
 .restaurant-card {
   padding: 10px;
   border-radius: 15px;
-  transition: 0.3s;
+  transition: transform 0.28s ease, box-shadow 0.28s ease;
+  -webkit-tap-highlight-color: transparent;
+  will-change: transform;
 }
 
 .restaurant-card:hover {
@@ -317,8 +326,13 @@
     margin-bottom: 24px;
     line-height: 1.12;
   }
+  .city-subtitle {
+    margin: -12px 0 18px;
+    font-size: 14px;
+  }
   .res-grid {
-    margin-top: 4px;
+    margin-top: 8px;
+    gap: 22px;
   }
   .banner-overlay {
     padding-left: 18px;
@@ -336,6 +350,34 @@
   .rl-search-btn {
     padding: 0 10px;
     font-size: 11px;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .restaurant-card:hover {
+    box-shadow: none;
+    transform: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .restaurant-card {
+    opacity: 0;
+    transform: translateY(14px);
+    animation: rl-card-reveal 0.55s ease-out forwards;
+    animation-timeline: view();
+    animation-range: entry 8% cover 30%;
+  }
+}
+
+@keyframes rl-card-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

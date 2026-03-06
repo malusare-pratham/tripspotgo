@@ -227,6 +227,7 @@ const RestaurantPagelist = () => {
       </div>
 
       <h2 className="city-title">Restaurants Near You</h2>
+      <p className="city-subtitle">Discover great food spots around your location.</p>
 
       <div className="res-grid">
         {filteredRestaurants.length > 0 ? (
