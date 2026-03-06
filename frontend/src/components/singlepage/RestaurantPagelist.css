@@ -189,7 +189,7 @@
 .restaurant-card {
   padding: 10px;
   border-radius: 15px;
-  transition: transform 0.28s ease, box-shadow 0.28s ease;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
   -webkit-tap-highlight-color: transparent;
   will-change: transform;
 }
@@ -333,6 +333,7 @@
   .res-grid {
     margin-top: 8px;
     gap: 22px;
+    padding: 0 6px;
   }
   .banner-overlay {
     padding-left: 18px;
@@ -362,22 +363,12 @@
 
 @media (max-width: 600px) {
   .restaurant-card {
-    opacity: 0;
-    transform: translateY(14px);
-    animation: rl-card-reveal 0.55s ease-out forwards;
-    animation-timeline: view();
-    animation-range: entry 8% cover 30%;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.10);
   }
-}
 
-@keyframes rl-card-reveal {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  .restaurant-card:active {
+    transform: translateY(-2px) scale(0.995);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
   }
 }
 

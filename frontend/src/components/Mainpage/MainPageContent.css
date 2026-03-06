@@ -560,6 +560,7 @@
   transition: 0.3s;
   background: #fff;
   border: 1px solid #eef0f4;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.10);
   cursor: pointer;
 }
 
@@ -764,8 +765,19 @@
   }
   .mpc-card-grid {
     grid-template-columns: 1fr;
-    gap: 20px;
-    padding: 0;
+    gap: 22px;
+    padding: 0 10px;
+  }
+  .mpc-restaurant-card {
+    border: none;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.10);
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mpc-restaurant-card:active,
+  .mpc-restaurant-card.mpc-press {
+    transform: translateY(-2px) scale(0.995);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
   }
   .mpc-explore-more {
     display: block;
