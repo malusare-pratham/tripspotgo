@@ -289,4 +289,3 @@ const RestaurantPagelist = () => {
 };
 
 export default RestaurantPagelist;
-
