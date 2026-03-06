@@ -164,7 +164,14 @@
 }
 
 /* Card Grid */
-.city-title { font-size: 30px; margin-bottom: 20px; color: #1c1c1c; font-weight: 700;}
+.city-title {
+  font-size: 30px;
+  margin-bottom: 20px;
+  font-weight: 700;
+  background: linear-gradient(90deg, #5a35d6, #ff4791);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 
 .res-grid {
   display: grid;
@@ -307,8 +314,11 @@
   }
   .city-title {
     margin-top: 10px;
-    margin-bottom: 12px;
+    margin-bottom: 24px;
     line-height: 1.12;
+  }
+  .res-grid {
+    margin-top: 4px;
   }
   .banner-overlay {
     padding-left: 18px;
