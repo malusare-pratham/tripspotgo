@@ -45,6 +45,21 @@ const TransactionPage = () => {
     return 'Food & Dining';
   };
 
+  const getCategoryIcon = (raw) => {
+    const normalized = normalizeCategory(raw);
+    switch (normalized) {
+      case 'Activities':
+        return <Bike size={18} />;
+      case 'Stores':
+        return <Store size={18} />;
+      case 'Hotels & Villas':
+        return <Hotel size={18} />;
+      case 'Food & Dining':
+      default:
+        return <Utensils size={18} />;
+    }
+  };
+
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
@@ -127,7 +142,7 @@ const TransactionPage = () => {
               <div key={item.id || item.transactionId} className="tx-row-card">
                 <div className="row-top">
                   <div className="brand-box">
-                    <div className="brand-img"><Hotel size={18} /></div>
+                    <div className="brand-img">{getCategoryIcon(item.category)}</div>
                     <div>
                       <h4>{item.partner || 'Partner Restaurant'}</h4>
                       <span className="sub-type">{normalizeCategory(item.category)} • {new Date(item.dateTime).toLocaleDateString()}</span>
@@ -165,7 +180,7 @@ const TransactionPage = () => {
             <div className="tx-row-card">
               <div className="row-top">
                 <div className="brand-box">
-                  <div className="brand-img"><Hotel size={18} /></div>
+                  <div className="brand-img">{getCategoryIcon(activeTab)}</div>
                   <div>
                     <h4>No transactions yet</h4>
                     <span className="sub-type">Upload a bill to see history</span>

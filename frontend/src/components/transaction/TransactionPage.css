@@ -133,5 +133,6 @@
 @media (max-width: 480px) {
   .stat-card-mini h3 { font-size: 0.8rem; }
   .stat-card-mini label { font-size: 0.55rem; }
-  .price-item span { font-size: 0.8rem; }
+  .price-item span { font-size: 0.85rem; }
+  .price-item .c-navy { font-size: 0.85rem !important; }
 }
