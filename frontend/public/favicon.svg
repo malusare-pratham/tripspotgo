@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Magicpoint">
+  <rect width="64" height="64" rx="14" fill="#6d28d9"/>
+  <path
+    d="M18 44V20h4.2l9.8 12.4L41.8 20H46v24h-4.6V28.6l-8.8 11.2h-1.4l-8.8-11.2V44H18z"
+    fill="#f9fafb"
+  />
+</svg>

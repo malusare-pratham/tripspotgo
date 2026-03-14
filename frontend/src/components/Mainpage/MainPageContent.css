@@ -14,6 +14,7 @@
   font-family: 'Inter', sans-serif;
   color: var(--text-dark);
   padding-bottom: 40px;
+  overflow-x: hidden;
 }
 
 /* २. कंटेनर आणि हेडर */
@@ -25,14 +26,37 @@
 
 @media (max-width: 768px) {
   .mp-main-container {
-    padding: 10px 0;
+    padding: 10px 12px;
   }
 }
 
 .mp-page-header {
   text-align: center;
-  margin: 30px 0;
+  margin: 16px 0 12px;
   padding: 0 15px;
+}
+
+.mp-mobile-sticky {
+  position: relative;
+  top: auto;
+  z-index: 40;
+  background: #fcfcfc;
+  padding-top: 4px;
+  border-bottom: none;
+}
+
+.mp-mobile-sticky.is-stuck {
+  position: fixed;
+  top: var(--nav-height, 65px);
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1201;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+}
+
+.mp-section {
+  padding-top: var(--mp-sticky-space, 0px);
 }
 
 .mp-gradient-title {
@@ -447,20 +471,15 @@
   }
 
   .mp-mobile-sticky {
-    position: sticky;
-    top: 70px;
-    z-index: 40;
-    background: #fcfcfc;
-    padding-top: 6px;
-    border-bottom: none;
+    top: var(--nav-height, 65px);
   }
 
   .mp-mobile-sticky .mp-page-header {
-    margin: 12px 0 10px;
+    margin: 6px 0 4px;
   }
 
   .mp-mobile-sticky .mp-filter-section {
-    margin: 6px 0 10px;
+    margin: 3px 0 6px;
     padding: 0 12px;
   }
 
@@ -488,6 +507,64 @@
   .mp-rating { font-size: 12px; min-width: 64px; min-height: 22px; padding: 4px 9px; }
   .mp-open-now { font-size: 11px; padding: 3px 9px; }
   .mp-food-badge { font-size: 10px; padding: 2px 8px; }
+}
+
+@media (max-width: 600px) {
+  .mp-mobile-sticky {
+    padding-top: 0;
+  }
+
+  .mp-page-header {
+    margin: 0 0 2px;
+  }
+
+  .mp-filter-section {
+    display: block;
+  }
+
+  .mp-category-tabs {
+    margin-top: 10px;
+    display: flex;
+    visibility: visible;
+    opacity: 1;
+    gap: 15px;
+    padding-bottom: 0;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+
+  .mp-tab {
+    font-size: 15px;
+    padding: 12px 20px;
+    color: #666;
+  }
+
+  .mp-filter-section {
+    margin-bottom: 124px;
+  }
+
+  .mp-section {
+    margin-top: 80px;
+  }
+
+  .mp-section-header {
+    margin-top: 46px;
+    display: flex;
+    visibility: visible;
+    opacity: 1;
+    position: relative;
+    z-index: 1;
+    padding: 4px 12px;
+    margin-bottom: 32px;
+    background: #fcfcfc;
+  }
+
+  .mp-section-header h2 {
+    display: block;
+    font-size: 18px;
+    color: #1a1a1a;
+  }
 }
 
 @media (max-width: 480px) {
@@ -538,20 +615,33 @@
 .mp-main-filters { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
 .mp-filter-pill { border: 1px solid #e0e0e0; padding: 10px 18px; border-radius: 10px; font-size: 14px; color: #444; white-space: nowrap; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; }
 .active-purple { background: var(--primary-purple); color: white !important; border-color: var(--primary-purple); }
-.mp-category-tabs { display: flex; gap: 15px; border-bottom: 1px solid #eee; margin-top: 10px; overflow-x: auto; scrollbar-width: none; }
-.mp-tab { background: none; border: none; padding: 12px 20px; font-size: 15px; font-weight: 800; color: #666; cursor: pointer; position: relative; white-space: nowrap; }
-.mp-tab.active { color: var(--primary-purple); }
+.mp-category-tabs { display: flex; gap: 15px; border-bottom: none; margin-top: 10px; overflow-x: auto; scrollbar-width: none; background: transparent; }
+.mp-tab { background: transparent; border: none; padding: 12px 20px; font-size: 15px; font-weight: 800; color: #666; cursor: pointer; position: relative; white-space: nowrap; }
+.mp-tab.active { color: var(--primary-purple); background: transparent; }
 .mp-tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: var(--primary-purple); }
+.mp-tab:focus-visible { outline: 2px solid var(--primary-purple); outline-offset: 4px; }
 .no-data { text-align: center; width: 100%; padding: 40px; color: #999; font-weight: 500; }
 
 /* MainPageContent unique card design (same as restaurant-list cards) */
 .mpc-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
-  gap: 30px;
-  padding: 0;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: clamp(16px, 2vw, 30px);
+  padding: 0 20px;
   max-width: 1100px;
-  margin: 0 auto 0 0;
+  margin: 0 auto;
+  align-items: stretch;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (min-width: 1024px) {
+  .mpc-card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: 30px;
+    padding: 0;
+    margin: 0 auto 0 0;
+  }
 }
 
 .mpc-restaurant-card {
@@ -562,6 +652,11 @@
   border: 1px solid #eef0f4;
   box-shadow: 0 6px 18px rgba(15, 23, 42, 0.10);
   cursor: pointer;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .mpc-restaurant-card:hover {
@@ -582,13 +677,15 @@
 
 .mpc-img-wrapper {
   position: relative;
+  width: 100%;
 }
 
 .mpc-img-wrapper img {
   width: 100%;
-  height: 220px;
+  height: clamp(180px, 24vw, 220px);
   border-radius: 15px;
   object-fit: cover;
+  max-width: 100%;
 }
 
 .mpc-offer-badge {
@@ -620,6 +717,9 @@
 
 .mpc-info-section {
   padding: 12px 5px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .mpc-title-row {
@@ -760,19 +860,29 @@
 }
 
 @media (max-width: 600px) {
+  .mp-main-container {
+    max-width: none;
+  }
   .mp-view-all {
-    display: none;
+    display: inline-flex;
+    font-size: 13px;
+    padding: 6px 10px;
   }
   .mpc-card-grid {
     grid-template-columns: 1fr;
-    gap: 22px;
-    padding: 0 10px;
+    gap: 18px;
+    padding: 0;
+    width: 100%;
+    max-width: none;
   }
   .mpc-restaurant-card {
     border: none;
     box-shadow: 0 6px 18px rgba(15, 23, 42, 0.10);
     transition: transform 0.16s ease, box-shadow 0.16s ease;
     -webkit-tap-highlight-color: transparent;
+    width: 100%;
+    max-width: 92vw;
+    margin: 0 auto;
   }
   .mpc-restaurant-card:active,
   .mpc-restaurant-card.mpc-press {
@@ -781,6 +891,12 @@
   }
   .mpc-explore-more {
     display: block;
+  }
+}
+
+@media (max-width: 420px) {
+  .mpc-card-grid {
+    padding: 0;
   }
 }
 

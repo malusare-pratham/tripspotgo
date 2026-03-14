@@ -32,6 +32,9 @@ import AdminDashboard from './AdminPortal/AdminDashboard';
 import PartnerLogin from './PartnerPortal/PartnerLogin';
 import PartnerDashboard from './PartnerPortal/PartnerDashboard';
 
+// --- नवीन Info कंपोनंट Import ---
+import Info from './AdminPortal/info';
+
 const AppLayout = () => {
   const location = useLocation();
   
@@ -49,7 +52,8 @@ const AppLayout = () => {
     location.pathname === '/admin-login' ||
     location.pathname === '/admin-dashboard' ||
     location.pathname === '/admin/dashboard' ||
-    location.pathname === '/partner-login' ||    
+    location.pathname === '/partner-login' ||   
+    location.pathname === '/admin/info' || 
     location.pathname === '/partner-dashboard' ||
     location.pathname === '/partner/dashboard';  
 
@@ -71,6 +75,9 @@ const AppLayout = () => {
           
           {/* नवीन RestaurantPagelist रूट */}
           <Route path="/restaurant-list" element={<RestaurantPagelist />} />
+
+          {/* --- नवीन Admin Info रूट अ‍ॅड केला --- */}
+          <Route path="/admin/info" element={<Info />} />
           
           <Route path="/transaction-history" element={<TransactionPage />} />
 

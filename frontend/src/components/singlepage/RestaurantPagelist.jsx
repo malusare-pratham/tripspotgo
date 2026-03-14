@@ -27,6 +27,7 @@ const RestaurantPagelist = () => {
   const navigate = useNavigate();
   const [partners, setPartners] = useState([]);
   const [partnerInfoById, setPartnerInfoById] = useState({});
+  const [reviewStatsById, setReviewStatsById] = useState({});
   const [activeFilters, setActiveFilters] = useState({
     rating45: false,
     petFriendly: false,
@@ -35,6 +36,7 @@ const RestaurantPagelist = () => {
     nonVegOnly: false
   });
   const [searchTerm, setSearchTerm] = useState('');
+  const reviewStatsRef = React.useRef({});
 
   useEffect(() => {
     const fetchPartners = async () => {
@@ -85,6 +87,43 @@ const RestaurantPagelist = () => {
     };
   }, [partners]);
 
+  useEffect(() => {
+    let isMounted = true;
+    const partnerIds = partners
+      .map((partner) => String(partner?._id || '').trim())
+      .filter(Boolean);
+
+    const missingIds = partnerIds.filter((id) => !reviewStatsRef.current[id]);
+    if (!missingIds.length) return;
+
+    const fetchReviews = async () => {
+      const entries = await Promise.all(
+        missingIds.map(async (partnerId) => {
+          try {
+            const res = await axios.get(`${API_BASE_URL}/api/restaurants/${partnerId}/reviews`);
+            const list = Array.isArray(res?.data?.data) ? res.data.data : [];
+            const avg = list.length
+              ? list.reduce((sum, item) => sum + Number(item?.rating || 0), 0) / list.length
+              : null;
+            return [partnerId, { avg, count: list.length }];
+          } catch (_error) {
+            return [partnerId, { avg: null, count: 0 }];
+          }
+        })
+      );
+
+      if (!isMounted) return;
+      const next = { ...reviewStatsRef.current, ...Object.fromEntries(entries) };
+      reviewStatsRef.current = next;
+      setReviewStatsById(next);
+    };
+
+    fetchReviews();
+    return () => {
+      isMounted = false;
+    };
+  }, [partners]);
+
   const restaurants = useMemo(
     () =>
       partners
@@ -92,6 +131,12 @@ const RestaurantPagelist = () => {
         .map((partner, index) => {
           const partnerId = String(partner?._id || '').trim();
           const info = partnerInfoById[partnerId];
+          const reviewStats = reviewStatsById[partnerId];
+          const ratingValue = Number(
+            reviewStats?.count
+              ? reviewStats.avg
+              : info?.rating ?? partner?.rating ?? 4.5
+          );
           const descriptionFromInfo = String(info?.description || '').trim();
           const descriptionFromPartner = String(partner?.description || '').trim();
           const addressFromPartner = String(partner?.address || '').trim();
@@ -100,7 +145,7 @@ const RestaurantPagelist = () => {
           return {
             id: partner?._id || index,
             name: partner?.restaurantName || 'Partner Restaurant',
-            rating: Number(partner?.rating || 4.5).toFixed(1),
+            rating: Number.isFinite(ratingValue) ? ratingValue.toFixed(1) : '0.0',
             foodType: String(partner?.foodType || 'Veg').trim().toLowerCase(),
             description:
               descriptionFromInfo ||
@@ -120,7 +165,7 @@ const RestaurantPagelist = () => {
               String(partner?.address || '').toLowerCase().includes('outdoor')
           };
         }),
-    [partners, partnerInfoById]
+    [partners, partnerInfoById, reviewStatsById]
   );
 
   const filteredRestaurants = useMemo(() => {

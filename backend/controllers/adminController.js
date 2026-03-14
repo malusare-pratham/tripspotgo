@@ -41,14 +41,15 @@ const toUploadedUrl = async (req, file) => {
     const filePath = file.path;
 
     if (isCloudinaryConfigured && filePath) {
+        const resolvedPath = path.resolve(filePath);
         try {
-            const uploaded = await cloudinary.uploader.upload(filePath, {
+            const uploaded = await cloudinary.uploader.upload(resolvedPath, {
                 folder: 'magicpoint',
                 resource_type: 'auto'
             });
             return uploaded?.secure_url || uploaded?.url || null;
         } finally {
-            await removeLocalFile(filePath);
+            await removeLocalFile(resolvedPath);
         }
     }
 
@@ -155,19 +156,30 @@ exports.partnerLogin = async (req, res) => {
 
 exports.addPartner = async (req, res) => {
     try {
-        const partnerData = req.body;
+        const partnerData = req.body || {};
         if (!partnerData.password) {
             return res.status(400).json({ message: 'Password is required for partner login' });
         }
 
         const salt = await bcrypt.genSalt(10);
-        partnerData.password = await bcrypt.hash(partnerData.password, salt);
+        const hashedPassword = await bcrypt.hash(partnerData.password, salt);
+
+        const allowedPayload = {
+            restaurantName: partnerData.restaurantName,
+            ownerName: partnerData.ownerName,
+            resMobile: partnerData.resMobile,
+            ownerMobile: partnerData.ownerMobile,
+            email: partnerData.email,
+            password: hashedPassword,
+            businessCategory: partnerData.businessCategory,
+            area: partnerData.area
+        };
 
         if (req.file) {
-            partnerData.resImage = await toUploadedUrl(req, req.file);
+            allowedPayload.resImage = await toUploadedUrl(req, req.file);
         }
 
-        const newPartner = new Partner(partnerData);
+        const newPartner = new Partner(allowedPayload);
         await newPartner.save();
         res.status(201).json({ message: 'Partner added successfully', newPartner });
     } catch (error) {
@@ -345,6 +357,19 @@ const toArray = (value) => {
     return [];
 };
 
+const toObject = (value) => {
+    if (value && typeof value === 'object' && !Array.isArray(value)) return value;
+    if (typeof value === 'string' && value.trim()) {
+        try {
+            const parsed = JSON.parse(value);
+            return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : null;
+        } catch (_error) {
+            return null;
+        }
+    }
+    return null;
+};
+
 const toStringOrUndefined = (value) => {
     if (value === undefined || value === null) return undefined;
     const str = String(value).trim();
@@ -382,6 +407,54 @@ const mapMenuItems = (items, uploadedByField) =>
         return item;
     });
 
+const mapMenuSections = (sections, uploadedByField) =>
+    toArray(sections).map((entry) => {
+        const section = entry && typeof entry === 'object' ? { ...entry } : {};
+        const name = String(section.name || '').trim();
+        return {
+            name,
+            items: mapMenuItems(section.items || [], uploadedByField)
+        };
+    }).filter((section) => section.name.length);
+
+const mapLegacyMenuToSections = (menu) => {
+    const legacyMenu = toObject(menu);
+    if (!legacyMenu) return [];
+
+    const buckets = [
+        { key: 'vegMenu', name: 'Veg Menu' },
+        { key: 'nonVegMenu', name: 'Non-Veg Menu' },
+        { key: 'cafeMenu', name: 'Cafe Menu' }
+    ];
+
+    const normalizeItem = (item) => {
+        const entry = item && typeof item === 'object' ? item : {};
+        const name = String(entry.name || entry.title || '').trim();
+        const description = String(entry.description || entry.desc || '').trim();
+        const priceRaw = entry.price ?? entry.amount ?? entry.rate;
+        const price = Number(priceRaw);
+        const image = String(entry.image || entry.img || entry.photo || '').trim();
+
+        if (!name) return null;
+        return {
+            name,
+            description,
+            price: Number.isFinite(price) ? price : 0,
+            image
+        };
+    };
+
+    return buckets.map((bucket) => {
+        const items = toArray(legacyMenu[bucket.key])
+            .map(normalizeItem)
+            .filter(Boolean);
+        return {
+            name: bucket.name,
+            items
+        };
+    }).filter((section) => section.items.length);
+};
+
 exports.getPartnerInfo = async (req, res) => {
     try {
         const { id } = req.params;
@@ -389,6 +462,16 @@ exports.getPartnerInfo = async (req, res) => {
 
         if (!info) {
             return res.status(200).json({ success: true, data: null });
+        }
+
+        if ((!Array.isArray(info.menuSections) || info.menuSections.length === 0) && info.menu) {
+            const legacySections = mapLegacyMenuToSections(info.menu);
+            const updated = await PartnersInfo.findOneAndUpdate(
+                { partnerId: id },
+                { $set: { menuSections: legacySections }, $unset: { menu: 1 } },
+                { new: true }
+            ).lean();
+            return res.status(200).json({ success: true, data: updated || info });
         }
 
         return res.status(200).json({ success: true, data: info });
@@ -403,14 +486,25 @@ exports.upsertPartnerInfo = async (req, res) => {
         const uploadedByField = await resolveUploadedFiles(req);
         const uploadedPhotos = uploadedByField.photoFiles || [];
         const uploadedVideos = uploadedByField.videoFiles || [];
+        const uploadedInterior = uploadedByField.interiorFiles || [];
+        const uploadedFood = uploadedByField.foodFiles || [];
+        const uploadedMenuImages = uploadedByField.menuFiles || [];
+        const uploadedOtherImages = uploadedByField.otherFiles || [];
         const hasPhotosPayload = Object.prototype.hasOwnProperty.call(req.body, 'photos');
         const hasVideosPayload = Object.prototype.hasOwnProperty.call(req.body, 'videos');
+        const hasInteriorPayload = Object.prototype.hasOwnProperty.call(req.body, 'interiorImages');
+        const hasFoodPayload = Object.prototype.hasOwnProperty.call(req.body, 'foodImages');
+        const hasMenuImagesPayload = Object.prototype.hasOwnProperty.call(req.body, 'menuImages');
+        const hasOtherImagesPayload = Object.prototype.hasOwnProperty.call(req.body, 'otherImages');
         const existingPhotos = hasPhotosPayload ? toArray(req.body.photos) : [];
         const existingVideos = hasVideosPayload ? toArray(req.body.videos) : [];
-        const hasMenuPayload =
-            Object.prototype.hasOwnProperty.call(req.body, 'vegMenu') ||
-            Object.prototype.hasOwnProperty.call(req.body, 'nonVegMenu') ||
-            Object.prototype.hasOwnProperty.call(req.body, 'cafeMenu');
+        const existingInterior = hasInteriorPayload ? toArray(req.body.interiorImages) : [];
+        const existingFood = hasFoodPayload ? toArray(req.body.foodImages) : [];
+        const existingMenuImages = hasMenuImagesPayload ? toArray(req.body.menuImages) : [];
+        const existingOtherImages = hasOtherImagesPayload ? toArray(req.body.otherImages) : [];
+        const hasMenuSectionsPayload = Object.prototype.hasOwnProperty.call(req.body, 'menuSections');
+        const hasLegacyMenuPayload = Object.prototype.hasOwnProperty.call(req.body, 'menu');
+        const legacyMenuSections = hasLegacyMenuPayload ? mapLegacyMenuToSections(req.body.menu) : [];
 
         const payload = {
             logo: (uploadedByField.logoFile && uploadedByField.logoFile[0]) || toStringOrUndefined(req.body.logo),
@@ -426,13 +520,13 @@ exports.upsertPartnerInfo = async (req, res) => {
             closeTime: toStringOrUndefined(req.body.closeTime),
             callNumber: toStringOrUndefined(req.body.callNumber),
             directionLink: toStringOrUndefined(req.body.directionLink),
-            menu: hasMenuPayload
-                ? {
-                    vegMenu: mapMenuItems(req.body.vegMenu, uploadedByField),
-                    nonVegMenu: mapMenuItems(req.body.nonVegMenu, uploadedByField),
-                    cafeMenu: mapMenuItems(req.body.cafeMenu, uploadedByField)
-                }
-                : undefined,
+            menuSections: hasMenuSectionsPayload
+                ? mapMenuSections(req.body.menuSections, uploadedByField)
+                : (legacyMenuSections.length ? legacyMenuSections : undefined),
+            interiorImages: (hasInteriorPayload || uploadedInterior.length) ? [...existingInterior, ...uploadedInterior] : undefined,
+            foodImages: (hasFoodPayload || uploadedFood.length) ? [...existingFood, ...uploadedFood] : undefined,
+            menuImages: (hasMenuImagesPayload || uploadedMenuImages.length) ? [...existingMenuImages, ...uploadedMenuImages] : undefined,
+            otherImages: (hasOtherImagesPayload || uploadedOtherImages.length) ? [...existingOtherImages, ...uploadedOtherImages] : undefined,
             photos: (hasPhotosPayload || uploadedPhotos.length) ? [...existingPhotos, ...uploadedPhotos] : undefined,
             videos: (hasVideosPayload || uploadedVideos.length) ? [...existingVideos, ...uploadedVideos] : undefined
         };
@@ -443,25 +537,17 @@ exports.upsertPartnerInfo = async (req, res) => {
 
         const doc = await PartnersInfo.findOneAndUpdate(
             { partnerId: id },
-            { $set: cleanedPayload, $setOnInsert: { partnerId: id } },
+            {
+                $set: cleanedPayload,
+                $setOnInsert: { partnerId: id },
+                $unset: { menu: 1 }
+            },
             { new: true, upsert: true, runValidators: true }
         );
 
         const partnerSyncPayload = {};
         if (Object.prototype.hasOwnProperty.call(cleanedPayload, 'restaurantName')) {
             partnerSyncPayload.restaurantName = cleanedPayload.restaurantName;
-        }
-        if (Object.prototype.hasOwnProperty.call(cleanedPayload, 'foodType')) {
-            partnerSyncPayload.foodType = cleanedPayload.foodType;
-        }
-        if (Object.prototype.hasOwnProperty.call(cleanedPayload, 'openTime')) {
-            partnerSyncPayload.openTime = cleanedPayload.openTime;
-        }
-        if (Object.prototype.hasOwnProperty.call(cleanedPayload, 'closeTime')) {
-            partnerSyncPayload.closeTime = cleanedPayload.closeTime;
-        }
-        if (Object.prototype.hasOwnProperty.call(cleanedPayload, 'directionLink')) {
-            partnerSyncPayload.locationLink = cleanedPayload.directionLink;
         }
 
         if (Object.keys(partnerSyncPayload).length > 0) {
@@ -503,6 +589,26 @@ exports.getAdminDashboardStats = async (req, res) => {
             totalTransactions: 0
         };
 
+        const userAgg = await Bill.aggregate([
+            {
+                $group: {
+                    _id: '$userId',
+                    totalTransactions: { $sum: 1 },
+                    totalSavings: { $sum: { $ifNull: ['$discountAmount', 0] } },
+                    totalSpent: { $sum: { $ifNull: ['$billAmount', 0] } }
+                }
+            }
+        ]);
+
+        const userStats = userAgg.reduce((acc, item) => {
+            acc[String(item._id)] = {
+                totalTransactions: item.totalTransactions || 0,
+                totalSavings: item.totalSavings || 0,
+                totalSpent: item.totalSpent || 0
+            };
+            return acc;
+        }, {});
+
         res.status(200).json({
             stats: {
                 loggedInUsers: users.length,
@@ -511,14 +617,20 @@ exports.getAdminDashboardStats = async (req, res) => {
                 netRevenue: totals.totalRevenue - totals.totalDiscount,
                 totalTransactions: totals.totalTransactions
             },
-            users: users.map((user) => ({
-                id: user._id,
-                name: user.name,
-                email: user.email || '-',
-                mobile: user.mobileNumber,
-                membershipPlan: user.membershipPlan,
-                lastLoginAt: user.lastLoginAt || user.membershipActivatedAt || user.createdAt
-            }))
+            userStats,
+            users: users.map((user) => {
+                const stat = userStats[String(user._id)] || {};
+                return {
+                    id: user._id,
+                    name: user.name,
+                    email: user.email || '-',
+                    mobile: user.mobileNumber,
+                    membershipPlan: user.membershipPlan,
+                    lastLoginAt: user.lastLoginAt || user.membershipActivatedAt || user.createdAt,
+                    transactions: stat.totalTransactions || 0,
+                    totalSaved: stat.totalSavings || 0
+                };
+            })
         });
     } catch (error) {
         res.status(500).json({ message: 'Error fetching admin dashboard stats', error: error.message });

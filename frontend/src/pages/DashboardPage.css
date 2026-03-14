@@ -2,6 +2,7 @@
     width: 100%;
     font-family: 'Segoe UI', Arial, sans-serif;
     background-color: #ffffff;
+    --nav-height: 65px;
 }
 
 .pg-root-combined .magic-navbar {
@@ -30,6 +31,8 @@
     justify-content: space-between;
     align-items: center;
     color: white;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .mg-logo { font-size: 24px; font-weight: 900; margin: 0; letter-spacing: -1px; }
@@ -127,6 +130,7 @@
     align-items: baseline;
     justify-content: center;
     gap: 6px;
+    flex-wrap: wrap;
 }
 .mg-plan-text { font-size: 32px; }
 .mg-divider {
@@ -179,6 +183,7 @@
     background: #ffffff; width: 100%; max-width: 580px; display: flex; 
     align-items: center; padding: 4px 8px; border-radius: 50px; 
     box-shadow: 0 8px 20px rgba(0,0,0,0.3); 
+    gap: 6px;
 }
 .mg-search-icon { color: #999; margin-left: 8px; }
 .mg-search-bar input { flex: 1; border: none; outline: none; padding: 8px; font-size: 14px; color: #333; }
@@ -188,6 +193,7 @@
 }
 
 .mg-hero-stats { display: flex; justify-content: center; gap: 15px; font-size: 10px; opacity: 0.8; }
+.mg-hero-stats span { display: inline-flex; align-items: center; gap: 6px; }
 
 .mg-hero-curve {
     position: absolute; bottom: -1px; left: 0; width: 100%; line-height: 0; z-index: 5;
@@ -206,6 +212,10 @@
       gap: 12px;
       flex-wrap: wrap;
       justify-content: center;
+  }
+  .mg-nav-right {
+      flex-wrap: wrap;
+      justify-content: flex-end;
   }
 }
 
@@ -228,6 +238,9 @@
   .mg-hero-stats {
       flex-wrap: wrap;
       gap: 10px;
+  }
+  .mg-search-bar {
+      border-radius: 50px;
   }
 }
 
@@ -283,10 +296,13 @@
       width: calc(100% - 64px);
       max-width: calc(100% - 64px);
       padding: 5px 8px;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
   }
   .mg-search-bar input {
       padding: 6px;
       font-size: 13px;
+      min-width: 0;
   }
   .mg-search-btn {
       padding: 6px 14px;
@@ -333,13 +349,28 @@
       width: calc(100% - 48px);
       max-width: calc(100% - 48px);
       padding: 4px 7px;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
   }
   .mg-search-bar input {
       padding: 5px;
       font-size: 12px;
+      min-width: 0;
   }
   .mg-search-btn {
       padding: 5px 12px;
       font-size: 10px;
+      width: auto;
+  }
+}
+
+@media (max-width: 360px) {
+  .mg-card-body {
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+  }
+  .mg-divider {
+      display: none;
   }
 }

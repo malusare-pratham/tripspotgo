@@ -10,6 +10,14 @@ const menuItemSchema = new mongoose.Schema(
     { _id: false }
 );
 
+const menuSectionSchema = new mongoose.Schema(
+    {
+        name: { type: String, required: true, trim: true },
+        items: { type: [menuItemSchema], default: [] }
+    },
+    { _id: false }
+);
+
 const partnersInfoSchema = new mongoose.Schema(
     {
         partnerId: {
@@ -32,11 +40,11 @@ const partnersInfoSchema = new mongoose.Schema(
         closeTime: { type: String, trim: true },
         callNumber: { type: String, trim: true },
         directionLink: { type: String, trim: true },
-        menu: {
-            vegMenu: { type: [menuItemSchema], default: [] },
-            nonVegMenu: { type: [menuItemSchema], default: [] },
-            cafeMenu: { type: [menuItemSchema], default: [] }
-        },
+        menuSections: { type: [menuSectionSchema], default: [] },
+        interiorImages: { type: [String], default: [] },
+        foodImages: { type: [String], default: [] },
+        menuImages: { type: [String], default: [] },
+        otherImages: { type: [String], default: [] },
         photos: { type: [String], default: [] },
         videos: { type: [String], default: [] }
     },

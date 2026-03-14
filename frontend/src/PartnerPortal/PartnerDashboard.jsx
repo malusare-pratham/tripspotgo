@@ -21,11 +21,11 @@ const defaultInfoForm = {
     closeTime: '',
     callNumber: '',
     directionLink: '',
-    menu: {
-        vegMenu: [],
-        nonVegMenu: [],
-        cafeMenu: []
-    },
+    menuSections: [],
+    interiorImages: [],
+    foodImages: [],
+    menuImages: [],
+    otherImages: [],
     photos: [],
     videos: []
 };
@@ -42,8 +42,10 @@ const PartnerDashboard = () => {
     const [isEditingInfo, setIsEditingInfo] = useState(false);
     const [infoForm, setInfoForm] = useState(defaultInfoForm);
     const [logoFile, setLogoFile] = useState(null);
-    const [photoFiles, setPhotoFiles] = useState([]);
-    const [videoFiles, setVideoFiles] = useState([]);
+    const [interiorFiles, setInteriorFiles] = useState([]);
+    const [foodFiles, setFoodFiles] = useState([]);
+    const [menuFiles, setMenuFiles] = useState([]);
+    const [otherFiles, setOtherFiles] = useState([]);
     const [savingInfo, setSavingInfo] = useState(false);
     const [stats, setStats] = useState({ revenue: 0, discounts: 0, customers: 0, avgBill: 0 });
     const [transactions, setTransactions] = useState([]);
@@ -122,11 +124,16 @@ const PartnerDashboard = () => {
                 closeTime: info.closeTime || '',
                 callNumber: info.callNumber || '',
                 directionLink: info.directionLink || '',
-                menu: {
-                    vegMenu: Array.isArray(info?.menu?.vegMenu) ? info.menu.vegMenu.map((x) => ({ ...x, file: null })) : [],
-                    nonVegMenu: Array.isArray(info?.menu?.nonVegMenu) ? info.menu.nonVegMenu.map((x) => ({ ...x, file: null })) : [],
-                    cafeMenu: Array.isArray(info?.menu?.cafeMenu) ? info.menu.cafeMenu.map((x) => ({ ...x, file: null })) : []
-                },
+                menuSections: Array.isArray(info.menuSections) && info.menuSections.length
+                    ? info.menuSections.map((section) => ({
+                        name: section?.name || '',
+                        items: Array.isArray(section?.items) ? section.items.map((x) => ({ ...x, file: null })) : []
+                    }))
+                    : [],
+                interiorImages: Array.isArray(info.interiorImages) ? info.interiorImages : [],
+                foodImages: Array.isArray(info.foodImages) ? info.foodImages : [],
+                menuImages: Array.isArray(info.menuImages) ? info.menuImages : [],
+                otherImages: Array.isArray(info.otherImages) ? info.otherImages : [],
                 photos: Array.isArray(info.photos) ? info.photos : [],
                 videos: Array.isArray(info.videos) ? info.videos : []
             });
@@ -205,34 +212,56 @@ const PartnerDashboard = () => {
         setInfoForm((prev) => ({ ...prev, [key]: value }));
     };
 
-    const setMenuField = (section, idx, key, value) => {
+    const setMenuSectionName = (sectionIdx, value) => {
         setInfoForm((prev) => {
-            const next = { ...prev, menu: { ...prev.menu } };
-            const items = [...(next.menu[section] || [])];
-            items[idx] = { ...items[idx], [key]: value };
-            next.menu[section] = items;
-            return next;
+            const sections = [...(prev.menuSections || [])];
+            const existing = sections[sectionIdx] || { name: '', items: [] };
+            sections[sectionIdx] = { ...existing, name: value };
+            return { ...prev, menuSections: sections };
         });
     };
 
-    const addMenuItem = (section) => {
+    const addMenuSection = () => {
         setInfoForm((prev) => ({
             ...prev,
-            menu: {
-                ...prev.menu,
-                [section]: [...(prev.menu[section] || []), emptyMenuItem()]
-            }
+            menuSections: [...(prev.menuSections || []), { name: '', items: [emptyMenuItem()] }]
         }));
     };
 
-    const removeMenuItem = (section, idx) => {
+    const removeMenuSection = (sectionIdx) => {
         setInfoForm((prev) => ({
             ...prev,
-            menu: {
-                ...prev.menu,
-                [section]: (prev.menu[section] || []).filter((_, i) => i !== idx)
-            }
+            menuSections: (prev.menuSections || []).filter((_, idx) => idx !== sectionIdx)
         }));
+    };
+
+    const setMenuItemField = (sectionIdx, itemIdx, key, value) => {
+        setInfoForm((prev) => {
+            const sections = [...(prev.menuSections || [])];
+            const section = sections[sectionIdx] || { name: '', items: [] };
+            const items = [...(section.items || [])];
+            items[itemIdx] = { ...items[itemIdx], [key]: value };
+            sections[sectionIdx] = { ...section, items };
+            return { ...prev, menuSections: sections };
+        });
+    };
+
+    const addMenuItem = (sectionIdx) => {
+        setInfoForm((prev) => {
+            const sections = [...(prev.menuSections || [])];
+            const section = sections[sectionIdx] || { name: '', items: [] };
+            sections[sectionIdx] = { ...section, items: [...(section.items || []), emptyMenuItem()] };
+            return { ...prev, menuSections: sections };
+        });
+    };
+
+    const removeMenuItem = (sectionIdx, itemIdx) => {
+        setInfoForm((prev) => {
+            const sections = [...(prev.menuSections || [])];
+            const section = sections[sectionIdx] || { name: '', items: [] };
+            sections[sectionIdx] = { ...section, items: (section.items || []).filter((_, idx) => idx !== itemIdx) };
+            return { ...prev, menuSections: sections };
+        });
     };
 
     const handleSavePartnersInfo = async () => {
@@ -275,15 +304,41 @@ const PartnerDashboard = () => {
                     return payload;
                 });
 
-            formData.append('vegMenu', JSON.stringify(encodeMenu(infoForm.menu.vegMenu, 'veg')));
-            formData.append('nonVegMenu', JSON.stringify(encodeMenu(infoForm.menu.nonVegMenu, 'nonVeg')));
-            formData.append('cafeMenu', JSON.stringify(encodeMenu(infoForm.menu.cafeMenu, 'cafe')));
+            const encodeMenuSections = () =>
+                (infoForm.menuSections || []).map((section, sIdx) => {
+                    const sectionName = String(section?.name || '').trim();
+                    const items = (section.items || [])
+                        .filter((item) => String(item?.name || '').trim())
+                        .map((item, idx) => {
+                            const payload = {
+                                name: item.name || '',
+                                description: item.description || '',
+                                price: Number(item.price) || 0,
+                                image: item.image || ''
+                            };
+                            if (item.file) {
+                                const key = `menuSection_${sIdx}_item_${idx}`;
+                                formData.append(key, item.file);
+                                payload.image = `upload:${key}`;
+                            }
+                            return payload;
+                        });
+                    return { name: sectionName, items };
+                }).filter((section) => section.name && section.items.length);
 
+            formData.append('menuSections', JSON.stringify(encodeMenuSections()));
+
+            formData.append('interiorImages', JSON.stringify(infoForm.interiorImages || []));
+            formData.append('foodImages', JSON.stringify(infoForm.foodImages || []));
+            formData.append('menuImages', JSON.stringify(infoForm.menuImages || []));
+            formData.append('otherImages', JSON.stringify(infoForm.otherImages || []));
             formData.append('photos', JSON.stringify(infoForm.photos || []));
             formData.append('videos', JSON.stringify(infoForm.videos || []));
 
-            photoFiles.forEach((file) => formData.append('photoFiles', file));
-            videoFiles.forEach((file) => formData.append('videoFiles', file));
+            interiorFiles.forEach((file) => formData.append('interiorFiles', file));
+            foodFiles.forEach((file) => formData.append('foodFiles', file));
+            menuFiles.forEach((file) => formData.append('menuFiles', file));
+            otherFiles.forEach((file) => formData.append('otherFiles', file));
 
             await axios.put(`${API_BASE_URL}/api/admin/partner-info/${partnerInfo.id}`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
@@ -292,8 +347,10 @@ const PartnerDashboard = () => {
             alert('PartnersInfo saved');
             await fetchPartnerInfoForm(partnerInfo.id, partnerInfo);
             setLogoFile(null);
-            setPhotoFiles([]);
-            setVideoFiles([]);
+            setInteriorFiles([]);
+            setFoodFiles([]);
+            setMenuFiles([]);
+            setOtherFiles([]);
             setIsEditingInfo(false);
         } catch (error) {
             alert(error?.response?.data?.message || 'Error saving PartnersInfo');
@@ -474,7 +531,6 @@ const PartnerDashboard = () => {
                                             <option value="Both">Both</option>
                                         </select>
                                     </div>
-                                    <div><label>Rating</label><input type="number" step="0.1" min="0" max="5" className="pi-input" value={infoForm.rating} onChange={(e) => setField('rating', e.target.value)} /></div>
                                     <div><label>Location</label><input className="pi-input" value={infoForm.location} onChange={(e) => setField('location', e.target.value)} /></div>
                                     <div><label>Open Time</label><input className="pi-input" value={infoForm.openTime} onChange={(e) => setField('openTime', e.target.value)} /></div>
                                     <div><label>Close Time</label><input className="pi-input" value={infoForm.closeTime} onChange={(e) => setField('closeTime', e.target.value)} /></div>
@@ -491,30 +547,50 @@ const PartnerDashboard = () => {
                                         <input type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} />
                                     </div>
                                     <div>
-                                        <label>Photos Upload</label>
-                                        <input type="file" accept="image/*" multiple onChange={(e) => setPhotoFiles(Array.from(e.target.files || []))} />
+                                        <label>Interior Images</label>
+                                        <input type="file" accept="image/*" multiple onChange={(e) => setInteriorFiles(Array.from(e.target.files || []))} />
                                     </div>
                                     <div>
-                                        <label>Videos Upload</label>
-                                        <input type="file" accept="video/*" multiple onChange={(e) => setVideoFiles(Array.from(e.target.files || []))} />
+                                        <label>Food Images</label>
+                                        <input type="file" accept="image/*" multiple onChange={(e) => setFoodFiles(Array.from(e.target.files || []))} />
+                                    </div>
+                                    <div>
+                                        <label>Menu Images</label>
+                                        <input type="file" accept="image/*" multiple onChange={(e) => setMenuFiles(Array.from(e.target.files || []))} />
+                                    </div>
+                                    <div>
+                                        <label>Other Images</label>
+                                        <input type="file" accept="image/*" multiple onChange={(e) => setOtherFiles(Array.from(e.target.files || []))} />
                                     </div>
                                 </div>
 
                                 <div className="menu-editor">
-                                    {['vegMenu', 'nonVegMenu', 'cafeMenu'].map((section) => (
-                                        <div key={section} className="menu-section">
+                                    <div className="menu-head">
+                                        <h4>Menu Sections</h4>
+                                        <button type="button" className="mini-btn" onClick={addMenuSection}>+ Add Section</button>
+                                    </div>
+                                    {(infoForm.menuSections || []).map((section, sIdx) => (
+                                        <div key={`section-${sIdx}`} className="menu-section">
                                             <div className="menu-head">
-                                                <h4>{section === 'vegMenu' ? 'Veg Menu' : section === 'nonVegMenu' ? 'Non-Veg Menu' : 'Cafe Menu'}</h4>
-                                                <button type="button" className="mini-btn" onClick={() => addMenuItem(section)}>+ Add Item</button>
+                                                <input
+                                                    className="pi-input menu-section-name"
+                                                    placeholder="Section name"
+                                                    value={section.name || ''}
+                                                    onChange={(e) => setMenuSectionName(sIdx, e.target.value)}
+                                                />
+                                                <div className="menu-section-actions">
+                                                    <button type="button" className="mini-btn" onClick={() => addMenuItem(sIdx)}>+ Add Item</button>
+                                                    <button type="button" className="mini-btn danger" onClick={() => removeMenuSection(sIdx)}>Remove Section</button>
+                                                </div>
                                             </div>
-                                            {(infoForm.menu[section] || []).map((item, idx) => (
-                                                <div key={`${section}-${idx}`} className="menu-item-row">
-                                                    <input className="pi-input" placeholder="Item name" value={item.name || ''} onChange={(e) => setMenuField(section, idx, 'name', e.target.value)} />
-                                                    <input className="pi-input" placeholder="Description" value={item.description || ''} onChange={(e) => setMenuField(section, idx, 'description', e.target.value)} />
-                                                    <input type="number" className="pi-input" placeholder="Rate" value={item.price ?? ''} onChange={(e) => setMenuField(section, idx, 'price', e.target.value)} />
-                                                    <input className="pi-input" placeholder="Image URL (optional)" value={item.image || ''} onChange={(e) => setMenuField(section, idx, 'image', e.target.value)} />
-                                                    <input type="file" accept="image/*" onChange={(e) => setMenuField(section, idx, 'file', e.target.files?.[0] || null)} />
-                                                    <button type="button" className="mini-btn danger" onClick={() => removeMenuItem(section, idx)}>Remove</button>
+                                            {(section.items || []).map((item, idx) => (
+                                                <div key={`section-${sIdx}-item-${idx}`} className="menu-item-row">
+                                                    <input className="pi-input" placeholder="Item name" value={item.name || ''} onChange={(e) => setMenuItemField(sIdx, idx, 'name', e.target.value)} />
+                                                    <input className="pi-input" placeholder="Description" value={item.description || ''} onChange={(e) => setMenuItemField(sIdx, idx, 'description', e.target.value)} />
+                                                    <input type="number" className="pi-input" placeholder="Rate" value={item.price ?? ''} onChange={(e) => setMenuItemField(sIdx, idx, 'price', e.target.value)} />
+                                                    <input className="pi-input" placeholder="Image URL (optional)" value={item.image || ''} onChange={(e) => setMenuItemField(sIdx, idx, 'image', e.target.value)} />
+                                                    <input type="file" accept="image/*" onChange={(e) => setMenuItemField(sIdx, idx, 'file', e.target.files?.[0] || null)} />
+                                                    <button type="button" className="mini-btn danger" onClick={() => removeMenuItem(sIdx, idx)}>Remove</button>
                                                 </div>
                                             ))}
                                         </div>

@@ -5,10 +5,7 @@ const partnerSchema = new mongoose.Schema({
     ownerName: { type: String, required: true },
     resMobile: { type: String, required: true },
     ownerMobile: { type: String, required: true },
-    foodType: { type: String, enum: ['Veg', 'Non-Veg', 'Both'], required: true },
     resImage: { type: String },
-    openTime: { type: String, required: true },
-    closeTime: { type: String, required: true },
     email: { type: String, required: true, unique: true },
 
     password: { type: String, required: true },
@@ -19,9 +16,6 @@ const partnerSchema = new mongoose.Schema({
         default: 'Food & Dining'
     },
 
-    address: { type: String, required: true },
-    locationLink: { type: String },
-    pincode: { type: String, required: true },
     area: { type: String, required: true },
     status: { type: String, default: 'Pending', enum: ['Pending', 'Active', 'Blocked'] }
 }, { timestamps: true });

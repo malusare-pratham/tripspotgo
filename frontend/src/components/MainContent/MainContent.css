@@ -47,6 +47,7 @@
 .mc-tab-btn.active {
   color: #4f46e5;
   border-bottom-color: #4f46e5;
+  background: transparent;
 }
 
 .mc-category-section {
@@ -216,14 +217,16 @@
 
   .mc-sliding-row {
     gap: 14px;
+    padding: 10px 12px 8px;
   }
 
   .mc-deal-card {
-    flex: 0 0 260px;
-    height: 186px;
+    flex: 0 0 min(86vw, 320px);
+    max-width: 86vw;
+    height: auto;
   }
 
   .mc-image-container {
-    height: 118px;
+    height: clamp(110px, 32vw, 140px);
   }
 }
