@@ -78,10 +78,11 @@ app.use('/api/memberships', membershipRoutes);
 app.use('/api/restaurants', restaurantRoutes);
 
 app.get('/', (_req, res) => {
-    res.status(200).json({ success: true, message: 'MagicPoint API is running' });
+    res.status(200).json({ success: true, message: 'tripspotgo API is running' });
 });
 
 app.use(notFound);
 app.use(errorHandler);
 
 module.exports = app;
+
