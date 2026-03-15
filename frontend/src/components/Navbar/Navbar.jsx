@@ -44,7 +44,7 @@ function Navbar({ isAuthenticated = false, onLogout, showMobileMenu = true, fixe
       <div className="nav-container">
         <div className="nav-left">
           <h2 className="logo" onClick={handleLogoClick} style={{ cursor: "pointer" }}>
-            TripSpot
+            tripspot
           </h2>
           <span className="tagline">Local Savings SuperApp</span>
         </div>
