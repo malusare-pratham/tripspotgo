@@ -1,7 +1,8 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://magicpoint.onrender.com/api/$1" },
-    { "source": "/uploads/(.*)", "destination": "https://magicpoint.onrender.com/uploads/$1" },
+    { "source": "/api/(.*)", "destination": "https://tripspotgo.onrender.com/api/$1" },
+    { "source": "/uploads/(.*)", "destination": "https://tripspotgo.onrender.com/uploads/$1" },
     { "source": "/(.*)", "destination": "/" }
   ]
 }
+
