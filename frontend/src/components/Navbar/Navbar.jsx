@@ -54,9 +54,9 @@ function Navbar({ isAuthenticated = false, onLogout, showMobileMenu = true, fixe
             {isAuthenticated ? (
               <>
                 <ul className="nav-links">
-                  <li>About us</li>
-                  <li>Contact us</li>
-                  <li>Blog</li>
+                  <li onClick={() => navigate('/about-us')} style={{ cursor: "pointer" }}>About us</li>
+                  <li onClick={() => navigate('/contact-us')} style={{ cursor: "pointer" }}>Contact us</li>
+                  <li onClick={() => navigate('/blog')} style={{ cursor: "pointer" }}>Blog</li>
                   {showTransactionMenu && (
                     <li onClick={openTransactionHistory} style={{ cursor: "pointer" }}>
                       Payment History
@@ -96,9 +96,9 @@ function Navbar({ isAuthenticated = false, onLogout, showMobileMenu = true, fixe
 
                 {showMobileMenu && menuOpen && (
                   <div className="premium-dropdown">
-                    <button type="button">About us</button>
-                    <button type="button">Contact us</button>
-                    <button type="button">Blog</button>
+                    <button type="button" onClick={() => { navigate('/about-us'); setMenuOpen(false); }}>About us</button>
+                    <button type="button" onClick={() => { navigate('/contact-us'); setMenuOpen(false); }}>Contact us</button>
+                    <button type="button" onClick={() => { navigate('/blog'); setMenuOpen(false); }}>Blog</button>
                     {showTransactionMenu && (
                       <button type="button" onClick={openTransactionHistory}>
                         Payment History
@@ -113,9 +113,9 @@ function Navbar({ isAuthenticated = false, onLogout, showMobileMenu = true, fixe
             ) : (
               <>
                 <ul className="nav-links">
-                  <li>About us</li>
-                  <li>Contact us</li>
-                  <li>Blog</li>
+                  <li onClick={() => navigate('/about-us')} style={{ cursor: "pointer" }}>About us</li>
+                  <li onClick={() => navigate('/contact-us')} style={{ cursor: "pointer" }}>Contact us</li>
+                  <li onClick={() => navigate('/blog')} style={{ cursor: "pointer" }}>Blog</li>
                   {showTransactionMenu && (
                     <li onClick={openTransactionHistory} style={{ cursor: "pointer" }}>
                       Payment History
@@ -142,9 +142,9 @@ function Navbar({ isAuthenticated = false, onLogout, showMobileMenu = true, fixe
                 )}
                 {showMobileMenu && menuOpen && (
                   <div className="premium-dropdown">
-                    <button type="button">About us</button>
-                    <button type="button">Contact us</button>
-                    <button type="button">Blog</button>
+                    <button type="button" onClick={() => { navigate('/about-us'); setMenuOpen(false); }}>About us</button>
+                    <button type="button" onClick={() => { navigate('/contact-us'); setMenuOpen(false); }}>Contact us</button>
+                    <button type="button" onClick={() => { navigate('/blog'); setMenuOpen(false); }}>Blog</button>
                     <button type="button" onClick={handleAuthAction}>
                       Sign In/Up
                     </button>

@@ -51,7 +51,7 @@
 
 .top-partner-meta {
     display: grid;
-    gap: 4px;
+    gap: 2px;
 }
 
 .top-partner-head {
@@ -538,6 +538,8 @@
     border-radius: 8px;
     padding: 6px 10px;
     background: #fff;
+    height: 38px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
 }
 
 .tx-search input {
@@ -545,6 +547,34 @@
     outline: none;
     font-size: 13px;
     min-width: 180px;
+    height: 100%;
+    background: transparent;
+}
+
+.tx-search:focus-within {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+}
+
+.tx-filters {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tx-date input {
+    border: 1px solid #dbe3ea;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 13px;
+    background: #fff;
+    height: 38px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.tx-date input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
 }
 
 .transaction-item {
@@ -775,6 +805,18 @@
 .recent-transactions-list {
     display: grid;
     gap: 12px;
+    max-height: 420px;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.recent-transactions-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.recent-transactions-list::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 999px;
 }
 
 .recent-item {
@@ -876,6 +918,83 @@
     cursor: not-allowed;
 }
 
+.review-list {
+    display: grid;
+    gap: 12px;
+}
+
+.review-item {
+    padding: 14px;
+}
+
+.review-row {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.2fr) minmax(180px, 1fr) minmax(260px, 2fr) minmax(140px, auto);
+    align-items: center;
+    gap: 12px;
+}
+
+.review-inline {
+    display: grid;
+    gap: 4px;
+}
+
+.review-inline span {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.review-inline strong {
+    color: #0f172a;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.review-text strong {
+    font-weight: 600;
+    color: #475569;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.review-rating-pill {
+    border: 1px solid #fcd34d;
+    background: #fffbeb;
+    color: #b45309;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.review-actions-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.review-delete-btn {
+    border: 1px solid #fecaca;
+    background: #fff1f2;
+    color: #b91c1c;
+    border-radius: 10px;
+    padding: 6px 10px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+@media (max-width: 900px) {
+    .review-row {
+        grid-template-columns: repeat(2, minmax(160px, 1fr));
+    }
+    .review-actions-inline {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+    }
+}
+
 .recent-heading {
     margin: 0;
     font-size: 24px;
@@ -958,8 +1077,10 @@ input:checked + .slider:before { transform: translateX(26px); }
     }
 
     .stats-grid { grid-template-columns: 1fr; }
+    .tx-filters { width: 100%; flex-direction: column; align-items: stretch; }
     .tx-search { width: 100%; }
     .tx-search input { min-width: 0; width: 100%; }
+    .tx-date input { width: 100%; }
     .approval-actions { width: 100%; }
     .approve-btn, .reject-btn { flex: 1; justify-content: center; }
     .pending-detail-item { flex-direction: column; }

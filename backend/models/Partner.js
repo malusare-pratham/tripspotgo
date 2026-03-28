@@ -17,6 +17,9 @@ const partnerSchema = new mongoose.Schema({
     },
 
     area: { type: String, required: true },
+    totalDiscount: { type: Number, default: 0 },
+    customerDiscount: { type: Number, default: 0 },
+    platformCommission: { type: Number, default: 0 },
     status: { type: String, default: 'Pending', enum: ['Pending', 'Active', 'Blocked'] }
 }, { timestamps: true });
 

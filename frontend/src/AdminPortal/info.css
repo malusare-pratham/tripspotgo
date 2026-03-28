@@ -73,6 +73,7 @@
 
 .partner { background: #e0f2fe; color: #0369a1; }
 .active { background: #dcfce7; color: #15803d; }
+.inactive { background: #fee2e2; color: #b91c1c; }
 
 .description {
   color: #64748b;
@@ -184,7 +185,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 60px;
+  margin-bottom: 24px;
 }
 
 .trans-title-wrapper {
@@ -229,4 +230,124 @@
   padding: 40px 0;
   color: #94a3b8;
   font-size: 15px;
+}
+
+.transactions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.transaction-card {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 24px;
+  padding: 16px 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+}
+
+.tx-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 220px;
+}
+
+.tx-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #e0f2fe;
+  color: #0ea5e9;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+
+.tx-meta h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.tx-meta p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.tx-status {
+  min-width: 110px;
+}
+
+.tx-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #dcfce7;
+  color: #15803d;
+  text-transform: capitalize;
+}
+
+.tx-amounts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(110px, 1fr));
+  gap: 20px;
+  align-items: center;
+}
+
+.tx-col span {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+
+.tx-col strong {
+  font-size: 16px;
+  color: #0f172a;
+}
+
+.tx-discount {
+  color: #16a34a;
+}
+
+.tx-final {
+  color: #1d4ed8;
+}
+
+.tx-action {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.tx-bill-btn {
+  padding: 8px 18px;
+  border-radius: 14px;
+  border: 1px solid #dbe3ea;
+  background: #f1f5ff;
+  color: #1d4ed8;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 1024px) {
+  .transaction-card {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .tx-amounts {
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+  }
+  .tx-action {
+    justify-content: flex-start;
+  }
 }

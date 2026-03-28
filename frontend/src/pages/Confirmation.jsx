@@ -27,7 +27,7 @@ const Confirmation = () => {
     };
   }, [navigate]);
 
-  const transactionData = {
+  const [transactionData] = React.useState(() => ({
     amountSaved: Number(payload.amountSaved) || 500,
     partner: String(payload.partner || 'The Grand Hotel Panchgani'),
     originalAmount: Number(payload.originalAmount) || 5000,
@@ -37,7 +37,7 @@ const Confirmation = () => {
     transactionId: String(payload.transactionId || `TXN${Math.floor(10000000 + Math.random() * 90000000)}`),
     dateTime: String(payload.dateTime || new Date().toLocaleString()),
     lifetimeSavings: Number(payload.lifetimeSavings) || (Number(payload.discount) || 500)
-  };
+  }));
 
   return (
     <div className="conf-page-container conf-scope">

@@ -279,7 +279,7 @@ const MainPageContent = () => {
         <div className="mp-mobile-sticky">
           <header className="mp-page-header">
             <h1 className="mp-gradient-title">Explore nearby offers</h1>
-            <p className="mp-sub-title">Lowest prices for all your favourite Magicpoints</p>
+            <p className="mp-sub-title">Lowest prices for all your favourite Tripspotgos</p>
           </header>
 
           <FilterBar activeCategory={activeCategory} setActiveCategory={setActiveCategory} />

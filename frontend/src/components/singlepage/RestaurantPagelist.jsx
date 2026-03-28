@@ -219,7 +219,7 @@ const RestaurantPagelist = () => {
         >
           <ArrowLeft size={20} />
         </button>
-        <h1 className="rl-brand">magicpoint</h1>
+        <h1 className="rl-brand">Tripspotgo</h1>
         <div className="rl-search-wrap">
           <Search size={16} className="rl-search-icon" />
           <input
@@ -265,7 +265,7 @@ const RestaurantPagelist = () => {
           <div className="banner-txt">
             <p>Get up to</p>
             <h1 className="discount-val">10% OFF</h1>
-            <p>on your dining bills with magicpoint</p>
+            <p>on your dining bills with Tripspotgo</p>
             <button className="cta-btn">Check out all the restaurants</button>
           </div>
         </div>

@@ -82,7 +82,7 @@ const MainContent = () => {
 
   return (
     <div className="mc-main-container">
-      <h1 className="mc-main-top-heading">Lowest prices for your favorite Magicpoints</h1>
+      <h1 className="mc-main-top-heading">Lowest prices for your favorite Tripspotgos</h1>
 
       <div className="mc-tab-row">
         {categories.map((cat) => (

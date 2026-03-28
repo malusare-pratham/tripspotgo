@@ -1,0 +1,112 @@
+/* AboutUs.css */
+.pg-root-combined {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.seo-page-container {
+  background-color: #f8fafc;
+  padding: 100px 20px 60px;
+  flex: 1;
+}
+
+.seo-header {
+  text-align: center;
+  padding: 40px 0;
+}
+
+.seo-header h1 {
+  font-size: 3rem;
+  color: #1e293b;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+.seo-header p {
+  font-size: 1.25rem;
+  color: #64748b;
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.seo-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto 60px;
+}
+
+.seo-card {
+  background: white;
+  padding: 40px 30px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  border: 1px solid #f1f5f9;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.seo-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+}
+
+.icon-wrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 25px;
+}
+
+.seo-card:nth-child(1) .icon-wrapper { background: #eff6ff; color: #3b82f6; }
+.seo-card:nth-child(2) .icon-wrapper { background: #f0fdf4; color: #22c55e; }
+.seo-card:nth-child(3) .icon-wrapper { background: #faf5ff; color: #a855f7; }
+
+.seo-card h3 {
+  font-size: 1.5rem;
+  color: #0f172a;
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+
+.seo-card p {
+  color: #64748b;
+  line-height: 1.6;
+  font-size: 1.05rem;
+}
+
+.seo-mission {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 60px 40px;
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.03);
+}
+
+.seo-mission h2 {
+  font-size: 2.5rem;
+  color: #1e293b;
+  margin-bottom: 25px;
+  font-weight: 800;
+}
+
+.seo-mission p {
+  font-size: 1.15rem;
+  color: #475569;
+  line-height: 1.8;
+}
+
+@media (max-width: 768px) {
+  .seo-header h1 { font-size: 2.2rem; }
+  .seo-header p { font-size: 1.1rem; }
+  .seo-mission p { font-size: 1.05rem; }
+  .seo-mission { padding: 40px 20px; }
+}

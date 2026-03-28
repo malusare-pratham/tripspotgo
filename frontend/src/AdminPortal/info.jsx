@@ -28,6 +28,7 @@ const Info = () => {
   const [partnerInfo, setPartnerInfo] = useState(null);
   const [stats, setStats] = useState({ revenue: 0, discounts: 0, customers: 0, avgBill: 0 });
   const [transactions, setTransactions] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const partnerId = useMemo(() => {
@@ -141,13 +142,24 @@ const Info = () => {
 
   const revenueChangePrefix = revenueChange > 0 ? '+' : '';
   const discountPercent = stats.revenue > 0 ? ((stats.discounts / stats.revenue) * 100) : 0;
-  const partnerCommission = stats.revenue * 0.15;
+  const partnerCommissionPercent = Number(partnerInfo?.platformCommission || 15);
+  const partnerCommission = stats.revenue * (partnerCommissionPercent / 100);
+  const filteredTransactions = useMemo(() => {
+    const query = String(searchQuery || '').trim().toLowerCase();
+    if (!query) return transactions;
+    return transactions.filter((tx) => {
+      const id = String(tx?._id || '').toLowerCase();
+      const user = String(tx?.userName || '').toLowerCase();
+      const amount = String(tx?.billAmount ?? '').toLowerCase();
+      return id.includes(query) || user.includes(query) || amount.includes(query);
+    });
+  }, [transactions, searchQuery]);
   const statsCards = [
     { title: "Total Revenue", value: formatCurrency(stats.revenue), sub: `${revenueChangePrefix}${revenueChange.toFixed(1)}% from yesterday`, icon: <LuTrendingUp />, color: "green" },
     { title: "Discounts Given", value: formatCurrency(stats.discounts), sub: `${discountPercent.toFixed(1)}% of revenue`, icon: "$", color: "yellow" },
     { title: "Customers", value: String(stats.customers || 0), sub: "Total transactions", icon: <LuUsers />, color: "blue" },
     { title: "Avg. Bill", value: formatCurrency(stats.avgBill), sub: "Per transaction", icon: <LuFile />, color: "purple" },
-    { title: "Partner Commission", value: formatCurrency(partnerCommission), sub: "15% of total revenue", icon: <LuFile />, color: "purple" },
+    { title: "Partner Commission", value: formatCurrency(partnerCommission), sub: `${partnerCommissionPercent}% of total revenue`, icon: <LuFile />, color: "purple" },
   ];
 
   return (
@@ -169,12 +181,8 @@ const Info = () => {
             <h1>{partnerInfo?.name || partnerInfo?.restaurantName || 'Partner'}</h1>
           </div>
           <div className="status-badges">
-            <span className="badge partner">Partner</span>
-            <span className={`badge ${String(partnerInfo?.businessStatus || 'OPEN').toUpperCase() === 'OPEN' ? 'active' : 'inactive'}`}>
-              {String(partnerInfo?.businessStatus || 'OPEN').toUpperCase() === 'OPEN' ? 'Active' : 'Closed'}
-            </span>
+            <span className="badge partner">{partnerInfo?.businessCategory || 'Food & Dining'}</span>
           </div>
-          <p className="description">Manage approvals faster and keep your customer experience smooth.</p>
         </div>
         <div className="action-buttons">
           {/* actions removed as requested */}
@@ -204,12 +212,73 @@ const Info = () => {
           </div>
           <div className="search-box">
             <LuSearch className="search-icon" />
-            <input type="text" placeholder="Search transactions" />
+            <input
+              type="text"
+              placeholder="Search transactions"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
         </div>
-        <div className="empty-state">
-          <p>{isLoading ? 'Loading transactions...' : 'No matching transactions found.'}</p>
-        </div>
+        {isLoading ? (
+          <div className="empty-state">
+            <p>Loading transactions...</p>
+          </div>
+        ) : filteredTransactions.length === 0 ? (
+          <div className="empty-state">
+            <p>No matching transactions found.</p>
+          </div>
+        ) : (
+          <div className="transactions-list">
+            {filteredTransactions.map((tx) => {
+              const bill = Number(tx.billAmount) || 0;
+              const discount = Number(tx.discountAmount) || 0;
+              const finalPay = Math.max(bill - discount, 0);
+              const name = tx.userName || 'Customer';
+              const initials = name.trim().slice(0, 1).toUpperCase();
+              const status = String(tx.status || 'Verified');
+              const txId = String(tx._id || '').slice(-10) || '-';
+              return (
+                <div key={tx._id} className="transaction-card">
+                  <div className="tx-left">
+                    <div className="tx-avatar">{initials}</div>
+                    <div className="tx-meta">
+                      <h4>{name}</h4>
+                      <p>{tx.createdAt ? new Date(tx.createdAt).toLocaleString() : '-'}</p>
+                    </div>
+                  </div>
+
+                  <div className="tx-status">
+                    <span className={`tx-pill ${status.toLowerCase()}`}>{status}</span>
+                  </div>
+
+                  <div className="tx-amounts">
+                    <div className="tx-col">
+                      <span>Original</span>
+                      <strong>{formatCurrency(bill)}</strong>
+                    </div>
+                    <div className="tx-col">
+                      <span>Discount</span>
+                      <strong className="tx-discount">-{formatCurrency(discount)}</strong>
+                    </div>
+                    <div className="tx-col">
+                      <span>Final Pay</span>
+                      <strong className="tx-final">{formatCurrency(finalPay)}</strong>
+                    </div>
+                    <div className="tx-col">
+                      <span>Transaction</span>
+                      <strong>{txId}</strong>
+                    </div>
+                  </div>
+
+                  <div className="tx-action">
+                    <button type="button" className="tx-bill-btn">Bill</button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

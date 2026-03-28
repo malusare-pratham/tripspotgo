@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -8,6 +8,20 @@ import {
 import './TransactionPage.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+
+const formatInr = (value) =>
+  new Intl.NumberFormat('en-IN', {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 0
+  }).format(Number(value) || 0);
+
+const Money = ({ value, className = '', negative = false }) => (
+  <span className={`money-value ${className}`}>
+    {negative ? '- ' : ''}
+    <IndianRupee size={14} />
+    {formatInr(value)}
+  </span>
+);
 
 const TransactionPage = () => {
   const navigate = useNavigate();
@@ -22,20 +36,6 @@ const TransactionPage = () => {
     { name: 'Stores', icon: <Store size={14} /> },
     { name: 'Hotels & Villas', icon: <Hotel size={14} /> }
   ];
-
-  const formatInr = (value) =>
-    new Intl.NumberFormat('en-IN', {
-      maximumFractionDigits: 2,
-      minimumFractionDigits: 0
-    }).format(Number(value) || 0);
-
-  const Money = ({ value, className = '', negative = false }) => (
-    <span className={`money-value ${className}`}>
-      {negative ? '- ' : ''}
-      <IndianRupee size={14} />
-      {formatInr(value)}
-    </span>
-  );
 
   const normalizeCategory = (raw) => {
     const value = String(raw || '').trim();

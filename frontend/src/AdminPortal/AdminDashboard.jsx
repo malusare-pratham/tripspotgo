@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './AdminDashboard.css';
+import AdminSeoEditor from './AdminSeoEditor';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
@@ -13,7 +14,10 @@ const initialForm = {
     businessCategory: 'Food & Dining',
     email: '',
     password: '',
-    area: ''
+    area: '',
+    totalDiscount: '',
+    customerDiscount: '',
+    platformCommission: ''
 };
 
 const AdminDashboard = () => {
@@ -26,12 +30,18 @@ const AdminDashboard = () => {
     const [quickTab, setQuickTab] = useState('overview');
     const [partnerSearch, setPartnerSearch] = useState('');
     const [memberSearch, setMemberSearch] = useState('');
+    const [nowTick, setNowTick] = useState(() => Date.now());
     const navigate = useNavigate();
     const [dashboardStats, setDashboardStats] = useState({
         loggedInUsers: 0,
         totalRevenue: 0,
         netRevenue: 0,
-        totalTransactions: 0
+        totalTransactions: 0,
+        todayActiveUsers: 0,
+        todayActivePartners: 0,
+        todayRevenue: 0,
+        todayNetRevenue: 0,
+        todayTransactions: 0
     });
     const [formData, setFormData] = useState(initialForm);
     const [resImageFile, setResImageFile] = useState(null);
@@ -50,7 +60,12 @@ const AdminDashboard = () => {
                 loggedInUsers: Number(statsRes?.data?.stats?.loggedInUsers || 0),
                 totalRevenue: Number(statsRes?.data?.stats?.totalRevenue || 0),
                 netRevenue: Number(statsRes?.data?.stats?.netRevenue || 0),
-                totalTransactions: Number(statsRes?.data?.stats?.totalTransactions || 0)
+                totalTransactions: Number(statsRes?.data?.stats?.totalTransactions || 0),
+                todayActiveUsers: Number(statsRes?.data?.stats?.todayActiveUsers || 0),
+                todayActivePartners: Number(statsRes?.data?.stats?.todayActivePartners || 0),
+                todayRevenue: Number(statsRes?.data?.stats?.todayRevenue || 0),
+                todayNetRevenue: Number(statsRes?.data?.stats?.todayNetRevenue || 0),
+                todayTransactions: Number(statsRes?.data?.stats?.todayTransactions || 0)
             });
             setLoggedInUsers(statsRes?.data?.users || []);
             setUserStatsById(statsRes?.data?.userStats || {});
@@ -64,6 +79,11 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         fetchDashboard();
+    }, []);
+
+    useEffect(() => {
+        const timer = setInterval(() => setNowTick(Date.now()), 1000);
+        return () => clearInterval(timer);
     }, []);
 
     const handleLogout = () => {
@@ -97,7 +117,16 @@ const AdminDashboard = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        setFormData((prev) => {
+            const next = { ...prev, [name]: value };
+            if (name === 'totalDiscount' || name === 'customerDiscount') {
+                const total = Number(next.totalDiscount || 0);
+                const customer = Number(next.customerDiscount || 0);
+                const platform = Math.max(total - customer, 0);
+                next.platformCommission = Number.isFinite(platform) ? platform : '';
+            }
+            return next;
+        });
     };
 
     const handleAddPartner = async (e) => {
@@ -178,26 +207,68 @@ const AdminDashboard = () => {
 
     const membersList = useMemo(() => {
         const query = memberSearch.trim().toLowerCase();
+        const parseDate = (value) => {
+            if (!value) return null;
+            const parsed = new Date(value);
+            return Number.isNaN(parsed.getTime()) ? null : parsed;
+        };
+        const parseObjectIdDate = (value) => {
+            const raw = typeof value === 'string' ? value : '';
+            if (raw.length < 8) return null;
+            const ts = Number.parseInt(raw.slice(0, 8), 16);
+            if (!Number.isFinite(ts)) return null;
+            const parsed = new Date(ts * 1000);
+            return Number.isNaN(parsed.getTime()) ? null : parsed;
+        };
+        const addHours = (date, hours) => new Date(date.getTime() + hours * 60 * 60 * 1000);
+        const formatDateTime = (date) =>
+            date
+                ? date.toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                })
+                : '-';
+
         return formattedUsers
             .map((user) => {
-                const rawDate = user?.lastLoginAt ? new Date(user.lastLoginAt) : null;
-                const joinDate = rawDate && !Number.isNaN(rawDate.getTime())
-                    ? rawDate.toISOString().slice(0, 10)
-                    : '-';
-                const expiryDate = rawDate && !Number.isNaN(rawDate.getTime())
-                    ? new Date(rawDate.getFullYear() + 1, rawDate.getMonth(), rawDate.getDate()).toISOString().slice(0, 10)
-                    : '-';
-                const isActive = joinDate !== '-' && new Date(expiryDate) >= new Date();
+                const activatedAt = parseDate(user?.membershipActivatedAt);
+                const createdAt = parseDate(user?.createdAt);
+                const expiresAt = parseDate(user?.membershipExpiresAt);
+                const fallbackIdDate = parseObjectIdDate(String(user?.id || user?._id || ''));
+
+                const joinBase = createdAt || activatedAt || fallbackIdDate || null;
+                const joinDate = formatDateTime(joinBase);
+
+                const expiryDateValue = expiresAt || (joinBase ? addHours(joinBase, 48) : null);
+                const expiryDate = formatDateTime(expiryDateValue);
+                const isActive = Boolean(expiryDateValue) && expiryDateValue >= new Date();
+                const remainingMs = expiryDateValue ? expiryDateValue.getTime() - nowTick : null;
+                const remaining = remainingMs === null
+                    ? '-'
+                    : remainingMs <= 0
+                        ? 'Expired'
+                        : (() => {
+                            const totalSeconds = Math.floor(remainingMs / 1000);
+                            const hours = Math.floor(totalSeconds / 3600);
+                            const minutes = Math.floor((totalSeconds % 3600) / 60);
+                            const seconds = totalSeconds % 60;
+                            return `${hours}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`;
+                        })();
                 const plan = String(user?.membershipPlan || 'single').toLowerCase();
-                const type = plan.includes('family') ? 'family' : 'single';
+                const type = plan.includes('family') ? 'Family' : 'Single';
+                const typeKey = plan.includes('family') ? 'family' : 'single';
                 const stat = userStatsById[String(user.id)] || {};
                 return {
                     id: user.id,
                     name: user.name || '-',
-                    mobile: user.mobile || '-',
+                    mobile: user.mobile || user.mobileNumber || '-',
+                    email: user.email || '-',
                     type,
+                    typeKey,
                     joinDate,
                     expiryDate,
+                    remaining,
                     status: isActive ? 'Active' : 'Inactive',
                     transactions: Number(user.transactions ?? stat.totalTransactions ?? 0),
                     totalSaved: Number(user.totalSaved ?? stat.totalSavings ?? 0)
@@ -209,7 +280,7 @@ const AdminDashboard = () => {
                 const mobile = String(member.mobile || '').toLowerCase();
                 return name.includes(query) || mobile.includes(query);
             });
-    }, [formattedUsers, memberSearch, userStatsById]);
+    }, [formattedUsers, memberSearch, userStatsById, nowTick]);
 
     return (
         <div className="admin-dashboard">
@@ -281,23 +352,23 @@ const AdminDashboard = () => {
                         <div className="admin-today-row">
                             <div className="admin-today-card">
                                 <p>Today&apos;s Active Users</p>
-                                <h4>{dashboardStats.loggedInUsers}</h4>
+                                <h4>{dashboardStats.todayActiveUsers}</h4>
                             </div>
                             <div className="admin-today-card">
                                 <p>Today&apos;s Active Partners</p>
-                                <h4>{partners.length}</h4>
+                                <h4>{dashboardStats.todayActivePartners}</h4>
                             </div>
                             <div className="admin-today-card">
                                 <p>Today&apos;s Revenue</p>
-                                <h4>Rs. {dashboardStats.totalRevenue}</h4>
+                                <h4>Rs. {dashboardStats.todayRevenue}</h4>
                             </div>
                             <div className="admin-today-card">
                                 <p>Today&apos;s Net Revenue</p>
-                                <h4>Rs. {dashboardStats.netRevenue}</h4>
+                                <h4>Rs. {dashboardStats.todayNetRevenue}</h4>
                             </div>
                             <div className="admin-today-card">
                                 <p>Today&apos;s Transactions</p>
-                                <h4>{dashboardStats.totalTransactions}</h4>
+                                <h4>{dashboardStats.todayTransactions}</h4>
                             </div>
                         </div>
 
@@ -328,15 +399,17 @@ const AdminDashboard = () => {
                             </button>
                             <button
                                 type="button"
-                                className={`admin-quick-pill ${quickTab === 'transactions' ? 'active' : ''}`}
-                                onClick={() => setQuickTab('transactions')}
+                                className={`admin-quick-pill ${quickTab === 'seo' ? 'active' : ''}`}
+                                onClick={() => setQuickTab('seo')}
                             >
-                                <i className="fa-regular fa-clipboard"></i>
-                                Transactions
+                                <i className="fa-solid fa-globe"></i>
+                                Manage SEO
                             </button>
                         </div>
 
-                        {quickTab === 'partners' ? (
+                        {quickTab === 'seo' ? (
+                            <AdminSeoEditor />
+                        ) : quickTab === 'partners' ? (
                             <div className="partners-card">
                                 <div className="partners-card-header">
                                     <h3>All Partners</h3>
@@ -350,10 +423,6 @@ const AdminDashboard = () => {
                                                 onChange={(e) => setPartnerSearch(e.target.value)}
                                             />
                                         </div>
-                                        <button type="button" className="partners-filter-btn">
-                                            <i className="fa-solid fa-filter"></i>
-                                            Filter
-                                        </button>
                                         <button
                                             type="button"
                                             className="partners-add-btn"
@@ -361,10 +430,6 @@ const AdminDashboard = () => {
                                         >
                                             <i className="fa-solid fa-plus"></i>
                                             Add Partner
-                                        </button>
-                                        <button type="button" className="partners-export-btn">
-                                            <i className="fa-solid fa-download"></i>
-                                            Export
                                         </button>
                                     </div>
                                 </div>
@@ -374,11 +439,11 @@ const AdminDashboard = () => {
                                         <thead>
                                             <tr>
                                                 <th>Partner</th>
+                                                <th>Email</th>
                                                 <th>Category</th>
                                                 <th>Status</th>
-                                                <th>Transactions</th>
-                                                <th>Revenue</th>
                                                 <th>Actions</th>
+                                                <th></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -390,6 +455,7 @@ const AdminDashboard = () => {
                                                                 <span>{partner.restaurantName || '-'}</span>
                                                             </div>
                                                         </td>
+                                                        <td>{partner.email || '-'}</td>
                                                         <td>
                                                             <span className="category-pill">
                                                                 {partner.businessCategory || '-'}
@@ -400,8 +466,6 @@ const AdminDashboard = () => {
                                                                 {String(partner.status || 'Pending').toLowerCase()}
                                                             </span>
                                                         </td>
-                                                        <td>0</td>
-                                                        <td>₹0</td>
                                                         <td>
                                                             <div className="partner-actions">
                                                                 {partner.status !== 'Active' && (
@@ -429,19 +493,21 @@ const AdminDashboard = () => {
                                                                 >
                                                                     Delete
                                                                 </button>
-                                                                <button
-                                                                    type="button"
-                                                                    className="partner-next-btn"
-                                                                    aria-label="Next"
-                                                                    onClick={() => {
-                                                                        const payload = { partnerId: partner._id, partner };
-                                                                        localStorage.setItem('adminSelectedPartner', JSON.stringify(partner));
-                                                                        navigate('/admin/info', { state: payload });
-                                                                    }}
-                                                                >
-                                                                    <i className="fa-solid fa-arrow-right"></i>
-                                                                </button>
                                                             </div>
+                                                        </td>
+                                                        <td>
+                                                            <button
+                                                                type="button"
+                                                                className="partner-next-btn"
+                                                                aria-label="Next"
+                                                                onClick={() => {
+                                                                    const payload = { partnerId: partner._id, partner };
+                                                                    localStorage.setItem('adminSelectedPartner', JSON.stringify(partner));
+                                                                    navigate('/admin/info', { state: payload });
+                                                                }}
+                                                            >
+                                                                <i className="fa-solid fa-arrow-right"></i>
+                                                            </button>
                                                         </td>
                                                     </tr>
                                                 ))
@@ -459,9 +525,6 @@ const AdminDashboard = () => {
                                 <div className="members-card-header">
                                     <div>
                                         <h3>All Members</h3>
-                                        <small className="members-debug">
-                                            Stats loaded: {Object.keys(userStatsById || {}).length}
-                                        </small>
                                     </div>
                                     <div className="members-toolbar">
                                         <div className="members-search">
@@ -485,9 +548,11 @@ const AdminDashboard = () => {
                                         <thead>
                                             <tr>
                                                 <th>Member</th>
+                                                <th>Email</th>
                                                 <th>Type</th>
                                                 <th>Join Date</th>
                                                 <th>Expiry</th>
+                                                <th>Remaining</th>
                                                 <th>Transactions</th>
                                                 <th>Total Saved</th>
                                                 <th>Status</th>
@@ -504,11 +569,13 @@ const AdminDashboard = () => {
                                                                 <small>{member.mobile}</small>
                                                             </div>
                                                         </td>
+                                                        <td>{member.email || '-'}</td>
                                                         <td>
-                                                            <span className={`member-type-pill ${member.type}`}>{member.type}</span>
+                                                            <span className={`member-type-text ${member.typeKey}`}>{member.type}</span>
                                                         </td>
                                                         <td>{member.joinDate}</td>
                                                         <td>{member.expiryDate}</td>
+                                                        <td>{member.remaining}</td>
                                                         <td>{member.transactions}</td>
                                                         <td className="member-saved">₹{member.totalSaved}</td>
                                                         <td>
@@ -529,7 +596,7 @@ const AdminDashboard = () => {
                                                 ))
                                             ) : (
                                                 <tr>
-                                                    <td colSpan="8">{loadingList ? 'Loading...' : 'No members found.'}</td>
+                                                    <td colSpan="10">{loadingList ? 'Loading...' : 'No members found.'}</td>
                                                 </tr>
                                             )}
                                         </tbody>
@@ -673,22 +740,61 @@ const AdminDashboard = () => {
 
                         <form className="professional-form" onSubmit={handleAddPartner}>
                             <div className="form-grid">
-                                <input name="restaurantName" placeholder="Restaurant Name" value={formData.restaurantName} onChange={handleInputChange} required />
-                                <input name="ownerName" placeholder="Owner Name" value={formData.ownerName} onChange={handleInputChange} required />
-                                <input name="resMobile" placeholder="Restaurant Mobile" value={formData.resMobile} onChange={handleInputChange} required />
-                                <input name="ownerMobile" placeholder="Owner Mobile" value={formData.ownerMobile} onChange={handleInputChange} required />
+                                <div className="form-field">
+                                    <label>Restaurant Name</label>
+                                    <input name="restaurantName" placeholder="Restaurant Name" value={formData.restaurantName} onChange={handleInputChange} required />
+                                </div>
+                                <div className="form-field">
+                                    <label>Owner Name</label>
+                                    <input name="ownerName" placeholder="Owner Name" value={formData.ownerName} onChange={handleInputChange} required />
+                                </div>
+                                <div className="form-field">
+                                    <label>Restaurant Mobile</label>
+                                    <input name="resMobile" placeholder="Restaurant Mobile" value={formData.resMobile} onChange={handleInputChange} required />
+                                </div>
+                                <div className="form-field">
+                                    <label>Owner Mobile</label>
+                                    <input name="ownerMobile" placeholder="Owner Mobile" value={formData.ownerMobile} onChange={handleInputChange} required />
+                                </div>
 
-                                <select name="businessCategory" value={formData.businessCategory} onChange={handleInputChange} required>
-                                    <option>Food & Dining</option>
-                                    <option>Activities & Adventure</option>
-                                    <option>Local Stores & Gift House</option>
-                                    <option>Stay & Hotels</option>
-                                </select>
+                                <div className="form-field">
+                                    <label>Business Category</label>
+                                    <select name="businessCategory" value={formData.businessCategory} onChange={handleInputChange} required>
+                                        <option>Food & Dining</option>
+                                        <option>Activities & Adventure</option>
+                                        <option>Local Stores & Gift House</option>
+                                        <option>Stay & Hotels</option>
+                                    </select>
+                                </div>
 
-                                <input type="file" onChange={(e) => setResImageFile(e.target.files?.[0] || null)} />
-                                <input name="email" type="email" placeholder="Email ID" value={formData.email} onChange={handleInputChange} required />
-                                <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleInputChange} required />
-                                <input name="area" placeholder="Area" value={formData.area} onChange={handleInputChange} required />
+                                <div className="form-field">
+                                    <label>Restaurant Image</label>
+                                    <input type="file" onChange={(e) => setResImageFile(e.target.files?.[0] || null)} />
+                                </div>
+                                <div className="form-field">
+                                    <label>Email ID</label>
+                                    <input name="email" type="email" placeholder="Email ID" value={formData.email} onChange={handleInputChange} required />
+                                </div>
+                                <div className="form-field">
+                                    <label>Password</label>
+                                    <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleInputChange} required />
+                                </div>
+                                <div className="form-field">
+                                    <label>Area</label>
+                                    <input name="area" placeholder="Area" value={formData.area} onChange={handleInputChange} required />
+                                </div>
+                                <div className="form-field">
+                                    <label>Total Discount (%)</label>
+                                    <input name="totalDiscount" type="number" min="0" step="0.01" placeholder="Total Discount (%)" value={formData.totalDiscount} onChange={handleInputChange} />
+                                </div>
+                                <div className="form-field">
+                                    <label>Discounts Given (%)</label>
+                                    <input name="customerDiscount" type="number" min="0" step="0.01" placeholder="Customer Discount (%)" value={formData.customerDiscount} onChange={handleInputChange} />
+                                </div>
+                                <div className="form-field">
+                                    <label>Partner Commission</label>
+                                    <input name="platformCommission" type="number" min="0" step="0.01" placeholder="Partner Commission" value={formData.platformCommission} readOnly />
+                                </div>
                             </div>
 
                             <button type="submit" className="save-btn" disabled={savingPartner}>

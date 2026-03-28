@@ -49,8 +49,11 @@ const PartnerDashboard = () => {
     const [savingInfo, setSavingInfo] = useState(false);
     const [stats, setStats] = useState({ revenue: 0, discounts: 0, customers: 0, avgBill: 0 });
     const [transactions, setTransactions] = useState([]);
+    const [reviews, setReviews] = useState([]);
+    const [reviewSearch, setReviewSearch] = useState('');
     const [pendingBills, setPendingBills] = useState([]);
     const [txSearch, setTxSearch] = useState('');
+    const [txDate, setTxDate] = useState(() => new Date().toISOString().slice(0, 10));
     const [lastSynced, setLastSynced] = useState(null);
 
     const fetchData = async (id) => {
@@ -61,6 +64,15 @@ const PartnerDashboard = () => {
             setLastSynced(new Date());
         } catch (err) {
             console.error('Error loading dashboard data', err);
+        }
+    };
+
+    const fetchReviews = async (id) => {
+        try {
+            const res = await axios.get(`${API_BASE_URL}/api/restaurants/${id}/reviews`);
+            setReviews(Array.isArray(res?.data?.data) ? res.data.data : []);
+        } catch (_err) {
+            setReviews([]);
         }
     };
 
@@ -158,6 +170,7 @@ const PartnerDashboard = () => {
                 fetchData(resolvedId);
                 fetchPendingBills(resolvedId);
                 fetchPartnerInfoForm(resolvedId, normalized);
+                fetchReviews(resolvedId);
             }
         }
     }, []);
@@ -169,6 +182,25 @@ const PartnerDashboard = () => {
         }, 4000);
         return () => clearInterval(intervalId);
     }, [partnerInfo?.id]);
+
+    useEffect(() => {
+        if (partnerInfo?.id) {
+            fetchReviews(partnerInfo.id);
+        }
+    }, [partnerInfo?.id]);
+
+    const deleteReview = async (reviewId) => {
+        const resolvedId = partnerInfo?.id || resolvePartnerId(partnerInfo);
+        if (!resolvedId || !reviewId) return;
+        if (!window.confirm('Delete this review?')) return;
+        try {
+            await axios.delete(`${API_BASE_URL}/api/admin/partner-reviews/${resolvedId}/${reviewId}`);
+            setReviews((prev) => prev.filter((r) => r._id !== reviewId));
+        } catch (_err) {
+            const message = _err?.response?.data?.message || 'Unable to delete review';
+            alert(message);
+        }
+    };
 
     const reviewPendingBill = async (billId, decision) => {
         if (!partnerInfo?.id || !billId) return;
@@ -363,11 +395,25 @@ const PartnerDashboard = () => {
 
     const filteredTransactions = transactions.filter((t) => {
         const query = txSearch.toLowerCase();
-        if (!query) return true;
-        return (
+        const matchesQuery =
+            !query ||
             String(t.userName || '').toLowerCase().includes(query) ||
             String(t.billAmount || '').includes(query) ||
-            new Date(t.createdAt).toLocaleString().toLowerCase().includes(query)
+            new Date(t.createdAt).toLocaleString().toLowerCase().includes(query);
+
+        if (!matchesQuery) return false;
+
+        if (!txDate) return true;
+        const txDateOnly = new Date(t.createdAt).toISOString().slice(0, 10);
+        return txDateOnly === txDate;
+    });
+    const filteredReviews = reviews.filter((r) => {
+        const query = reviewSearch.toLowerCase();
+        if (!query) return true;
+        return (
+            String(r.userName || '').toLowerCase().includes(query) ||
+            String(r.title || '').toLowerCase().includes(query) ||
+            String(r.text || '').toLowerCase().includes(query)
         );
     });
     const getRevenueChangeFromYesterday = () => {
@@ -402,6 +448,8 @@ const PartnerDashboard = () => {
     const revenueChange = getRevenueChangeFromYesterday();
     const revenueChangePrefix = revenueChange > 0 ? '+' : '';
     const formatCurrency = (value) => `₹${Number(value || 0).toFixed(2)}`;
+    const partnerCommissionPercent = Number(partnerInfo?.platformCommission || 15);
+    const partnerCommissionAmount = stats.revenue * (partnerCommissionPercent / 100);
 
     return (
         <div className="partner-container">
@@ -411,10 +459,7 @@ const PartnerDashboard = () => {
                         <span className="name-icon"><BadgeCheck size={20} /></span>
                         <h4 className="m-0">{infoForm.restaurantName || partnerInfo.name}</h4>
                     </div>
-                    <div className="badges">
-                        <span className="badge hotel">Partner</span>
-                        <span className="badge active">Active</span>
-                    </div>
+                    <div className="badges" />
                     <p className="top-partner-msg">Manage approvals faster and keep your customer experience smooth.</p>
                 </div>
                 <div className="top-strip-actions">
@@ -627,23 +672,38 @@ const PartnerDashboard = () => {
                     <h2>₹{stats.avgBill}</h2>
                     <small>Per transaction</small>
                 </div>
+                <div className="stat-card stat-commission">
+                    <div className="stat-header"><span>Partner Commission</span> <span className="stat-icon avgbill"><FileText size={18} color="#0ea5e9" /></span></div>
+                    <h2>{formatCurrency(partnerCommissionAmount)}</h2>
+                    <small>{partnerCommissionPercent}% of revenue</small>
+                </div>
             </div>
             <div className="partner-card">
                 <div className="card-header">
                     <h4 className="recent-heading">Recent Transactions</h4>
-                    <div className="tx-search">
-                        <Search size={14} />
-                        <input
-                            type="text"
-                            placeholder="Search transactions"
-                            value={txSearch}
-                            onChange={(e) => setTxSearch(e.target.value)}
-                        />
+                    <div className="tx-filters">
+                        <div className="tx-search">
+                            <Search size={14} />
+                            <input
+                                type="text"
+                                placeholder="Search transactions"
+                                value={txSearch}
+                                onChange={(e) => setTxSearch(e.target.value)}
+                            />
+                        </div>
+                        <div className="tx-date">
+                            <input
+                                type="date"
+                                value={txDate}
+                                onChange={(e) => setTxDate(e.target.value)}
+                                aria-label="Filter by date"
+                            />
+                        </div>
                     </div>
                 </div>
                 <div className="transaction-list recent-transactions-list">
                     {filteredTransactions.length > 0 ? (
-                        filteredTransactions.map((t, i) => (
+                        filteredTransactions.slice(0, 5).map((t, i) => (
                             <div key={i} className="transaction-item recent-item">
                                 <div className="recent-row">
                                     <div className="recent-user-wrap">
@@ -684,6 +744,56 @@ const PartnerDashboard = () => {
                         ))
                     ) : (
                         <p style={{ textAlign: 'center', padding: '20px', color: '#999' }}>No matching transactions found.</p>
+                    )}
+                </div>
+            </div>
+
+            <div className="partner-card">
+                <div className="card-header">
+                    <h4 className="recent-heading">Reviews</h4>
+                    <div className="tx-search">
+                        <Search size={14} />
+                        <input
+                            type="text"
+                            placeholder="Search reviews"
+                            value={reviewSearch}
+                            onChange={(e) => setReviewSearch(e.target.value)}
+                        />
+                    </div>
+                </div>
+                <div className="review-list">
+                    {filteredReviews.length > 0 ? (
+                        filteredReviews.map((review) => (
+                            <div key={review._id} className="transaction-item recent-item review-item">
+                                <div className="review-row">
+                                    <div className="recent-user-wrap">
+                                        <div className="user-avatar">{review.userName ? review.userName[0] : 'U'}</div>
+                                        <div className="user-details">
+                                            <strong className="recent-title">{review.userName || 'Customer'}</strong>
+                                            <small className="recent-sub">{review.createdAt ? new Date(review.createdAt).toLocaleString() : '-'}</small>
+                                        </div>
+                                    </div>
+
+                                    <div className="review-inline">
+                                        <span>Title</span>
+                                        <strong>{review.title || 'Review'}</strong>
+                                    </div>
+                                    <div className="review-inline review-text">
+                                        <span>Review</span>
+                                        <strong>{review.text || '-'}</strong>
+                                    </div>
+
+                                    <div className="review-actions-inline">
+                                        <span className="review-rating-pill">{review.rating}★</span>
+                                        <button type="button" className="review-delete-btn" onClick={() => deleteReview(review._id)}>
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <p style={{ textAlign: 'center', padding: '20px', color: '#999' }}>No reviews found.</p>
                     )}
                 </div>
             </div>

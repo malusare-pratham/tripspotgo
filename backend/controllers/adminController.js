@@ -146,7 +146,13 @@ exports.partnerLogin = async (req, res) => {
                 id: partner._id,
                 name: partner.restaurantName,
                 email: partner.email,
-                businessStatus: partner.businessStatus
+                businessStatus: partner.businessStatus,
+                businessCategory: partner.businessCategory,
+                platformCommission: partner.platformCommission,
+                totalDiscount: partner.totalDiscount,
+                customerDiscount: partner.customerDiscount,
+                area: partner.area,
+                resImage: partner.resImage
             }
         });
     } catch (error) {
@@ -172,7 +178,10 @@ exports.addPartner = async (req, res) => {
             email: partnerData.email,
             password: hashedPassword,
             businessCategory: partnerData.businessCategory,
-            area: partnerData.area
+            area: partnerData.area,
+            totalDiscount: Number(partnerData.totalDiscount || 0),
+            customerDiscount: Number(partnerData.customerDiscount || 0),
+            platformCommission: Number(partnerData.platformCommission || 0)
         };
 
         if (req.file) {
@@ -190,14 +199,35 @@ exports.addPartner = async (req, res) => {
 exports.getAllPartners = async (req, res) => {
     try {
         const partners = await Partner.find();
+        const partnerIds = partners.map((partner) => partner._id);
+        const revenueStats = await Bill.aggregate([
+            { $match: { partnerId: { $in: partnerIds }, status: 'Verified' } },
+            {
+                $group: {
+                    _id: '$partnerId',
+                    transactions: { $sum: 1 },
+                    revenue: { $sum: { $ifNull: ['$billAmount', 0] } }
+                }
+            }
+        ]);
+        const revenueMap = revenueStats.reduce((acc, row) => {
+            acc[String(row._id)] = {
+                transactions: Number(row.transactions || 0),
+                revenue: Number(row.revenue || 0)
+            };
+            return acc;
+        }, {});
         const shapedPartners = await Promise.all(partners.map(async (partner) => {
             const item = partner.toObject();
+            const stats = revenueMap[String(partner._id)] || { transactions: 0, revenue: 0 };
             const migratedUrl = await migrateLocalImageToCloud(item.resImage);
             if (migratedUrl && migratedUrl !== item.resImage) {
                 item.resImage = migratedUrl;
                 await Partner.findByIdAndUpdate(partner._id, { $set: { resImage: migratedUrl } });
             }
             item.imageUrl = buildImageUrl(req, item.resImage);
+            item.transactions = stats.transactions;
+            item.revenue = stats.revenue;
             return item;
         }));
         res.status(200).json(shapedPartners);
@@ -562,15 +592,13 @@ exports.upsertPartnerInfo = async (req, res) => {
 
 exports.getAdminDashboardStats = async (req, res) => {
     try {
-        const users = await User.find({
-            $or: [
-                { lastLoginAt: { $ne: null } },
-                { membershipActivatedAt: { $ne: null } }
-            ]
-        })
+        const users = await User.find({})
             .sort({ lastLoginAt: -1, membershipActivatedAt: -1, createdAt: -1 })
-            .select('name email mobileNumber membershipPlan lastLoginAt membershipActivatedAt createdAt')
+            .select('name email mobileNumber membershipPlan lastLoginAt membershipActivatedAt membershipExpiresAt createdAt')
             .lean();
+
+        const now = new Date();
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
         const revenueAgg = await Bill.aggregate([
             {
@@ -587,6 +615,28 @@ exports.getAdminDashboardStats = async (req, res) => {
             totalRevenue: 0,
             totalDiscount: 0,
             totalTransactions: 0
+        };
+
+        const todayAgg = await Bill.aggregate([
+            { $match: { createdAt: { $gte: todayStart } } },
+            {
+                $group: {
+                    _id: null,
+                    totalRevenue: { $sum: { $ifNull: ['$billAmount', 0] } },
+                    totalDiscount: { $sum: { $ifNull: ['$discountAmount', 0] } },
+                    totalTransactions: { $sum: 1 },
+                    uniqueUsers: { $addToSet: '$userId' },
+                    uniquePartners: { $addToSet: '$partnerId' }
+                }
+            }
+        ]);
+
+        const todayTotals = todayAgg[0] || {
+            totalRevenue: 0,
+            totalDiscount: 0,
+            totalTransactions: 0,
+            uniqueUsers: [],
+            uniquePartners: []
         };
 
         const userAgg = await Bill.aggregate([
@@ -615,7 +665,13 @@ exports.getAdminDashboardStats = async (req, res) => {
                 totalRevenue: totals.totalRevenue,
                 totalDiscount: totals.totalDiscount,
                 netRevenue: totals.totalRevenue - totals.totalDiscount,
-                totalTransactions: totals.totalTransactions
+                totalTransactions: totals.totalTransactions,
+                todayActiveUsers: todayTotals.uniqueUsers.length,
+                todayActivePartners: todayTotals.uniquePartners.length,
+                todayRevenue: todayTotals.totalRevenue,
+                todayDiscount: todayTotals.totalDiscount,
+                todayNetRevenue: todayTotals.totalRevenue - todayTotals.totalDiscount,
+                todayTransactions: todayTotals.totalTransactions
             },
             userStats,
             users: users.map((user) => {
@@ -627,6 +683,9 @@ exports.getAdminDashboardStats = async (req, res) => {
                     mobile: user.mobileNumber,
                     membershipPlan: user.membershipPlan,
                     lastLoginAt: user.lastLoginAt || user.membershipActivatedAt || user.createdAt,
+                    membershipActivatedAt: user.membershipActivatedAt,
+                    membershipExpiresAt: user.membershipExpiresAt,
+                    createdAt: user.createdAt,
                     transactions: stat.totalTransactions || 0,
                     totalSaved: stat.totalSavings || 0
                 };

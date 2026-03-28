@@ -10,6 +10,7 @@ const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const membershipRoutes = require('./routes/membershipRoutes');
 const restaurantRoutes = require('./routes/restaurantRoutes');
+const seoRoutes = require('./routes/seoRoutes');
 const notFound = require('./middleware/notFound');
 const errorHandler = require('./middleware/errorHandler');
 
@@ -76,6 +77,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/memberships', membershipRoutes);
 app.use('/api/restaurants', restaurantRoutes);
+app.use('/api/seo-pages', seoRoutes);
 
 app.get('/', (_req, res) => {
     res.status(200).json({ success: true, message: 'tripspotgo API is running' });
@@ -85,4 +87,3 @@ app.use(notFound);
 app.use(errorHandler);
 
 module.exports = app;
-

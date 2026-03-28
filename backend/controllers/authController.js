@@ -241,10 +241,43 @@ const loginUser = asyncHandler(async (req, res) => {
         throw error;
     }
 
+    const now = new Date();
+    const toValidDate = (value) => {
+        if (!value) return null;
+        const parsed = new Date(value);
+        return Number.isNaN(parsed.getTime()) ? null : parsed;
+    };
+    const toObjectIdDate = (value) => {
+        const raw = String(value || '');
+        if (raw.length < 8) return null;
+        const ts = Number.parseInt(raw.slice(0, 8), 16);
+        if (!Number.isFinite(ts)) return null;
+        const parsed = new Date(ts * 1000);
+        return Number.isNaN(parsed.getTime()) ? null : parsed;
+    };
+    const activatedAt = toValidDate(user.membershipActivatedAt);
+    const createdAt = toValidDate(user.createdAt);
+    const expiresAtStored = toValidDate(user.membershipExpiresAt);
+    const baseTime = activatedAt || createdAt || toObjectIdDate(user._id) || null;
+    const expiryCandidate = expiresAtStored
+        || (baseTime ? new Date(baseTime.getTime() + 48 * 60 * 60 * 1000) : null);
+
+    if (!expiryCandidate || Number.isNaN(expiryCandidate.getTime())) {
+        const error = new Error('Membership status not found. Please contact support.');
+        error.statusCode = 403;
+        throw error;
+    }
+
+    if (expiryCandidate.getTime() <= now.getTime()) {
+        const error = new Error('Membership expired. Please renew to login.');
+        error.statusCode = 403;
+        throw error;
+    }
+
     // Start 48hr timer only once; re-login must not reset it.
     let shouldSave = false;
     if (!user.membershipExpiresAt) {
-        const startTime = user.membershipActivatedAt ? new Date(user.membershipActivatedAt) : new Date();
+        const startTime = activatedAt || baseTime || now;
         const expiresAt = new Date(startTime.getTime() + 48 * 60 * 60 * 1000);
 
         user.membershipActivatedAt = startTime;
@@ -252,7 +285,7 @@ const loginUser = asyncHandler(async (req, res) => {
         shouldSave = true;
     }
 
-    user.lastLoginAt = new Date();
+    user.lastLoginAt = now;
     shouldSave = true;
 
     if (shouldSave) {

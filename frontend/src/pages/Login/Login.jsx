@@ -7,23 +7,23 @@ import './Login.css';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 function Login() {
-    const [isForgot, setIsForgot] = useState(false);
-    const [step, setStep] = useState(1);
-    const [formData, setFormData] = useState({ mobile: '', password: '' });
-    const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate();
     const location = useLocation();
-
-    useEffect(() => {
+    const [isForgot, setIsForgot] = useState(false);
+    const [step, setStep] = useState(1);
+    
+    const [formData, setFormData] = useState(() => {
         const fromState = location?.state?.mobile;
         const fromStorage = localStorage.getItem('pendingSignupMobile');
         const mobile = fromState || fromStorage || '';
-
+        
         if (mobile) {
-            setFormData((prev) => ({ ...prev, mobile }));
             localStorage.removeItem('pendingSignupMobile');
+            return { mobile, password: '' };
         }
-    }, [location.state]);
+        return { mobile: '', password: '' };
+    });
+    const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
         if (!API_BASE_URL) return;

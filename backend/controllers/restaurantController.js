@@ -1,4 +1,5 @@
 const asyncHandler = require('../middleware/asyncHandler');
+const mongoose = require('mongoose');
 const fs = require('fs/promises');
 const path = require('path');
 const { cloudinary, isCloudinaryConfigured } = require('../config/cloudinary');
@@ -82,6 +83,9 @@ const getPartnerReviews = asyncHandler(async (req, res) => {
     if (!partnerId) {
         return res.status(400).json({ success: false, message: 'Partner id is required' });
     }
+    if (!mongoose.Types.ObjectId.isValid(partnerId)) {
+        return res.status(400).json({ success: false, message: 'Invalid partner id' });
+    }
 
     const reviews = await Review.find({ partnerId })
         .sort({ createdAt: -1 })
@@ -151,4 +155,21 @@ const createPartnerReview = asyncHandler(async (req, res) => {
     res.status(201).json({ success: true, data: review });
 });
 
-module.exports = { getRestaurant, getPartnerReviews, createPartnerReview };
+const deletePartnerReview = asyncHandler(async (req, res) => {
+    const { partnerId, reviewId } = req.params;
+    if (!partnerId || !reviewId) {
+        return res.status(400).json({ success: false, message: 'Partner id and review id are required' });
+    }
+    if (!mongoose.Types.ObjectId.isValid(partnerId) || !mongoose.Types.ObjectId.isValid(reviewId)) {
+        return res.status(400).json({ success: false, message: 'Invalid partner or review id' });
+    }
+
+    const review = await Review.findOneAndDelete({ _id: reviewId, partnerId });
+    if (!review) {
+        return res.status(404).json({ success: false, message: 'Review not found' });
+    }
+
+    res.status(200).json({ success: true, message: 'Review deleted', data: review });
+});
+
+module.exports = { getRestaurant, getPartnerReviews, createPartnerReview, deletePartnerReview };

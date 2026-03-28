@@ -11,16 +11,15 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 const DashboardPage = () => {
   const navigate = useNavigate();
   const [remainingTime, setRemainingTime] = useState("48hr-00m-00s");
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
+  const [user, setUser] = useState(() => {
     try {
       const saved = localStorage.getItem("authUser");
-      setUser(saved ? JSON.parse(saved) : null);
+      return saved ? JSON.parse(saved) : null;
     } catch (_error) {
-      setUser(null);
+      return null;
     }
-  }, []);
+  });
+
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -101,7 +100,15 @@ const DashboardPage = () => {
 
   const validUntilLabel =
     membershipExpiresAtMs
-      ? new Date(membershipExpiresAtMs).toLocaleString()
+      ? new Date(membershipExpiresAtMs).toLocaleString('en-GB', {
+          day: 'numeric',
+          month: 'numeric',
+          year: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: true
+        })
       : "Not Available";
 
   const handleLogout = () => {

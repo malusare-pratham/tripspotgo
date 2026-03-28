@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
+const { deletePartnerReview } = require('../controllers/restaurantController');
 const upload = require('../middleware/upload');
 
 router.post('/login', adminController.adminLogin);
@@ -15,6 +16,7 @@ router.get('/partner-info/:id', adminController.getPartnerInfo);
 router.put('/partner-info/:id', upload.any(), adminController.upsertPartnerInfo);
 
 router.post('/add-partner', upload.single('resImage'), adminController.addPartner);
+router.delete('/partner-reviews/:partnerId/:reviewId', deletePartnerReview);
 router.get('/partners', adminController.getAllPartners);
 router.put('/update-status/:id', adminController.updateStatus);
 router.delete('/delete-partner/:id', adminController.deletePartner);

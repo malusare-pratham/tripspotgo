@@ -35,8 +35,9 @@ function Footer() {
           <div className="footer-col">
             <h4>USEFUL LINKS</h4>
             <ul>
-              <li>About Us</li>
-              <li>News Room</li>
+              <li><Link to="/about-us" style={{ color: 'inherit', textDecoration: 'none' }}>About Us</Link></li>
+              <li><Link to="/blog" style={{ color: 'inherit', textDecoration: 'none' }}>Blog</Link></li>
+              <li><Link to="/contact-us" style={{ color: 'inherit', textDecoration: 'none' }}>Contact Us</Link></li>
               <li>Terms & Conditions</li>
               <li><Link to="/admin-login" style={{ color: 'inherit', textDecoration: 'none' }}>Admin Login</Link></li>
               <li><Link to="/partner-login" style={{ color: 'inherit', textDecoration: 'none' }}>Partner Login</Link></li>
@@ -64,10 +65,10 @@ function Footer() {
         </div>
 
         <div className="footer-bottom">
-          <p>Name of the Company: MAGICPOINT TECHNOLOGIES PRIVATE LIMITED</p>
+          <p>Name of the Company: Tripspotgo TECHNOLOGIES PRIVATE LIMITED</p>
           <p>Registered Office: Panchagani-Mahabaleshwer Main roade ,near dhobigali , Panchagani -412805</p>
           <div className="copyright">
-            &copy; 2026 magicpoints. All Rights Reserved.
+            &copy; 2026 Tripspotgos. All Rights Reserved.
           </div>
         </div>
       </div>

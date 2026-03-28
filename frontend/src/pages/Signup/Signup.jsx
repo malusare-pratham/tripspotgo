@@ -125,7 +125,7 @@ function Signup() {
                 key: keyId,
                 amount: order.amount,
                 currency: order.currency || 'INR',
-                name: 'MagicPoint',
+                name: 'Tripspotgo',
                 description: `${payload.membershipPlan} Membership`,
                 order_id: order.id,
                 prefill: {

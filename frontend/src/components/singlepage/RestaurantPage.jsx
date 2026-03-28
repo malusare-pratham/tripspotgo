@@ -645,7 +645,7 @@ const RestaurantPage = () => {
             <button className="rp-back-btn" onClick={handleBack}>
               <ArrowLeft size={20} />
             </button>
-            <div className="rp-logo">MagicPoints</div>
+            <div className="rp-logo">Tripspotgos</div>
           </div>
           <div className="rp-search-bar">
             <Search className="rp-s-icon" size={16} />
